@@ -1,5 +1,5 @@
 {
-  "name": "Astro Companion",
+  "name": "AstroTool",
   "description": "An essential web application for amateur astronomers, providing local astronomical data and a comprehensive telescope calculator. Features a night mode to preserve night vision.",
   "requestFramePermissions": [
     "geolocation"

@@ -71,7 +71,7 @@ const App: React.FC = () => {
       <header className={`md:w-64 md:flex-shrink-0 md:flex md:flex-col p-4 border-b md:border-b-0 md:border-r ${isNightMode ? 'border-red-800' : 'border-gray-700'} bg-opacity-20 ${isNightMode ? 'bg-red-900/10' : 'bg-gray-800'}`}>
         <div className="flex justify-between items-center mb-6">
           <h1 className={`text-2xl font-bold ${isNightMode ? 'text-red-400' : 'text-white'}`}>
-            Astro Companion
+            AstroTool
           </h1>
           <button onClick={toggleNightMode} className={`p-2 rounded-full ${isNightMode ? 'text-red-400 hover:bg-red-900/50' : 'text-yellow-400 hover:bg-gray-700'}`}>
             {isNightMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}

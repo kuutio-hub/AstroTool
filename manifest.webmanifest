@@ -1,7 +1,7 @@
 
 {
-  "name": "Astro Companion",
-  "short_name": "AstroComp",
+  "name": "AstroTool",
+  "short_name": "AstroTool",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#111827",
