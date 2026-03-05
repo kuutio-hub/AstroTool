@@ -155,29 +155,6 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                 };
                 contentArea.appendChild(monthlyDiv);
 
-                // Solar Activity
-                const solarDiv = document.createElement('div');
-                solarDiv.className = `mt-2 rounded ${dropdownBg}`;
-                solarDiv.innerHTML = `
-                    <button id="solar-btn" class="w-full p-2 text-[10px] font-bold uppercase flex justify-between items-center ${isNightMode ? 'text-red-700' : 'text-slate-600 hover:bg-slate-200'} transition-colors rounded">
-                        Naptevékenység
-                        ${solarActivityOpen ? ChevronUpIcon("w-3 h-3") : ChevronDownIcon("w-3 h-3")}
-                    </button>
-                    ${solarActivityOpen ? `
-                        <div class="p-2 text-[10px] space-y-2 border-t border-current/10">
-                            ${createDataRow("Ciklus", "25. napciklus")}
-                            ${createDataRow("Maximum", "2025 (várható)")}
-                            ${createDataRow("Aktivitás", "Magas")}
-                            <p class="opacity-60 italic mt-1">A naptevékenység jelenleg a maximuma felé közelít, gyakori flerekkel és napfoltokkal.</p>
-                        </div>
-                    ` : ''}
-                `;
-                solarDiv.querySelector('#solar-btn').onclick = () => {
-                    solarActivityOpen = !solarActivityOpen;
-                    render();
-                };
-                contentArea.appendChild(solarDiv);
-
             } else {
                 contentArea.innerHTML = `<p class="text-[10px] opacity-50 text-center">Nincs adat</p>`;
             }

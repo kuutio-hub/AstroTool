@@ -11,6 +11,8 @@ export function createCatalog(isNightMode) {
     let selectedConst = 'ALL';
     let selectedType = 'ALL';
     let expandedItem = null;
+    let currentPage = 1;
+    const itemsPerPage = 25;
 
     // Render Function
     function render() {
@@ -38,9 +40,9 @@ export function createCatalog(isNightMode) {
             </div>
         `;
 
-        filtersDiv.querySelector('input').oninput = (e) => { searchTerm = e.target.value; renderList(); };
-        filtersDiv.querySelector('#const-filter').onchange = (e) => { selectedConst = e.target.value; renderList(); };
-        filtersDiv.querySelector('#type-filter').onchange = (e) => { selectedType = e.target.value; renderList(); };
+        filtersDiv.querySelector('input').oninput = (e) => { searchTerm = e.target.value; currentPage = 1; renderList(); };
+        filtersDiv.querySelector('#const-filter').onchange = (e) => { selectedConst = e.target.value; currentPage = 1; renderList(); };
+        filtersDiv.querySelector('#type-filter').onchange = (e) => { selectedType = e.target.value; currentPage = 1; renderList(); };
 
         container.appendChild(filtersDiv);
 
@@ -66,8 +68,10 @@ export function createCatalog(isNightMode) {
                 return;
             }
 
-            // Limit to 50 items for performance if search is empty
-            const displayList = (searchTerm === '' && selectedConst === 'ALL' && selectedType === 'ALL') ? filtered.slice(0, 50) : filtered;
+            // Pagination Logic
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const displayList = filtered.slice(startIndex, startIndex + itemsPerPage);
 
             displayList.forEach(item => {
                 const isExpanded = expandedItem === item.id;
@@ -105,11 +109,36 @@ export function createCatalog(isNightMode) {
                 listDiv.appendChild(itemEl);
             });
             
-            if (displayList.length < filtered.length) {
-                const moreDiv = document.createElement('div');
-                moreDiv.className = "text-center text-[10px] opacity-50 pt-2";
-                moreDiv.innerText = `...és még ${filtered.length - displayList.length} találat (szűkítsd a keresést)`;
-                listDiv.appendChild(moreDiv);
+            // Pagination Controls
+            if (totalPages > 1) {
+                const paginationDiv = document.createElement('div');
+                paginationDiv.className = "flex justify-center items-center gap-4 pt-4 text-xs font-bold";
+                
+                const btnClass = `px-3 py-1 rounded ${isNightMode ? 'bg-red-900/30 hover:bg-red-900/50' : 'bg-slate-200 hover:bg-slate-300'}`;
+                
+                paginationDiv.innerHTML = `
+                    <button id="prev-btn" class="${btnClass} ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" ${currentPage === 1 ? 'disabled' : ''}>&lt; Előző</button>
+                    <span class="opacity-70">${currentPage} / ${totalPages}</span>
+                    <button id="next-btn" class="${btnClass} ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" ${currentPage === totalPages ? 'disabled' : ''}>Következő &gt;</button>
+                `;
+                
+                paginationDiv.querySelector('#prev-btn').onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderList();
+                        window.scrollTo(0, 0);
+                    }
+                };
+                
+                paginationDiv.querySelector('#next-btn').onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderList();
+                        window.scrollTo(0, 0);
+                    }
+                };
+                
+                listDiv.appendChild(paginationDiv);
             }
         }
 

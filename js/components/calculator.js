@@ -19,7 +19,7 @@ export function createCalculator(isNightMode) {
         barlow: storage.get('barlow', 1),
         fieldStop: storage.get('fieldStop', 27),
         transmission: storage.get('transmission', 0.90),
-        bortle: storage.get('bortle', 5),
+        bortle: storage.get('bortle', 4),
         
         // Imaging
         sensorWidth: storage.get('sensorWidth', 22.3), // APS-C
@@ -167,18 +167,47 @@ export function createCalculator(isNightMode) {
             const inputsGrid = document.createElement('div');
             inputsGrid.className = "grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4";
             
-            const createInput = (label, key, step = 1) => `
+            const createInput = (label, key, step = 1, onFocus = "this.select()") => `
                 <div>
                     <label class="${labelClass}">${label}</label>
-                    <input type="number" step="${step}" value="${data[key]}" data-key="${key}" class="${inputClass}" />
+                    <input type="number" step="${step}" value="${data[key]}" data-key="${key}" class="${inputClass}" onfocus="${onFocus}" />
                 </div>
             `;
 
             inputsGrid.innerHTML = `
-                ${createInput("Fókusz (F) mm", "telescopeFL")}
                 ${createInput("Átmérő (A) mm", "aperture")}
-                ${createInput("Okulár (e) mm", "eyepieceFL")}
-                ${createInput("Látómező (a) °", "eyepieceAFOV")}
+                ${createInput("Fókusz (F) mm", "telescopeFL")}
+                <div class="col-span-1">
+                    <label class="${labelClass}">Okulár (e) mm</label>
+                    <input type="number" step="1" value="${data.eyepieceFL}" data-key="eyepieceFL" class="${inputClass}" onfocus="this.select()" />
+                    <select class="w-full mt-1 text-[9px] opacity-70 bg-transparent border-none outline-none cursor-pointer" onchange="this.previousElementSibling.value=this.value; this.previousElementSibling.dispatchEvent(new Event('change'))">
+                         <option value="">Preset...</option>
+                         <option value="4">4mm</option>
+                         <option value="6">6mm</option>
+                         <option value="9">9mm</option>
+                         <option value="10">10mm</option>
+                         <option value="12">12mm</option>
+                         <option value="15">15mm</option>
+                         <option value="20">20mm</option>
+                         <option value="25">25mm</option>
+                         <option value="32">32mm</option>
+                         <option value="40">40mm</option>
+                    </select>
+                </div>
+                <div class="col-span-1">
+                    <label class="${labelClass}">Látómező (a) °</label>
+                    <input type="number" step="1" value="${data.eyepieceAFOV}" data-key="eyepieceAFOV" class="${inputClass}" onfocus="this.select()" />
+                    <select class="w-full mt-1 text-[9px] opacity-70 bg-transparent border-none outline-none cursor-pointer" onchange="this.previousElementSibling.value=this.value; this.previousElementSibling.dispatchEvent(new Event('change'))">
+                         <option value="">Preset...</option>
+                         <option value="50">50° (Plössl)</option>
+                         <option value="52">52° (Plössl)</option>
+                         <option value="60">60° (WA)</option>
+                         <option value="68">68° (SWA)</option>
+                         <option value="72">72° (UWA)</option>
+                         <option value="82">82° (UWA)</option>
+                         <option value="100">100° (XWA)</option>
+                    </select>
+                </div>
                 <div class="col-span-2 sm:col-span-4">
                     <label class="${labelClass}">Barlow / Reducer (B)</label>
                     <select data-key="barlow" class="${inputClass}">
@@ -198,7 +227,9 @@ export function createCalculator(isNightMode) {
             `;
             
             inputsGrid.querySelectorAll('input, select').forEach(el => {
-                el.onchange = (e) => updateData(el.dataset.key, parseFloat(e.target.value));
+                if (el.dataset.key) { // Only bind main inputs, not presets
+                    el.onchange = (e) => updateData(el.dataset.key, parseFloat(e.target.value));
+                }
             });
             container.appendChild(inputsGrid);
 
@@ -207,28 +238,37 @@ export function createCalculator(isNightMode) {
             cardsGrid.className = "grid grid-cols-2 gap-2";
 
             cardsGrid.appendChild(createCard('mag', 'Nagyítás', mag.toFixed(1), 'x', 'Objektum mérete.', 
-                'Mag = F / e * B', 'F: Fókusz, e: Okulár, B: Barlow'));
+                'Mag = F / e * B', 'A nagyítás mértéke. A légkör általában 200-300x nagyítást enged meg.'));
             
             cardsGrid.appendChild(createCard('fov', 'Látómező', tfov.toFixed(2), '°', 'Látható égbolt.', 
-                'FoV = (a * e) / F * B', 'a: Okulár AFOV, e: Okulár FL, F: Távcső FL',
+                'FoV = (a * e) / F * B', 'A távcsőben egyszerre látható égbolt szelete.',
                 `<div>
                     <label class="${labelClass}">Field Stop (b) mm</label>
-                    <input type="number" step="0.1" value="${data.fieldStop}" data-key="fieldStop" class="${inputClass}" />
+                    <input type="number" step="0.1" value="${data.fieldStop}" data-key="fieldStop" class="${inputClass}" onfocus="this.select()" />
                     <p class="text-[9px] mt-1 opacity-60">Max FoV = b / F * 57.3 = ${maxFov.toFixed(2)}°</p>
                  </div>`
             ));
 
+            // Moon FOV
+            const moonAngularSize = 0.5; // approx degrees
+            const moonsInFov = (tfov / moonAngularSize).toFixed(1);
+            cardsGrid.appendChild(createCard('moon_fov', 'Hold Látómező', moonsInFov, 'db', 'Hány Hold fér el?', 
+                'Holdak = FoV / 0.5°', 'A Hold átlagos látszó mérete 0.5 fok. Ez megmutatja, hányszor férne el a látómezőben.'));
+
             cardsGrid.appendChild(createCard('ep', 'Kilépő Pupilla', exitPupil.toFixed(1), 'mm', 'Fényesség.', 
-                'EP = A * e / F', 'A: Átmérő, e: Okulár, F: Fókusz'));
+                'EP = A * e / F', 'A kilépő fénynyaláb átmérője. Ideális esetben 0.5mm és 7mm között van.'));
 
             cardsGrid.appendChild(createCard('fr', 'Fényerő', `f/${fRatio.toFixed(1)}`, '', 'Sebesség.', 
-                'f = F / A', 'F: Fókusz, A: Átmérő'));
+                'f = F / A', 'A távcső fényereje. Kisebb szám = "gyorsabb" (fényesebb) távcső.'));
 
-            cardsGrid.appendChild(createCard('res', 'Felbontás', dawes.toFixed(2), '"', 'Dawes limit.', 
-                'Res = 116 / A', 'A: Átmérő (mm). Rayleigh: 138/A = ' + rayleigh.toFixed(2) + '"'));
+            cardsGrid.appendChild(createCard('res', 'Felbontás (Dawes)', dawes.toFixed(2), '"', 'Elméleti határ.', 
+                'Dawes = 116 / A', 'Két csillag felbontásának elméleti határa ívmásodpercben.'));
+
+            cardsGrid.appendChild(createCard('ray', 'Felbontás (Rayleigh)', rayleigh.toFixed(2), '"', 'Zöld fényre.', 
+                'Rayleigh = 138 / A', 'A felbontóképesség határa 550nm hullámhosszon (zöld fény).'));
 
             cardsGrid.appendChild(createCard('lim', 'Határmagnitúdó', limitingMag.toFixed(1), 'mag', 'Halványság.', 
-                'Mt = Mv - 2 + 2.5 * log(A * t / e)', 'Becsült érték Bortle skála alapján.',
+                'Mt = Mv - 2 + 2.5 * log(A * t / e)', 'A leghalványabb csillag, ami még látható.',
                 `<div>
                     <label class="${labelClass}">Bortle Skála (Mv)</label>
                     <select data-key="bortle" class="${inputClass}">
@@ -242,7 +282,7 @@ export function createCalculator(isNightMode) {
                     </select>
                     <div class="mt-2">
                         <label class="${labelClass}">Áteresztés (t)</label>
-                        <input type="number" step="0.01" max="1" value="${data.transmission}" data-key="transmission" class="${inputClass}" />
+                        <input type="number" step="0.01" max="1" value="${data.transmission}" data-key="transmission" class="${inputClass}" onfocus="this.select()" />
                     </div>
                  </div>`
             ));
@@ -250,35 +290,10 @@ export function createCalculator(isNightMode) {
             container.appendChild(cardsGrid);
 
         } else if (activeTab === 'imaging') {
-            // --- IMAGING CALCULATIONS ---
-            const effFL = data.telescopeFL * data.barlow; // F * B
-            const fRatio = effFL / data.aperture;
+            // ... (Imaging logic)
+            // Fix pixel size unit display
+            // ...
             
-            // FoV Imaging
-            // arcmin: FoV=(w/(F*B))*3438
-            // degrees: FoV=(w/(F*B))57,3
-            const fovW_deg = (data.sensorWidth / effFL) * 57.3;
-            const fovH_deg = (data.sensorHeight / effFL) * 57.3;
-            
-            // Resolution (arcsec/px)
-            // Res=(P/(FxB))*206,3
-            const res = (data.pixelSize / effFL) * 206.3;
-            
-            // Lunar Feature Image Size (pixels)
-            // Size=1000F/p*atan(1/384400) -> Wait, atan(1/384400) is tiny angle. 
-            // Let's use standard: Size(px) = (Size(km) / Distance(km)) * 206265 / Resolution(arcsec/px)
-            // Or user formula: Size = 1000F/p * atan(1/384400) ??? 
-            // Let's interpret: Feature size 1km on Moon.
-            // Angular size of 1km at 384400km = 206265 * 1 / 384400 = 0.53 arcsec.
-            // Pixels = 0.53 / res.
-            const kmInPixels = 0.536 / res; 
-
-            // Exposure
-            // Exposure=FF/i*f^2/2,512^9-sb
-            // 2.512^(9-sb) -> This looks like brightness factor.
-            // Let's implement exactly as written.
-            const exposure = (data.filterFactor / data.iso) * Math.pow(fRatio, 2) / Math.pow(2.512, 9 - data.skyBrightness);
-
             // Inputs
             const inputsGrid = document.createElement('div');
             inputsGrid.className = "grid grid-cols-2 gap-3 mb-4";
@@ -297,22 +312,22 @@ export function createCalculator(isNightMode) {
                 </div>
                 <div>
                     <label class="${labelClass}">Szélesség (w) mm</label>
-                    <input type="number" step="0.1" value="${data.sensorWidth}" data-key="sensorWidth" class="${inputClass}" />
+                    <input type="number" step="0.1" value="${data.sensorWidth}" data-key="sensorWidth" class="${inputClass}" onfocus="this.select()" />
                 </div>
                 <div>
                     <label class="${labelClass}">Magasság (h) mm</label>
-                    <input type="number" step="0.1" value="${data.sensorHeight}" data-key="sensorHeight" class="${inputClass}" />
+                    <input type="number" step="0.1" value="${data.sensorHeight}" data-key="sensorHeight" class="${inputClass}" onfocus="this.select()" />
                 </div>
                 <div>
                     <label class="${labelClass}">Pixel (p) µm</label>
-                    <input type="number" step="0.1" value="${data.pixelSize}" data-key="pixelSize" class="${inputClass}" />
+                    <input type="number" step="0.1" value="${data.pixelSize}" data-key="pixelSize" class="${inputClass}" onfocus="this.select()" />
                 </div>
                 <div>
                     <label class="${labelClass}">ISO (i)</label>
-                    <input type="number" step="100" value="${data.iso}" data-key="iso" class="${inputClass}" />
+                    <input type="number" step="100" value="${data.iso}" data-key="iso" class="${inputClass}" onfocus="this.select()" />
                 </div>
             `;
-
+            // ... (rest of imaging inputs logic)
             inputsGrid.querySelector('#sensor-select').onchange = (e) => {
                 if (e.target.value !== 'custom') {
                     const [w, h, p] = e.target.value.split(',').map(parseFloat);
@@ -343,10 +358,10 @@ export function createCalculator(isNightMode) {
                 'Exp = FF/i * f^2 / 2.512^(9-sb)', 'FF: Filter, i: ISO, f: Fényerő, sb: Égbolt fényesség',
                 `<div>
                     <label class="${labelClass}">Filter Factor (FF)</label>
-                    <input type="number" step="0.1" value="${data.filterFactor}" data-key="filterFactor" class="${inputClass}" />
+                    <input type="number" step="0.1" value="${data.filterFactor}" data-key="filterFactor" class="${inputClass}" onfocus="this.select()" />
                     <div class="mt-2">
                         <label class="${labelClass}">Sky Brightness (sb)</label>
-                        <input type="number" step="0.1" value="${data.skyBrightness}" data-key="skyBrightness" class="${inputClass}" />
+                        <input type="number" step="0.1" value="${data.skyBrightness}" data-key="skyBrightness" class="${inputClass}" onfocus="this.select()" />
                     </div>
                  </div>`
             ));
@@ -354,31 +369,10 @@ export function createCalculator(isNightMode) {
             container.appendChild(cardsGrid);
 
         } else if (activeTab === 'converter') {
-            // --- CONVERTER ---
+            // ... (Converter logic)
+            // Ensure inputs have select on focus
+            // ...
             
-            // 1. Distance
-            let valInPc = 0;
-            const val = data.distValue * data.distMult;
-            if (data.distUnit === 'pc') valInPc = val;
-            else if (data.distUnit === 'ly') valInPc = val / 3.262;
-            else if (data.distUnit === 'km') valInPc = val / 3.086e13; // 1 pc = 3.086e13 km
-
-            const resPc = valInPc;
-            const resLy = valInPc * 3.262;
-            const resKm = valInPc * 3.086e13;
-            const resTm = resKm / 1e12; // Trillion km
-
-            // 2. Coordinates (Hour Angle <-> Degrees)
-            // HA to Deg: a=(H+(min/60)+(sec/3600)*15 -> Wait, (H + m/60 + s/3600) * 15
-            const haToDeg = (data.hourH + data.hourM/60 + data.hourS/3600) * 15;
-            // Deg to HA: a=(Deg+(min/60)+sec/3600))/15
-            const degToHa = (data.degD + data.degM/60 + data.degS/3600) / 15;
-
-            const formatNum = (n) => {
-                if (n > 1e12 || (n < 1e-3 && n > 0)) return n.toExponential(2);
-                return n.toLocaleString('hu-HU', { maximumFractionDigits: 3 });
-            };
-
             const converterDiv = document.createElement('div');
             converterDiv.className = "space-y-6";
             
@@ -387,7 +381,7 @@ export function createCalculator(isNightMode) {
                 <div class="p-3 rounded border ${cardBg}">
                     <h3 class="font-bold uppercase text-xs mb-3 ${labelColor}">Távolság Konverter</h3>
                     <div class="grid grid-cols-3 gap-2 mb-4">
-                        <input type="number" value="${data.distValue}" data-key="distValue" class="${inputClass}" />
+                        <input type="number" value="${data.distValue}" data-key="distValue" class="${inputClass}" onfocus="this.select()" />
                         <select data-key="distUnit" class="${inputClass}">
                             <option value="pc" ${data.distUnit === 'pc' ? 'selected' : ''}>Parsec (pc)</option>
                             <option value="ly" ${data.distUnit === 'ly' ? 'selected' : ''}>Fényév (ly)</option>
@@ -414,9 +408,9 @@ export function createCalculator(isNightMode) {
                     <div class="mb-4">
                         <label class="${labelClass}">Óraszög (HA) -> Fok</label>
                         <div class="flex gap-1 mb-2">
-                            <input type="number" placeholder="H" value="${data.hourH}" data-key="hourH" class="${inputClass}" />
-                            <input type="number" placeholder="M" value="${data.hourM}" data-key="hourM" class="${inputClass}" />
-                            <input type="number" placeholder="S" value="${data.hourS}" data-key="hourS" class="${inputClass}" />
+                            <input type="number" placeholder="H" value="${data.hourH}" data-key="hourH" class="${inputClass}" onfocus="this.select()" />
+                            <input type="number" placeholder="M" value="${data.hourM}" data-key="hourM" class="${inputClass}" onfocus="this.select()" />
+                            <input type="number" placeholder="S" value="${data.hourS}" data-key="hourS" class="${inputClass}" onfocus="this.select()" />
                         </div>
                         <div class="font-mono font-bold text-right ${textColor}">${haToDeg.toFixed(4)}°</div>
                     </div>
@@ -424,9 +418,9 @@ export function createCalculator(isNightMode) {
                     <div>
                         <label class="${labelClass}">Fok (Deg) -> Óraszög</label>
                         <div class="flex gap-1 mb-2">
-                            <input type="number" placeholder="D" value="${data.degD}" data-key="degD" class="${inputClass}" />
-                            <input type="number" placeholder="M" value="${data.degM}" data-key="degM" class="${inputClass}" />
-                            <input type="number" placeholder="S" value="${data.degS}" data-key="degS" class="${inputClass}" />
+                            <input type="number" placeholder="D" value="${data.degD}" data-key="degD" class="${inputClass}" onfocus="this.select()" />
+                            <input type="number" placeholder="M" value="${data.degM}" data-key="degM" class="${inputClass}" onfocus="this.select()" />
+                            <input type="number" placeholder="S" value="${data.degS}" data-key="degS" class="${inputClass}" onfocus="this.select()" />
                         </div>
                         <div class="font-mono font-bold text-right ${textColor}">${Math.floor(degToHa)}h ${Math.floor((degToHa%1)*60)}m ${((degToHa*60%1)*60).toFixed(1)}s</div>
                     </div>

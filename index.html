@@ -74,9 +74,30 @@
             width: 100%;
             text-align: center;
         }
+
+        /* Input Spinners Removal */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Star Background for Day Mode */
+        .day-mode-bg {
+            background-color: #0f172a; /* Slate 900 */
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 transition-colors duration-500 min-h-screen flex flex-col">
+<body class="transition-colors duration-500 min-h-screen flex flex-col">
     
     <!-- App Container -->
     <div id="app" class="flex-1 flex flex-col">

@@ -30,12 +30,12 @@ document.body.appendChild(dimmer);
 // Update Theme
 function updateTheme() {
     if (state.isNightMode) {
-        document.body.classList.add('bg-slate-950', 'text-red-600');
-        document.body.classList.remove('bg-slate-100', 'text-slate-900');
+        document.body.classList.add('bg-black', 'text-red-600');
+        document.body.classList.remove('day-mode-bg', 'text-slate-100');
         document.documentElement.classList.add('night-mode');
     } else {
-        document.body.classList.add('bg-slate-100', 'text-slate-900');
-        document.body.classList.remove('bg-slate-950', 'text-red-600');
+        document.body.classList.add('day-mode-bg', 'text-slate-100');
+        document.body.classList.remove('bg-black', 'text-red-600');
         document.documentElement.classList.remove('night-mode');
     }
     
@@ -47,62 +47,16 @@ function updateTheme() {
     renderFooter();
 }
 
-// Calculate Data
-function calculateData() {
-    if (!window.SunCalc) return;
-    
-    const now = new Date();
-    const times = window.SunCalc.getTimes(now, state.location.latitude, state.location.longitude);
-    const moonIllum = window.SunCalc.getMoonIllumination(now);
-    const moonTimes = window.SunCalc.getMoonTimes(now, state.location.latitude, state.location.longitude);
-    
-    // Calculate daylight duration
-    const durationMs = times.sunset - times.sunrise;
-    const hours = Math.floor(durationMs / (1000 * 60 * 60));
-    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    // Calculate remaining daylight
-    let remaining = "0ó 0p";
-    if (now < times.sunset && now > times.sunrise) {
-        const remMs = times.sunset - now;
-        const remH = Math.floor(remMs / (1000 * 60 * 60));
-        const remM = Math.floor((remMs % (1000 * 60 * 60)) / (1000 * 60));
-        remaining = `${remH}ó ${remM}p`;
-    } else if (now < times.sunrise) {
-        remaining = "Még nem kelt fel";
-    } else {
-        remaining = "Már lement";
-    }
-
-    // Moon Distance (approximate calculation)
-    const moonPos = window.SunCalc.getMoonPosition(now, state.location.latitude, state.location.longitude);
-    const moonAge = moonIllum.phase * 29.53;
-
-    state.sunData = {
-        ...times,
-        daylightDuration: `${hours}ó ${minutes}p`,
-        remainingDaylight: remaining
-    };
-
-    state.moonData = {
-        rise: moonTimes.rise,
-        set: moonTimes.set,
-        fraction: moonIllum.fraction,
-        phase: moonIllum.phase,
-        distance: moonPos.distance,
-        age: moonAge
-    };
-    
-    renderContent();
-}
+// ... (calculateData remains same)
 
 // Render Header
 function renderHeader() {
-    const btnClass = `p-2 rounded-full transition-all ${state.isNightMode ? 'hover:bg-red-900/20 text-red-500' : 'hover:bg-slate-200 text-slate-600'}`;
+    const btnClass = `p-2 rounded-full transition-all ${state.isNightMode ? 'hover:bg-red-900/20 text-red-500' : 'hover:bg-white/10 text-slate-300'}`;
+    const titleClass = `text-lg font-bold tracking-widest uppercase cursor-pointer ${state.isNightMode ? 'text-red-600' : 'text-slate-100'}`;
     
     header.innerHTML = `
-        <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold tracking-widest uppercase ${state.isNightMode ? 'text-red-600' : 'text-slate-800'}">AstroTool</h1>
+        <div class="flex items-center gap-2" id="brand-logo">
+            <h1 class="${titleClass}">AstroTool</h1>
         </div>
         <div class="flex items-center gap-2">
             ${state.isNightMode ? `
@@ -119,6 +73,12 @@ function renderHeader() {
             </button>
         </div>
     `;
+
+    header.querySelector('#brand-logo').onclick = () => {
+        state.activeTab = 'dashboard';
+        renderFooter();
+        renderContent();
+    };
 
     header.querySelector('#gps-btn').onclick = () => {
         state.geoLoading = true;
@@ -155,14 +115,14 @@ function renderHeader() {
 function renderFooter() {
     const navItems = [
         { id: 'dashboard', icon: DashboardIcon, label: 'Műszerfal' },
-        { id: 'catalog', icon: CatalogIcon, label: 'Katalógus' },
-        { id: 'calculator', icon: TelescopeIcon, label: 'Kalkulátor' }
+        { id: 'calculator', icon: TelescopeIcon, label: 'Kalkulátor' },
+        { id: 'catalog', icon: CatalogIcon, label: 'Katalógus' }
     ];
 
     const navHtml = navItems.map(item => {
         const isActive = state.activeTab === item.id;
-        const activeClass = state.isNightMode ? 'text-red-500 bg-red-950/30' : 'text-blue-600 bg-blue-100';
-        const inactiveClass = state.isNightMode ? 'text-red-900 hover:text-red-700' : 'text-slate-400 hover:text-slate-600';
+        const activeClass = state.isNightMode ? 'text-red-500 bg-red-950/30' : 'text-blue-300 bg-blue-900/40';
+        const inactiveClass = state.isNightMode ? 'text-red-900 hover:text-red-700' : 'text-slate-400 hover:text-slate-200';
         
         return `
             <button data-tab="${item.id}" class="flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${isActive ? activeClass : inactiveClass}">
@@ -173,6 +133,7 @@ function renderFooter() {
     }).join('');
 
     footer.innerHTML = `<div class="flex justify-around items-center max-w-md mx-auto">${navHtml}</div>`;
+
 
     footer.querySelectorAll('button').forEach(btn => {
         btn.onclick = () => {

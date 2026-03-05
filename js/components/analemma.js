@@ -164,92 +164,202 @@ export function createAnalemma(location, isNightMode) {
     }
 
     // Render SVG
-    function renderSVG() {
+    function renderSVG(isFullScreen = false) {
         // Style Config
-        // Always dark blue background for Analemma as requested
         const lineColor = '#fbbf24'; // Gold
         const dotColor = '#f59e0b'; // Darker Gold
         const textColor = '#94a3b8'; // Slate 400
         const horizonColor = '#334155'; // Slate 700
         const currentSunColor = '#fcd34d'; // Bright Yellow
 
+        // Clear previous content
+        svg.innerHTML = '';
+
+        // ViewBox
         svg.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
         
         // Glow Filter
-        let defs = `
-            <defs>
-                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="2" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-            </defs>
+        let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        defs.innerHTML = `
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
         `;
+        svg.appendChild(defs);
 
-        let html = defs + `
-          <line x1="-1000" y1="90" x2="1000" y2="90" stroke="${horizonColor}" stroke-width="${viewBox.w / 400}" />
-          
-          <text x="100" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5" font-family="monospace">DÉL</text>
-          <text x="50" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5" font-family="monospace">KELET</text>
-          <text x="150" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5" font-family="monospace">NYUGAT</text>
+        // Horizon Line
+        const horizon = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        horizon.setAttribute("x1", "-1000");
+        horizon.setAttribute("y1", "90");
+        horizon.setAttribute("x2", "1000");
+        horizon.setAttribute("y2", "90");
+        horizon.setAttribute("stroke", horizonColor);
+        horizon.setAttribute("stroke-width", viewBox.w / 400);
+        svg.appendChild(horizon);
 
-          <!-- Analemma Curve -->
-          <path
-            d="M ${points.path.map(p => `${p.x},${p.y}`).join(' L ')} Z"
-            fill="none"
-            stroke="${lineColor}"
-            stroke-width="${viewBox.w / 500}"
-            filter="url(#glow)"
-            opacity="0.8"
-          />
-        `;
-
-        // Month Separator Dots
-        points.monthLabels.forEach((m, i) => {
-             html += `<circle cx="${m.x}" cy="${m.y}" r="${viewBox.w / 400}" fill="${textColor}" opacity="0.3" />`;
+        // Compass Directions
+        const directions = [
+            { text: "DÉL", x: 100 },
+            { text: "KELET", x: 50 },
+            { text: "NYUGAT", x: 150 }
+        ];
+        directions.forEach(d => {
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", d.x);
+            t.setAttribute("y", 96);
+            t.setAttribute("font-size", viewBox.w / 60);
+            t.setAttribute("text-anchor", "middle");
+            t.setAttribute("fill", textColor);
+            t.setAttribute("opacity", "0.5");
+            t.setAttribute("font-family", "monospace");
+            t.textContent = d.text;
+            svg.appendChild(t);
         });
 
-        // Month Labels
-        if (viewBox.w < 100) {
-            points.monthLabels.forEach((m, i) => {
-                html += `
-                <text x="${m.x}" y="${m.y}" dy="${-viewBox.w / 100}" font-size="${viewBox.w / 40}" text-anchor="middle" fill="${textColor}" opacity="0.6" class="font-mono" style="font-size: ${viewBox.w / 40}px">
-                    ${m.name}
-                </text>`;
-            });
-        }
+        // Analemma Curve
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M ${points.path.map(p => `${p.x},${p.y}`).join(' L ')} Z`);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", lineColor);
+        path.setAttribute("stroke-width", viewBox.w / 500);
+        path.setAttribute("filter", "url(#glow)");
+        path.setAttribute("opacity", "0.8");
+        svg.appendChild(path);
 
-        // Key Points (Solstices/Equinoxes) - Faded
-        points.keyPoints.forEach((p, i) => {
-            if (p.isCurrent) return; // Skip current day here
-
-            const r = viewBox.w / 300;
-            const strokeWidth = viewBox.w / 1000;
+        // Month Labels (Larger and Shortened)
+        points.monthLabels.forEach((m) => {
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", m.x);
+            t.setAttribute("y", m.y);
+            // Offset label slightly
+            t.setAttribute("dy", -viewBox.w / 50); 
+            t.setAttribute("font-size", viewBox.w / 30); // Larger font
+            t.setAttribute("text-anchor", "middle");
+            t.setAttribute("fill", textColor);
+            t.setAttribute("opacity", "0.8");
+            t.setAttribute("font-weight", "bold");
+            t.setAttribute("class", "font-mono");
+            t.textContent = m.name;
+            svg.appendChild(t);
             
-            html += `
-            <g opacity="0.6">
-              <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${dotColor}" stroke="none" />
-              <text x="${p.x}" y="${p.y - viewBox.w / 80}" font-size="${viewBox.w / 50}" text-anchor="middle" fill="${textColor}" class="font-bold uppercase tracking-tighter" style="font-size: ${viewBox.w / 50}px">
-                ${p.name}
-              </text>
-            </g>`;
+            // Dot on curve
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", m.x);
+            c.setAttribute("cy", m.y);
+            c.setAttribute("r", viewBox.w / 400);
+            c.setAttribute("fill", textColor);
+            c.setAttribute("opacity", "0.5");
+            svg.appendChild(c);
         });
 
-        // Current Sun - Bright & Glowing
+        // Key Points (Solstices/Equinoxes)
+        points.keyPoints.forEach((p) => {
+            if (p.isCurrent) return;
+
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("opacity", "0.6");
+            
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", p.x);
+            c.setAttribute("cy", p.y);
+            c.setAttribute("r", viewBox.w / 300);
+            c.setAttribute("fill", dotColor);
+            g.appendChild(c);
+
+            // Only show text if zoomed in enough or fullscreen
+            if (viewBox.w < 150 || isFullScreen) {
+                const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                t.setAttribute("x", p.x);
+                t.setAttribute("y", p.y - viewBox.w / 60);
+                t.setAttribute("font-size", viewBox.w / 50);
+                t.setAttribute("text-anchor", "middle");
+                t.setAttribute("fill", textColor);
+                t.setAttribute("class", "font-bold uppercase tracking-tighter");
+                t.textContent = p.name;
+                g.appendChild(t);
+            }
+            svg.appendChild(g);
+        });
+
+        // Current Sun
         const current = points.keyPoints.find(p => p.isCurrent);
         if (current) {
-            const r = viewBox.w / 100;
-            html += `
-            <g filter="url(#glow)">
-                <circle cx="${current.x}" cy="${current.y}" r="${r}" fill="${currentSunColor}" stroke="white" stroke-width="${viewBox.w / 600}" />
-                <circle cx="${current.x}" cy="${current.y}" r="${r * 2}" fill="${currentSunColor}" opacity="0.3" />
-                <line x1="${current.x - r*3}" y1="${current.y}" x2="${current.x + r*3}" y2="${current.y}" stroke="${currentSunColor}" stroke-width="${viewBox.w / 800}" opacity="0.5" />
-                <line x1="${current.x}" y1="${current.y - r*3}" x2="${current.x}" y2="${current.y + r*3}" stroke="${currentSunColor}" stroke-width="${viewBox.w / 800}" opacity="0.5" />
-            </g>
-            `;
-        }
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("filter", "url(#glow)");
+            
+            const c1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c1.setAttribute("cx", current.x);
+            c1.setAttribute("cy", current.y);
+            c1.setAttribute("r", viewBox.w / 100);
+            c1.setAttribute("fill", currentSunColor);
+            c1.setAttribute("stroke", "white");
+            c1.setAttribute("stroke-width", viewBox.w / 600);
+            g.appendChild(c1);
 
-        svg.innerHTML = html;
+            const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c2.setAttribute("cx", current.x);
+            c2.setAttribute("cy", current.y);
+            c2.setAttribute("r", viewBox.w / 50);
+            c2.setAttribute("fill", currentSunColor);
+            c2.setAttribute("opacity", "0.3");
+            g.appendChild(c2);
+
+            // Crosshairs
+            const l1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l1.setAttribute("x1", current.x - viewBox.w / 30);
+            l1.setAttribute("y1", current.y);
+            l1.setAttribute("x2", current.x + viewBox.w / 30);
+            l1.setAttribute("y2", current.y);
+            l1.setAttribute("stroke", currentSunColor);
+            l1.setAttribute("stroke-width", viewBox.w / 800);
+            l1.setAttribute("opacity", "0.5");
+            g.appendChild(l1);
+
+            const l2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l2.setAttribute("x1", current.x);
+            l2.setAttribute("y1", current.y - viewBox.w / 30);
+            l2.setAttribute("x2", current.x);
+            l2.setAttribute("y2", current.y + viewBox.w / 30);
+            l2.setAttribute("stroke", currentSunColor);
+            l2.setAttribute("stroke-width", viewBox.w / 800);
+            l2.setAttribute("opacity", "0.5");
+            g.appendChild(l2);
+
+            svg.appendChild(g);
+        }
     }
+
+    // Fullscreen Toggle
+    svgContainer.onclick = (e) => {
+        // Only trigger if not dragging
+        if (isDragging || Math.abs(e.clientX - startPan.x) > 5 || Math.abs(e.clientY - startPan.y) > 5) return;
+
+        const modal = document.createElement('div');
+        modal.className = "fixed inset-0 z-[200] bg-black flex items-center justify-center p-4 animate-fade-in";
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = "absolute top-4 right-4 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 z-[210]";
+        closeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+        
+        const fsContainer = document.createElement('div');
+        fsContainer.className = "w-full h-full relative";
+        
+        // Clone SVG logic for fullscreen
+        const fsSvg = svg.cloneNode(true);
+        fsSvg.setAttribute("class", "w-full h-full");
+        fsContainer.appendChild(fsSvg);
+        
+        modal.appendChild(closeBtn);
+        modal.appendChild(fsContainer);
+        document.body.appendChild(modal);
+
+        // Close logic
+        closeBtn.onclick = () => document.body.removeChild(modal);
+    };
+
+    // Event Handlers (Zoom/Pan)
+    // ... (rest of event handlers)
 
     // Event Handlers
     svgContainer.onwheel = (e) => {
