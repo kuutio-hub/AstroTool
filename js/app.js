@@ -47,7 +47,44 @@ function updateTheme() {
     renderFooter();
 }
 
-// ... (calculateData remains same)
+// Calculate Data
+function calculateData() {
+    if (!state.location || !window.SunCalc) return;
+
+    const now = new Date();
+    const times = window.SunCalc.getTimes(now, state.location.latitude, state.location.longitude);
+    const moonIllumination = window.SunCalc.getMoonIllumination(now);
+    const moonTimes = window.SunCalc.getMoonTimes(now, state.location.latitude, state.location.longitude);
+    const moonPos = window.SunCalc.getMoonPosition(now, state.location.latitude, state.location.longitude);
+
+    // Sun Data
+    const dayDuration = times.sunset - times.sunrise;
+    const remaining = times.sunset - now;
+
+    state.sunData = {
+        dawn: times.dawn,
+        sunrise: times.sunrise,
+        solarNoon: times.solarNoon,
+        sunset: times.sunset,
+        dusk: times.dusk,
+        daylightDuration: `${Math.floor(dayDuration / (1000 * 60 * 60))}ó ${Math.floor((dayDuration % (1000 * 60 * 60)) / (1000 * 60))}p`,
+        remainingDaylight: remaining > 0 
+            ? `${Math.floor(remaining / (1000 * 60 * 60))}ó ${Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))}p`
+            : "0ó 0p"
+    };
+
+    // Moon Data
+    state.moonData = {
+        phase: moonIllumination.phase,
+        fraction: moonIllumination.fraction,
+        rise: moonTimes.rise,
+        set: moonTimes.set,
+        distance: moonPos.distance,
+        age: moonIllumination.phase * 29.53
+    };
+
+    renderContent();
+}
 
 // Render Header
 function renderHeader() {

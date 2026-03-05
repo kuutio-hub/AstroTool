@@ -87,14 +87,24 @@ export const FullscreenIcon = (className = "w-6 h-6") => `
 export const MoonPhaseIcon = (phase, isNightMode) => {
     const bgFill = isNightMode ? "#1a1a1a" : "#334155";
     const litFill = isNightMode ? "#ef4444" : "#fbbf24"; 
+    const glowColor = isNightMode ? "#ef4444" : "#fbbf24";
     
+    // Filter definition
+    const filterDef = `
+        <defs>
+            <filter id="moonGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+        </defs>
+    `;
+
     // Simplified SVG for phase
-    // This is a placeholder for a complex phase calculation
     if (phase < 0.03 || phase > 0.97) { // New Moon
-        return `<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/></svg>`;
+        return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/></svg>`;
     } else if (phase < 0.5) { // Waxing
-        return `<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/><path d="M50 5 A45 45 0 0 1 50 95 A${45 * Math.abs(Math.cos(phase * 2 * Math.PI))} 45 0 0 ${phase < 0.25 ? '0' : '1'} 50 5" fill="${litFill}"/></svg>`;
+        return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<g filter="url(#moonGlow)"><circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/><path d="M50 5 A45 45 0 0 1 50 95 A${45 * Math.abs(Math.cos(phase * 2 * Math.PI))} 45 0 0 ${phase < 0.25 ? '0' : '1'} 50 5" fill="${litFill}"/></g></svg>`;
     } else { // Waning
-        return `<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="50" cy="50" r="45" fill="${litFill}" stroke="currentColor" stroke-width="2"/><path d="M50 5 A45 45 0 0 0 50 95 A${45 * Math.abs(Math.cos(phase * 2 * Math.PI))} 45 0 0 ${phase < 0.75 ? '1' : '0'} 50 5" fill="${bgFill}"/></svg>`;
+        return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<g filter="url(#moonGlow)"><circle cx="50" cy="50" r="45" fill="${litFill}" stroke="currentColor" stroke-width="2"/><path d="M50 5 A45 45 0 0 0 50 95 A${45 * Math.abs(Math.cos(phase * 2 * Math.PI))} 45 0 0 ${phase < 0.75 ? '1' : '0'} 50 5" fill="${bgFill}"/></g></svg>`;
     }
 };

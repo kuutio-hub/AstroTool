@@ -6,7 +6,7 @@ export function createCalculator(isNightMode) {
     const container = document.createElement('div');
     container.className = "space-y-4";
 
-    // State
+        // State
     let activeTab = 'visual'; // 'visual' | 'imaging' | 'converter'
     let expandedCard = null; // ID of expanded card
 
@@ -40,6 +40,9 @@ export function createCalculator(isNightMode) {
         degD: storage.get('degD', 0),
         degM: storage.get('degM', 0),
         degS: storage.get('degS', 0),
+
+        tempValue: storage.get('tempValue', 20),
+        tempUnit: storage.get('tempUnit', 'C'),
     };
 
     // Save data on change
@@ -130,8 +133,8 @@ export function createCalculator(isNightMode) {
         tabs.querySelector('#tab-converter').onclick = () => { activeTab = 'converter'; expandedCard = null; render(); };
         container.appendChild(tabs);
 
-        const inputClass = `w-full p-2 rounded text-sm font-mono font-bold outline-none border transition-all ${isNightMode ? 'bg-black border-red-900/50 text-red-500 focus:border-red-500' : 'bg-white border-slate-300 text-slate-700 focus:border-blue-400'}`;
-        const labelClass = `block text-[9px] font-bold uppercase tracking-wider mb-1 ${isNightMode ? 'text-red-800' : 'text-slate-500'}`;
+        const inputClass = `w-full p-2 rounded text-sm font-mono font-bold outline-none border transition-all ${isNightMode ? 'bg-black border-red-900/50 text-red-500 focus:border-red-500' : 'bg-slate-100 border-slate-300 text-slate-900 focus:border-blue-400'}`;
+        const labelClass = `block text-[9px] font-bold uppercase tracking-wider mb-1 ${isNightMode ? 'text-red-800' : 'text-slate-600'}`;
 
         if (activeTab === 'visual') {
             // --- VISUAL CALCULATIONS ---
@@ -373,6 +376,14 @@ export function createCalculator(isNightMode) {
             // Ensure inputs have select on focus
             // ...
             
+            // Temperature
+            let tempRes = '';
+            if (data.tempUnit === 'C') {
+                tempRes = `${(data.tempValue * 9/5 + 32).toFixed(1)} °F`;
+            } else {
+                tempRes = `${((data.tempValue - 32) * 5/9).toFixed(1)} °C`;
+            }
+
             const converterDiv = document.createElement('div');
             converterDiv.className = "space-y-6";
             
@@ -399,6 +410,19 @@ export function createCalculator(isNightMode) {
                         <div>${formatNum(resKm)} km</div>
                         <div>${formatNum(resTm)} Tm</div>
                     </div>
+                </div>
+
+                <!-- Temperature -->
+                <div class="p-3 rounded border ${cardBg}">
+                    <h3 class="font-bold uppercase text-xs mb-3 ${labelColor}">Hőmérséklet Konverter</h3>
+                    <div class="flex gap-2 items-center mb-2">
+                        <input type="number" value="${data.tempValue}" data-key="tempValue" class="${inputClass}" onfocus="this.select()" />
+                        <select data-key="tempUnit" class="${inputClass} w-24">
+                            <option value="C" ${data.tempUnit === 'C' ? 'selected' : ''}>°C</option>
+                            <option value="F" ${data.tempUnit === 'F' ? 'selected' : ''}>°F</option>
+                        </select>
+                    </div>
+                    <div class="font-mono font-bold text-right ${textColor}">${tempRes}</div>
                 </div>
 
                 <!-- Coordinates -->
@@ -428,7 +452,13 @@ export function createCalculator(isNightMode) {
             `;
 
             converterDiv.querySelectorAll('input, select').forEach(el => {
-                el.onchange = (e) => updateData(el.dataset.key, el.tagName === 'SELECT' && el.dataset.key === 'distUnit' ? e.target.value : parseFloat(e.target.value));
+                el.onchange = (e) => {
+                    let val = e.target.value;
+                    if (el.type === 'number') {
+                         val = parseFloat(val);
+                    }
+                    updateData(el.dataset.key, val);
+                };
             });
 
             container.appendChild(converterDiv);

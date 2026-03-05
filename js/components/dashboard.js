@@ -33,7 +33,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         infoHeader.className = `p-3 rounded-lg border flex justify-between items-center text-xs ${cardBg}`;
         
         const now = new Date();
-        const utc = now.toUTCString().split(' ')[4].substring(0, 5);
+        const utc = `${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')}`;
         const local = formatTime(now);
         const lat = location.latitude.toFixed(4);
         const lon = location.longitude.toFixed(4);
@@ -52,33 +52,6 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
             </div>
         `;
         container.appendChild(infoHeader);
-
-        // 2. Analemma Widget (Collapsible)
-        const analemmaWidget = document.createElement('div');
-        analemmaWidget.className = `rounded-lg border overflow-hidden transition-all duration-300 ${isNightMode ? 'border-red-900/30' : 'border-blue-900/30'}`;
-        
-        // Header
-        const analemmaHeader = document.createElement('div');
-        analemmaHeader.className = `p-3 flex justify-between items-center cursor-pointer ${isNightMode ? 'bg-red-950/40 hover:bg-red-900/20' : 'bg-blue-900 text-white hover:bg-blue-800'}`;
-        analemmaHeader.innerHTML = `
-            <span class="font-bold uppercase tracking-widest text-xs">Analemma</span>
-            ${analemmaOpen ? ChevronUpIcon("w-4 h-4") : ChevronDownIcon("w-4 h-4")}
-        `;
-        analemmaHeader.onclick = () => {
-            analemmaOpen = !analemmaOpen;
-            render();
-        };
-        analemmaWidget.appendChild(analemmaHeader);
-
-        // Content
-        if (analemmaOpen) {
-            const analemmaContent = document.createElement('div');
-            // Dark blue background requested for Analemma
-            analemmaContent.className = "p-2 bg-[#0f172a]"; 
-            analemmaContent.appendChild(createAnalemma(location, isNightMode));
-            analemmaWidget.appendChild(analemmaContent);
-        }
-        container.appendChild(analemmaWidget);
 
         // 3. Sun & Moon Grid
         const headersGrid = document.createElement('div');
@@ -184,6 +157,33 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         }
 
         container.appendChild(contentArea);
+
+        // 2. Analemma Widget (Collapsible) - Moved below Sun/Moon
+        const analemmaWidget = document.createElement('div');
+        analemmaWidget.className = `rounded-lg border overflow-hidden transition-all duration-300 ${isNightMode ? 'border-red-900/30' : 'border-blue-900/30'}`;
+        
+        // Header
+        const analemmaHeader = document.createElement('div');
+        analemmaHeader.className = `p-3 flex justify-between items-center cursor-pointer ${isNightMode ? 'bg-red-950/40 hover:bg-red-900/20' : 'bg-blue-900 text-white hover:bg-blue-800'}`;
+        analemmaHeader.innerHTML = `
+            <span class="font-bold uppercase tracking-widest text-xs">Analemma</span>
+            ${analemmaOpen ? ChevronUpIcon("w-4 h-4") : ChevronDownIcon("w-4 h-4")}
+        `;
+        analemmaHeader.onclick = () => {
+            analemmaOpen = !analemmaOpen;
+            render();
+        };
+        analemmaWidget.appendChild(analemmaHeader);
+
+        // Content
+        if (analemmaOpen) {
+            const analemmaContent = document.createElement('div');
+            // Dark blue background requested for Analemma
+            analemmaContent.className = "p-2 bg-[#0f172a]"; 
+            analemmaContent.appendChild(createAnalemma(location, isNightMode));
+            analemmaWidget.appendChild(analemmaContent);
+        }
+        container.appendChild(analemmaWidget);
     }
 
     render();
