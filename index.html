@@ -1,32 +1,102 @@
-
 <!DOCTYPE html>
 <html lang="hu">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AstroTool</title>
-    <meta name="theme-color" content="#111827"/>
-    <link rel="manifest" href="manifest.webmanifest">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Add Babel Standalone for in-browser transpilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Add SunCalc library for astronomical calculations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
-  }
-}
-</script>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!-- Update script type to "text/babel" and specify presets -->
-    <script type="text/babel" data-presets="react,typescript" data-type="module" src="/index.tsx"></script>
+    <meta name="description" content="Csillagászati segédeszközök: Nap/Hold adatok, Analemma, Kalkulátorok">
     
-  </body>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SunCalc (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+
+    <!-- Custom Config for Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0' },
+                            '100%': { opacity: '1', transform: 'translateY(0)', maxHeight: '500px' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for Night Mode */
+        .night-mode ::-webkit-scrollbar {
+            width: 8px;
+        }
+        .night-mode ::-webkit-scrollbar-track {
+            background: #1a0505; 
+        }
+        .night-mode ::-webkit-scrollbar-thumb {
+            background: #7f1d1d; 
+            border-radius: 4px;
+        }
+        .night-mode ::-webkit-scrollbar-thumb:hover {
+            background: #991b1b; 
+        }
+        
+        /* Fraction styling */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        .fraction-num {
+            border-bottom: 1px solid currentColor;
+            padding: 0 0.2em;
+            line-height: 1;
+            padding-bottom: 2px;
+            width: 100%;
+            text-align: center;
+        }
+        .fraction-den {
+            line-height: 1;
+            padding-top: 2px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 transition-colors duration-500 min-h-screen flex flex-col">
+    
+    <!-- App Container -->
+    <div id="app" class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header id="header" class="p-4 border-b border-white/10 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+            <!-- Injected by JS -->
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 p-4 max-w-3xl mx-auto w-full">
+            <!-- Injected by JS -->
+        </main>
+
+        <!-- Footer -->
+        <footer id="footer" class="p-4 border-t border-white/10 text-center text-[10px] opacity-50">
+            <!-- Injected by JS -->
+        </footer>
+    </div>
+
+    <!-- Application Logic -->
+    <script type="module" src="./js/app.js"></script>
+</body>
 </html>

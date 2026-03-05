@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AstroTool (Vanilla JS)
 
-# Run and deploy your AI Studio app
+Ez a projekt egy csillagászati segédeszköz, amely tisztán HTML, CSS (Tailwind) és JavaScript alapokon működik, build lépés nélkül.
 
-This contains everything you need to run your app locally.
+## Futtatás
 
-View your app in AI Studio: https://ai.studio/apps/drive/1YhUKvK4DnImFVzqOFVZNH5_Mki2ZuXpx
+Egyszerűen nyisd meg az `index.html` fájlt egy böngészőben.
 
-## Run Locally
+Mivel a JavaScript modulokat (`type="module"`) használ, előfordulhat, hogy a böngésző biztonsági okokból nem engedi a helyi fájlok betöltését (`file://` protokoll). Ebben az esetben egy egyszerű helyi szerverre van szükség.
 
-**Prerequisites:**  Node.js
+### Helyi szerver indítása (opcionális)
 
+Ha van telepítve Node.js:
+```bash
+npx serve .
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Vagy Python-nal:
+```bash
+python3 -m http.server
+```
+
+## Funkciók
+
+- **Műszerfal:** Nap és Hold kelte/nyugta, fázisok, naptevékenység.
+- **Analemma:** A Nap pozíciójának éves változása az égen (interaktív diagram).
+- **Kalkulátor:** Távcső vizuális teljesítményének számítása és mértékegység átváltó.
+
+## Technológia
+
+- **Nyelv:** Vanilla JavaScript (ES6 Modules)
+- **Stílus:** Tailwind CSS (CDN)
+- **Könyvtárak:** SunCalc (CDN)
+- **Ikonok:** Egyedi SVG (Lucide stílus)
+
+## GitHub Pages
+
+A projekt közvetlenül feltölthető GitHub Pages-re, mivel nem igényel fordítást.
