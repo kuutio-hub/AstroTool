@@ -1,5 +1,5 @@
 
-import { messierCatalog, constellations, objectTypes } from '../data.js';
+import { catalogs, constellations, objectTypes } from '../catalogs.js';
 import { CatalogIcon, InfoIcon, ChevronDownIcon, ChevronUpIcon } from '../icons.js';
 
 export function createCatalog(isNightMode) {
@@ -17,7 +17,7 @@ export function createCatalog(isNightMode) {
         container.innerHTML = '';
         
         const inputBg = isNightMode ? 'bg-black border-red-900/50 text-red-600' : 'bg-white border-slate-200 text-slate-700';
-        const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white/60 border-white/40 shadow-sm';
+        const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white border-slate-300 shadow-sm';
         const textColor = isNightMode ? 'text-red-500' : 'text-slate-700';
         const labelColor = isNightMode ? 'text-red-800' : 'text-slate-500';
 
@@ -52,7 +52,7 @@ export function createCatalog(isNightMode) {
         function renderList() {
             listDiv.innerHTML = '';
             
-            const filtered = messierCatalog.filter(item => {
+            const filtered = catalogs.filter(item => {
                 const matchSearch = item.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
                                     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                     item.desc.toLowerCase().includes(searchTerm.toLowerCase());
@@ -66,7 +66,10 @@ export function createCatalog(isNightMode) {
                 return;
             }
 
-            filtered.forEach(item => {
+            // Limit to 50 items for performance if search is empty
+            const displayList = (searchTerm === '' && selectedConst === 'ALL' && selectedType === 'ALL') ? filtered.slice(0, 50) : filtered;
+
+            displayList.forEach(item => {
                 const isExpanded = expandedItem === item.id;
                 const itemEl = document.createElement('div');
                 itemEl.className = `p-3 rounded border transition-all ${cardBg}`;
@@ -77,7 +80,7 @@ export function createCatalog(isNightMode) {
                             <div class="font-mono font-bold text-lg ${textColor}">${item.id}</div>
                             <div>
                                 <div class="font-bold text-xs uppercase tracking-wider">${item.name}</div>
-                                <div class="text-[10px] opacity-60">${objectTypes[item.type]} • ${constellations[item.const]}</div>
+                                <div class="text-[10px] opacity-60">${objectTypes[item.type] || item.type} • ${constellations[item.const] || item.const}</div>
                             </div>
                         </div>
                         <div class="${isNightMode ? 'text-red-800' : 'text-slate-400'}">
@@ -101,6 +104,13 @@ export function createCatalog(isNightMode) {
 
                 listDiv.appendChild(itemEl);
             });
+            
+            if (displayList.length < filtered.length) {
+                const moreDiv = document.createElement('div');
+                moreDiv.className = "text-center text-[10px] opacity-50 pt-2";
+                moreDiv.innerText = `...és még ${filtered.length - displayList.length} találat (szűkítsd a keresést)`;
+                listDiv.appendChild(moreDiv);
+            }
         }
 
         renderList();
