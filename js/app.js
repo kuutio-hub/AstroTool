@@ -1,14 +1,15 @@
 
 import { createDashboard } from './components/dashboard.js';
-import { createAnalemma } from './components/analemma.js';
 import { createCalculator } from './components/calculator.js';
-import { getGeolocation, storage, formatTime } from './utils.js';
-import { DashboardIcon, TelescopeIcon, GlobeIcon, LightbulbIcon } from './icons.js';
+import { createCatalog } from './components/catalog.js';
+import { getGeolocation, storage } from './utils.js';
+import { DashboardIcon, TelescopeIcon, GlobeIcon, NightModeIcon, CatalogIcon } from './icons.js';
 
 // State
 const state = {
-    activeTab: 'dashboard', // dashboard, analemma, calculator
+    activeTab: 'dashboard', // dashboard, catalog, calculator
     isNightMode: storage.get('isNightMode', true),
+    dimLevel: storage.get('dimLevel', 0), // 0 to 0.8
     location: storage.get('location', { latitude: 47.4979, longitude: 19.0402 }), // Default Budapest
     sunData: null,
     moonData: null,
@@ -21,6 +22,11 @@ const header = document.getElementById('header');
 const mainContent = document.getElementById('main-content');
 const footer = document.getElementById('footer');
 
+// Dimmer Overlay
+const dimmer = document.createElement('div');
+dimmer.className = "fixed inset-0 pointer-events-none z-[100] bg-black transition-opacity duration-300";
+document.body.appendChild(dimmer);
+
 // Update Theme
 function updateTheme() {
     if (state.isNightMode) {
@@ -32,8 +38,13 @@ function updateTheme() {
         document.body.classList.remove('bg-slate-950', 'text-red-600');
         document.documentElement.classList.remove('night-mode');
     }
+    
+    // Apply Dimming
+    dimmer.style.opacity = state.isNightMode ? state.dimLevel : 0;
+
     renderHeader(); // Re-render header to update icon colors
     renderContent(); // Re-render content to pass new mode
+    renderFooter();
 }
 
 // Calculate Data
@@ -63,16 +74,8 @@ function calculateData() {
         remaining = "Már lement";
     }
 
-    // Moon Distance (approximate calculation as SunCalc doesn't provide it directly in simple getMoonPosition)
-    // Actually SunCalc.getMoonPosition returns distance in km? No, it returns distance in Earth radii?
-    // Let's check SunCalc docs or source.
-    // SunCalc.getMoonPosition(date, lat, lng) -> { azimuth, altitude, distance, parallacticAngle }
-    // distance is in kilometers.
+    // Moon Distance (approximate calculation)
     const moonPos = window.SunCalc.getMoonPosition(now, state.location.latitude, state.location.longitude);
-
-    // Moon Age (approximate)
-    // Synodic month is 29.53 days. Phase is 0..1.
-    // Age = phase * 29.53
     const moonAge = moonIllum.phase * 29.53;
 
     state.sunData = {
@@ -102,11 +105,17 @@ function renderHeader() {
             <h1 class="text-lg font-bold tracking-widest uppercase ${state.isNightMode ? 'text-red-600' : 'text-slate-800'}">AstroTool</h1>
         </div>
         <div class="flex items-center gap-2">
+            ${state.isNightMode ? `
+                <div class="flex items-center gap-1 mr-2">
+                    <span class="text-[10px] font-bold opacity-60">DIM</span>
+                    <input type="range" min="0" max="0.8" step="0.1" value="${state.dimLevel}" class="w-16 h-1 bg-red-900 rounded-lg appearance-none cursor-pointer accent-red-500" id="dim-slider">
+                </div>
+            ` : ''}
             <button id="gps-btn" class="${btnClass} ${state.geoLoading ? 'animate-pulse' : ''}" title="Helyzet frissítése">
                 ${GlobeIcon("w-5 h-5")}
             </button>
             <button id="theme-btn" class="${btnClass}" title="Éjszakai mód">
-                ${LightbulbIcon("w-5 h-5")}
+                ${NightModeIcon("w-5 h-5")}
             </button>
         </div>
     `;
@@ -132,13 +141,21 @@ function renderHeader() {
         storage.set('isNightMode', state.isNightMode);
         updateTheme();
     };
+
+    if (state.isNightMode) {
+        header.querySelector('#dim-slider').oninput = (e) => {
+            state.dimLevel = parseFloat(e.target.value);
+            storage.set('dimLevel', state.dimLevel);
+            dimmer.style.opacity = state.dimLevel;
+        };
+    }
 }
 
 // Render Footer (Navigation)
 function renderFooter() {
     const navItems = [
         { id: 'dashboard', icon: DashboardIcon, label: 'Műszerfal' },
-        { id: 'analemma', icon: GlobeIcon, label: 'Analemma' },
+        { id: 'catalog', icon: CatalogIcon, label: 'Katalógus' },
         { id: 'calculator', icon: TelescopeIcon, label: 'Kalkulátor' }
     ];
 
@@ -173,8 +190,8 @@ function renderContent() {
     let component;
     if (state.activeTab === 'dashboard') {
         component = createDashboard(state.location, state.sunData, state.moonData, state.isNightMode);
-    } else if (state.activeTab === 'analemma') {
-        component = createAnalemma(state.location, state.isNightMode);
+    } else if (state.activeTab === 'catalog') {
+        component = createCatalog(state.isNightMode);
     } else if (state.activeTab === 'calculator') {
         component = createCalculator(state.isNightMode);
     }

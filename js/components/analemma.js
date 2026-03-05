@@ -165,60 +165,88 @@ export function createAnalemma(location, isNightMode) {
 
     // Render SVG
     function renderSVG() {
-        const lineColor = isNightMode ? '#991b1b' : '#fbbf24';
-        const dotColor = isNightMode ? '#ef4444' : '#f59e0b';
-        const textColor = isNightMode ? '#ef4444' : '#94a3b8';
-        const horizonColor = isNightMode ? '#450a0a' : '#334155';
+        // Style Config
+        // Always dark blue background for Analemma as requested
+        const lineColor = '#fbbf24'; // Gold
+        const dotColor = '#f59e0b'; // Darker Gold
+        const textColor = '#94a3b8'; // Slate 400
+        const horizonColor = '#334155'; // Slate 700
+        const currentSunColor = '#fcd34d'; // Bright Yellow
 
         svg.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
         
-        let html = `
+        // Glow Filter
+        let defs = `
+            <defs>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+            </defs>
+        `;
+
+        let html = defs + `
           <line x1="-1000" y1="90" x2="1000" y2="90" stroke="${horizonColor}" stroke-width="${viewBox.w / 400}" />
           
-          <text x="100" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5">DÉL</text>
-          <text x="50" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5">KELET</text>
-          <text x="150" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5">NYUGAT</text>
+          <text x="100" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5" font-family="monospace">DÉL</text>
+          <text x="50" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5" font-family="monospace">KELET</text>
+          <text x="150" y="96" font-size="${viewBox.w / 60}" text-anchor="middle" fill="${textColor}" opacity="0.5" font-family="monospace">NYUGAT</text>
 
+          <!-- Analemma Curve -->
           <path
             d="M ${points.path.map(p => `${p.x},${p.y}`).join(' L ')} Z"
             fill="none"
             stroke="${lineColor}"
-            stroke-width="${viewBox.w / 600}"
-            stroke-dasharray="${viewBox.w/200},${viewBox.w/200}"
-            opacity="0.5"
+            stroke-width="${viewBox.w / 500}"
+            filter="url(#glow)"
+            opacity="0.8"
           />
         `;
 
         // Month Separator Dots
         points.monthLabels.forEach((m, i) => {
-             html += `<circle cx="${m.x}" cy="${m.y}" r="${viewBox.w / 400}" fill="${textColor}" opacity="0.5" />`;
+             html += `<circle cx="${m.x}" cy="${m.y}" r="${viewBox.w / 400}" fill="${textColor}" opacity="0.3" />`;
         });
 
         // Month Labels
         if (viewBox.w < 100) {
             points.monthLabels.forEach((m, i) => {
                 html += `
-                <text x="${m.x}" y="${m.y}" dy="${-viewBox.w / 100}" font-size="${viewBox.w / 40}" text-anchor="middle" fill="${textColor}" opacity="0.7" class="font-mono">
+                <text x="${m.x}" y="${m.y}" dy="${-viewBox.w / 100}" font-size="${viewBox.w / 40}" text-anchor="middle" fill="${textColor}" opacity="0.6" class="font-mono" style="font-size: ${viewBox.w / 40}px">
                     ${m.name}
                 </text>`;
             });
         }
 
-        // Key Points
+        // Key Points (Solstices/Equinoxes) - Faded
         points.keyPoints.forEach((p, i) => {
-            const r = p.isCurrent ? viewBox.w / 150 : viewBox.w / 300;
-            const fill = p.isCurrent ? (isNightMode ? '#ff0000' : '#ffffff') : dotColor;
-            const stroke = p.isCurrent ? dotColor : 'none';
+            if (p.isCurrent) return; // Skip current day here
+
+            const r = viewBox.w / 300;
             const strokeWidth = viewBox.w / 1000;
             
             html += `
-            <g>
-              <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />
-              <text x="${p.x}" y="${p.y - viewBox.w / 80}" font-size="${viewBox.w / 50}" text-anchor="middle" fill="${textColor}" class="font-bold uppercase tracking-tighter">
+            <g opacity="0.6">
+              <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${dotColor}" stroke="none" />
+              <text x="${p.x}" y="${p.y - viewBox.w / 80}" font-size="${viewBox.w / 50}" text-anchor="middle" fill="${textColor}" class="font-bold uppercase tracking-tighter" style="font-size: ${viewBox.w / 50}px">
                 ${p.name}
               </text>
             </g>`;
         });
+
+        // Current Sun - Bright & Glowing
+        const current = points.keyPoints.find(p => p.isCurrent);
+        if (current) {
+            const r = viewBox.w / 100;
+            html += `
+            <g filter="url(#glow)">
+                <circle cx="${current.x}" cy="${current.y}" r="${r}" fill="${currentSunColor}" stroke="white" stroke-width="${viewBox.w / 600}" />
+                <circle cx="${current.x}" cy="${current.y}" r="${r * 2}" fill="${currentSunColor}" opacity="0.3" />
+                <line x1="${current.x - r*3}" y1="${current.y}" x2="${current.x + r*3}" y2="${current.y}" stroke="${currentSunColor}" stroke-width="${viewBox.w / 800}" opacity="0.5" />
+                <line x1="${current.x}" y1="${current.y - r*3}" x2="${current.x}" y2="${current.y + r*3}" stroke="${currentSunColor}" stroke-width="${viewBox.w / 800}" opacity="0.5" />
+            </g>
+            `;
+        }
 
         svg.innerHTML = html;
     }
