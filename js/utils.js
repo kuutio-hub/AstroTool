@@ -1,9 +1,9 @@
 
 // Utility functions
 
-export const formatTime = (date) => {
+export const formatTime = (date, withSeconds = false) => {
     if (!date || isNaN(date.getTime())) return '--:--';
-    return date.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit', second: withSeconds ? '2-digit' : undefined });
 };
 
 export const formatDate = (date) => {
@@ -48,6 +48,36 @@ export const getGeolocation = (callback) => {
             callback(null, error);
         }
     );
+};
+
+// Time Service
+export const TimeService = {
+    offset: 0,
+    synced: false,
+
+    async sync() {
+        try {
+            const start = Date.now();
+            const response = await fetch('https://worldtimeapi.org/api/ip');
+            const data = await response.json();
+            const end = Date.now();
+            const networkDelay = (end - start) / 2;
+            
+            // data.unixtime is seconds, we need ms
+            const serverTime = data.unixtime * 1000 + networkDelay;
+            this.offset = serverTime - Date.now();
+            this.synced = true;
+            console.log("Time synced. Offset:", this.offset, "ms");
+        } catch (e) {
+            console.warn("Time sync failed, using system time.", e);
+            this.synced = false;
+            this.offset = 0;
+        }
+    },
+
+    now() {
+        return new Date(Date.now() + this.offset);
+    }
 };
 
 // Math Helpers

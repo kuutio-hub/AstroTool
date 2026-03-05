@@ -1,6 +1,6 @@
 
 import { SunIcon, MoonIcon, ChevronDownIcon, ChevronUpIcon, MoonPhaseIcon, GlobeIcon } from '../icons.js';
-import { formatTime, formatDate } from '../utils.js';
+import { formatTime, formatDate, TimeService } from '../utils.js';
 import { createAnalemma } from './analemma.js';
 
 export function createDashboard(location, sunData, moonData, isNightMode) {
@@ -31,10 +31,11 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         // 1. Info Header (GPS, Time)
         const infoHeader = document.createElement('div');
         infoHeader.className = `p-3 rounded-lg border flex justify-between items-center text-xs ${cardBg}`;
+        infoHeader.id = 'clock-display'; // Add ID for JS updates
         
-        const now = new Date();
-        const utc = `${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')}`;
-        const local = formatTime(now);
+        const now = TimeService.now();
+        const utc = now.toISOString().split('T')[1].split('.')[0];
+        const local = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const lat = location.latitude.toFixed(4);
         const lon = location.longitude.toFixed(4);
 
@@ -47,8 +48,8 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                 <div class="opacity-60 text-[10px] uppercase tracking-wider">GPS Koordináták</div>
             </div>
             <div class="text-right flex flex-col gap-1">
-                <div class="font-mono font-bold ${headerText}">Helyi: ${local}</div>
-                <div class="font-mono opacity-60 text-[10px]">UTC: ${utc}</div>
+                <div class="font-mono font-bold ${headerText} local-time">Helyi: ${local}</div>
+                <div class="font-mono opacity-60 text-[10px] utc-time">UTC: ${utc}</div>
             </div>
         `;
         container.appendChild(infoHeader);

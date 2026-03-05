@@ -2,7 +2,7 @@
 import { createDashboard } from './components/dashboard.js';
 import { createCalculator } from './components/calculator.js';
 import { createCatalog } from './components/catalog.js';
-import { getGeolocation, storage } from './utils.js';
+import { getGeolocation, storage, TimeService } from './utils.js';
 import { DashboardIcon, TelescopeIcon, GlobeIcon, NightModeIcon, CatalogIcon } from './icons.js';
 
 // State
@@ -205,6 +205,9 @@ function init() {
     renderHeader();
     renderFooter();
     
+    // Sync Time
+    TimeService.sync();
+
     // Initial calculation
     if (window.SunCalc) {
         calculateData();
@@ -220,6 +223,24 @@ function init() {
 
     // Refresh data every minute
     setInterval(calculateData, 60000);
+    
+    // Refresh Clock every second
+    setInterval(() => {
+        if (state.activeTab === 'dashboard') {
+            const clockEl = document.getElementById('clock-display');
+            if (clockEl) {
+                const now = TimeService.now();
+                const utc = now.toISOString().split('T')[1].split('.')[0];
+                const local = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                // Update text content directly to avoid re-rendering whole dashboard
+                const localEl = clockEl.querySelector('.local-time');
+                const utcEl = clockEl.querySelector('.utc-time');
+                if (localEl) localEl.textContent = `Helyi: ${local}`;
+                if (utcEl) utcEl.textContent = `UTC: ${utc}`;
+            }
+        }
+    }, 1000);
 }
 
 init();

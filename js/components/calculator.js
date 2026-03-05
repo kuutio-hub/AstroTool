@@ -252,11 +252,17 @@ export function createCalculator(isNightMode) {
                  </div>`
             ));
 
-            // Moon FOV
+            // Moon Visible Surface
             const moonAngularSize = 0.5; // approx degrees
-            const moonsInFov = (tfov / moonAngularSize).toFixed(1);
-            cardsGrid.appendChild(createCard('moon_fov', 'Hold Látómező', moonsInFov, 'db', 'Hány Hold fér el?', 
-                'Holdak = FoV / 0.5°', 'A Hold átlagos látszó mérete 0.5 fok. Ez megmutatja, hányszor férne el a látómezőben.'));
+            const moonDiameter = 3474; // km
+            // Formula: Visible Diameter = 2 * Distance * tan(TFOV/2). 
+            // Assuming Distance ~ 384400km. Or simpler: (TFOV / 0.5) * 3474
+            // Let's use the simpler linear approximation for small angles, or the precise one.
+            // Precise: D_vis = 2 * 384400 * tan(radians(tfov)/2)
+            const visibleMoonKm = 2 * 384400 * Math.tan((tfov * Math.PI / 180) / 2);
+            
+            cardsGrid.appendChild(createCard('moon_vis', 'Hold Látómező', visibleMoonKm.toFixed(0), 'km', 'Látható felszín.', 
+                'D = 2 * d * tan(FoV/2)', 'A Hold felszínéből látható átmérő kilométerben (d=384400km).'));
 
             cardsGrid.appendChild(createCard('ep', 'Kilépő Pupilla', exitPupil.toFixed(1), 'mm', 'Fényesség.', 
                 'EP = A * e / F', 'A kilépő fénynyaláb átmérője. Ideális esetben 0.5mm és 7mm között van.'));

@@ -234,7 +234,7 @@ export function createAnalemma(location, isNightMode) {
             t.setAttribute("y", m.y);
             // Offset label slightly
             t.setAttribute("dy", -viewBox.w / 50); 
-            t.setAttribute("font-size", viewBox.w / 30); // Larger font
+            t.setAttribute("font-size", viewBox.w / 25); // Larger font (was 30)
             t.setAttribute("text-anchor", "middle");
             t.setAttribute("fill", textColor);
             t.setAttribute("opacity", "0.8");
