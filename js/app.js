@@ -86,6 +86,66 @@ function render() {
     header.appendChild(controls);
     app.appendChild(header);
 
+    // Global Settings Bar
+    const globalSettings = document.createElement('div');
+    globalSettings.className = `astro-card mb-6 p-4`;
+    
+    let gData = {
+        F: storage.get('F', 1000),
+        A: storage.get('A', 200),
+        B: storage.get('B', 1),
+        e: storage.get('e', 25),
+        p: storage.get('p', 4.3),
+        w: storage.get('w', 22.3)
+    };
+
+    const updateGlobal = (key, val) => {
+        gData[key] = val;
+        storage.set(key, val);
+        window.dispatchEvent(new CustomEvent('astro-settings-changed', { detail: gData }));
+    };
+
+    globalSettings.innerHTML = `
+        <div class="flex items-center gap-2 mb-3 ${isNightMode ? 'text-red-500' : 'text-blue-300'} font-bold uppercase tracking-wider text-xs">
+            Globális Távcső Beállítások
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div>
+                <label class="astro-label">Fókusz (F) mm</label>
+                <input type="number" id="g-F" value="${gData.F}" class="astro-input">
+            </div>
+            <div>
+                <label class="astro-label">Apertúra (A) mm</label>
+                <input type="number" id="g-A" value="${gData.A}" class="astro-input">
+            </div>
+            <div>
+                <label class="astro-label">Barlow (B) x</label>
+                <input type="number" id="g-B" value="${gData.B}" class="astro-input" step="0.1">
+            </div>
+            <div>
+                <label class="astro-label">Okulár (e) mm</label>
+                <input type="number" id="g-e" value="${gData.e}" class="astro-input" step="0.1">
+            </div>
+            <div>
+                <label class="astro-label">Pixel (p) µm</label>
+                <input type="number" id="g-p" value="${gData.p}" class="astro-input" step="0.1">
+            </div>
+            <div>
+                <label class="astro-label">Szenzor W (w) mm</label>
+                <input type="number" id="g-w" value="${gData.w}" class="astro-input" step="0.1">
+            </div>
+        </div>
+    `;
+
+    globalSettings.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const key = e.target.id.split('-')[1];
+            updateGlobal(key, parseFloat(e.target.value) || 0);
+        });
+    });
+
+    app.appendChild(globalSettings);
+
     // Navigation
     const nav = document.createElement('nav');
     nav.className = "flex gap-2 mb-6 overflow-x-auto no-scrollbar border-b border-white/10 pb-2";

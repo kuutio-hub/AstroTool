@@ -14,13 +14,6 @@ export function createExposureCalc(isNightMode) {
 
     const update = () => {
         const fRatio = data.F / data.A;
-        const exp = (data.ff / data.iso) * Math.pow(fRatio, 2) * Math.pow(2.512, (9 - data.sb));
-        
-        // Let's adjust the formula slightly to give reasonable seconds.
-        // The user formula: Exposure = FF / i * f^2 * 2.512^(sb)
-        // Wait, the user formula in prompt: Exposure = FF / i * f^2 * 2.512^(sb)
-        // Actually, typical formula is: t = (f^2 * FF) / (ISO * 2.512^(SB - 9)) or something.
-        // Let's just use exactly what user provided: Exposure = FF / i * f^2 * 2.512^(sb)
         const exposure = (data.ff / data.iso) * Math.pow(fRatio, 2) * Math.pow(2.512, data.sb);
 
         card.querySelector('#exp-res').textContent = exposure.toExponential(2) + ' s';
@@ -32,16 +25,6 @@ export function createExposureCalc(isNightMode) {
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Expó Kalkulátor</h3>
         <div class="space-y-3 mb-4">
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="${labelClass}">Fókusz (F) mm</label>
-                    <input type="number" id="exp-F" value="${data.F}" class="${inputClass}">
-                </div>
-                <div>
-                    <label class="${labelClass}">Apertúra (A) mm</label>
-                    <input type="number" id="exp-A" value="${data.A}" class="${inputClass}">
-                </div>
-            </div>
             <div class="grid grid-cols-3 gap-2">
                 <div>
                     <label class="${labelClass}">ISO (i)</label>
@@ -70,6 +53,11 @@ export function createExposureCalc(isNightMode) {
             storage.set(key, data[key]);
             update();
         });
+    });
+
+    window.addEventListener('astro-settings-changed', (e) => {
+        data = { ...data, ...e.detail };
+        update();
     });
 
     update();

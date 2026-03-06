@@ -1,0 +1,22 @@
+[
+    {
+        "id": "WDS 02318+8915",
+        "catalog": "WDS",
+        "type": "Double Star",
+        "subtype": "DS",
+        "ra": "02h 31m 49.0s",
+        "dec": "+89° 15' 50\"",
+        "ra_deg": 37.954,
+        "dec_deg": 89.264,
+        "magnitude": 1.9,
+        "surface_brightness": null,
+        "size": "18.3\"",
+        "distance_ly": 433,
+        "constellation": "UMi",
+        "notes": "Polaris (Sarkcsillag)",
+        "mag_primary": 1.9,
+        "mag_secondary": 9.0,
+        "separation_arcsec": 18.3,
+        "position_angle": 235
+    }
+]

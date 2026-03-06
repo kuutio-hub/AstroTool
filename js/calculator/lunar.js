@@ -21,44 +21,23 @@ export function createLunarCalc(isNightMode) {
         const effF = data.F * data.B;
         const res = (data.p / effF) * 206.3;
         const kmInPixels = 0.536 / res;
+        
+        // Solar feature pixel size (1 arcsec on sun is approx 725 km)
+        // So 1 pixel = res arcsec = res * 725 km
+        const sunKmPerPixel = res * 725;
 
         card.querySelector('#lun-vis').textContent = lunarSizeKm.toFixed(0) + ' km';
         card.querySelector('#lun-img').textContent = kmInPixels.toFixed(1) + ' px';
+        card.querySelector('#sun-img').textContent = sunKmPerPixel.toFixed(0) + ' km/px';
     };
 
-    const inputClass = "astro-input";
     const labelClass = "astro-label";
 
     card.innerHTML = `
-        <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Hold Geometria</h3>
-        <div class="space-y-3 mb-4">
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="${labelClass}">Fókusz (F) mm</label>
-                    <input type="number" id="lun-F" value="${data.F}" class="${inputClass}">
-                </div>
-                <div>
-                    <label class="${labelClass}">Barlow (B) x</label>
-                    <input type="number" id="lun-B" value="${data.B}" class="${inputClass}">
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-                <div>
-                    <label class="${labelClass}">AFoV (a) °</label>
-                    <input type="number" id="lun-a" value="${data.a}" class="${inputClass}">
-                </div>
-                <div>
-                    <label class="${labelClass}">Okulár (e) mm</label>
-                    <input type="number" id="lun-e" value="${data.e}" class="${inputClass}">
-                </div>
-                <div>
-                    <label class="${labelClass}">Pixel (p) µm</label>
-                    <input type="number" id="lun-p" value="${data.p}" class="${inputClass}">
-                </div>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-            <div>
+        <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Hold/Nap Geometria</h3>
+        <div class="text-xs opacity-70 mb-4 italic">A paraméterek a globális beállításokból jönnek.</div>
+        <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10">
+            <div class="col-span-2">
                 <div class="${labelClass}">Vizuális Látómező (Hold felszín)</div>
                 <div id="lun-vis" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
@@ -66,16 +45,16 @@ export function createLunarCalc(isNightMode) {
                 <div class="${labelClass}">1 km a Holdon (Fotós)</div>
                 <div id="lun-img" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
+            <div>
+                <div class="${labelClass}">1 pixel a Napon (Fotós)</div>
+                <div id="sun-img" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
+            </div>
         </div>
     `;
 
-    card.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const key = e.target.id.split('-')[1];
-            data[key] = parseFloat(e.target.value) || 0;
-            storage.set(key, data[key]);
-            update();
-        });
+    window.addEventListener('astro-settings-changed', (e) => {
+        data = { ...data, ...e.detail };
+        update();
     });
 
     update();

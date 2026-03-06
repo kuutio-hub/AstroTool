@@ -3,6 +3,8 @@ import { formatTime, formatDate, TimeService } from './utils.js';
 import { createAnalemma } from './components/analemma.js';
 import { renderMoonPhaseIcon } from './components/moonphase.js';
 
+import { createCatalogSearch } from './components/catalogSearch.js';
+
 export function createDashboard(location, sunData, moonData, isNightMode) {
     const container = document.createElement('div');
     container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6";
@@ -80,6 +82,16 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const sunset = formatTime(sunData.sunset);
     const solarNoon = formatTime(sunData.solarNoon);
     const nadir = formatTime(sunData.nadir);
+    
+    // Sun distance and size
+    const sunDistKm = 149597870.7; // Approx 1 AU
+    const sunSizeDeg = 0.533; // Approx
+    
+    // Ecliptic longitude approximation
+    const daysSinceJ2000 = (TimeService.now().getTime() - new Date('2000-01-01T12:00:00Z').getTime()) / 86400000;
+    const meanAnomaly = (357.529 + 0.98560028 * daysSinceJ2000) % 360;
+    const equationOfCenter = 1.9148 * Math.sin(meanAnomaly * Math.PI / 180) + 0.02 * Math.sin(2 * meanAnomaly * Math.PI / 180);
+    const eclipticLong = (280.466 + 0.98564736 * daysSinceJ2000 + equationOfCenter) % 360;
 
     sunCard.innerHTML = `
         <div>
@@ -88,20 +100,20 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
             </div>
             <div class="space-y-3">
                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span class="astro-label mb-0">Napkelte</span>
-                    <span class="font-mono font-bold ${valueColor}">${sunrise}</span>
+                    <span class="astro-label mb-0">Napkelte / Napnyugta</span>
+                    <span class="font-mono font-bold ${valueColor}">${sunrise} / ${sunset}</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span class="astro-label mb-0">Delelés</span>
-                    <span class="font-mono font-bold ${valueColor}">${solarNoon}</span>
+                    <span class="astro-label mb-0">Delelés / Nadir</span>
+                    <span class="font-mono font-bold ${valueColor}">${solarNoon} / ${nadir}</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span class="astro-label mb-0">Napnyugta</span>
-                    <span class="font-mono font-bold ${valueColor}">${sunset}</span>
+                    <span class="astro-label mb-0">Távolság / Látszó méret</span>
+                    <span class="font-mono font-bold ${valueColor}">${formatNum(sunDistKm)} km / ${sunSizeDeg.toFixed(2)}°</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="astro-label mb-0">Éjfél (Nadir)</span>
-                    <span class="font-mono font-bold ${valueColor}">${nadir}</span>
+                    <span class="astro-label mb-0">Ekliptikai hosszúság</span>
+                    <span class="font-mono font-bold ${valueColor}">${(eclipticLong < 0 ? eclipticLong + 360 : eclipticLong).toFixed(2)}°</span>
                 </div>
             </div>
         </div>
@@ -121,29 +133,51 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     
     const isWaxing = moonData.phase < 0.5;
     const illumPercent = (moonData.fraction * 100).toFixed(1);
+    
+    const moonTimes = SunCalc.getMoonTimes(TimeService.now(), location.latitude, location.longitude);
+    const moonRise = moonTimes.rise ? formatTime(moonTimes.rise) : '-';
+    const moonSet = moonTimes.set ? formatTime(moonTimes.set) : '-';
+    
+    const moonDistKm = moonData.distance * 6371;
+    const moonSizeDeg = Math.atan(3474 / moonDistKm) * (180 / Math.PI);
+    
+    // Elongation
+    const elongation = moonData.phase * 360;
 
     moonCard.innerHTML = `
         <div>
             <div class="flex items-center gap-2 mb-2 ${headerColor} font-bold uppercase tracking-wider text-xs">
                 ${MoonIcon("w-4 h-4")} Hold Adatok
             </div>
-            <div class="flex justify-between items-center">
-                <div class="w-1/2">
-                    <div class="flex justify-center my-4">
+            <div class="flex justify-between items-center mb-4">
+                <div class="w-1/3">
+                    <div class="flex justify-center my-2">
                         ${renderMoonPhaseIcon(moonData.fraction, isWaxing, isNightMode)}
                     </div>
-                    <div class="text-center font-bold uppercase tracking-widest text-xs ${valueColor}">
+                    <div class="text-center font-bold uppercase tracking-widest text-[10px] ${valueColor}">
                         ${phaseName}
                     </div>
                 </div>
-                <div class="w-1/2 pl-4 space-y-3">
+                <div class="w-2/3 pl-4 grid grid-cols-2 gap-2">
                     <div>
-                        <div class="astro-label">Megvilágítás</div>
-                        <div class="font-mono font-bold text-lg ${valueColor}">${illumPercent}%</div>
+                        <div class="astro-label">Kel / Nyug</div>
+                        <div class="font-mono font-bold text-xs ${valueColor}">${moonRise} / ${moonSet}</div>
                     </div>
                     <div>
-                        <div class="astro-label">Kor</div>
-                        <div class="font-mono font-bold ${valueColor}">${(moonData.phase * 29.53).toFixed(1)} nap</div>
+                        <div class="astro-label">Megvilágítás</div>
+                        <div class="font-mono font-bold text-xs ${valueColor}">${illumPercent}%</div>
+                    </div>
+                    <div>
+                        <div class="astro-label">Távolság</div>
+                        <div class="font-mono font-bold text-xs ${valueColor}">${formatNum(moonDistKm)} km</div>
+                    </div>
+                    <div>
+                        <div class="astro-label">Látszó méret</div>
+                        <div class="font-mono font-bold text-xs ${valueColor}">${moonSizeDeg.toFixed(2)}°</div>
+                    </div>
+                    <div class="col-span-2">
+                        <div class="astro-label">Elongáció</div>
+                        <div class="font-mono font-bold text-xs ${valueColor}">${elongation.toFixed(1)}°</div>
                     </div>
                 </div>
             </div>
@@ -167,6 +201,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const wrapper = document.createElement('div');
     wrapper.appendChild(container);
     wrapper.appendChild(analemmaContainer);
+    wrapper.appendChild(createCatalogSearch(isNightMode));
 
     return wrapper;
 }

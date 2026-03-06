@@ -1,0 +1,18 @@
+[
+    {
+        "id": "Mel111",
+        "catalog": "Melotte",
+        "type": "Open Cluster",
+        "subtype": "OC",
+        "ra": "12h 22m 30.0s",
+        "dec": "+25° 48' 00\"",
+        "ra_deg": 185.625,
+        "dec_deg": 25.800,
+        "magnitude": 1.8,
+        "surface_brightness": 12.0,
+        "size": "275'",
+        "distance_ly": 280,
+        "constellation": "Com",
+        "notes": "Coma Star Cluster"
+    }
+]

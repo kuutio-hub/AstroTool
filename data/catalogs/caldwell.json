@@ -1,0 +1,18 @@
+[
+    {
+        "id": "C14",
+        "catalog": "Caldwell",
+        "type": "Double Cluster",
+        "subtype": "OC",
+        "ra": "02h 20m 00.0s",
+        "dec": "+57° 08' 00\"",
+        "ra_deg": 35.000,
+        "dec_deg": 57.133,
+        "magnitude": 4.3,
+        "surface_brightness": 11.5,
+        "size": "60'",
+        "distance_ly": 7500,
+        "constellation": "Per",
+        "notes": "Ikerhalmaz (NGC 869 / NGC 884)"
+    }
+]

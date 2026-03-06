@@ -1,0 +1,18 @@
+[
+    {
+        "id": "NGC7000",
+        "catalog": "NGC",
+        "type": "Emission Nebula",
+        "subtype": "EN",
+        "ra": "20h 59m 17.1s",
+        "dec": "+44° 31' 44\"",
+        "ra_deg": 314.821,
+        "dec_deg": 44.529,
+        "magnitude": 4.0,
+        "surface_brightness": 14.0,
+        "size": "120' x 100'",
+        "distance_ly": 2590,
+        "constellation": "Cyg",
+        "notes": "Észak-Amerika köd"
+    }
+]

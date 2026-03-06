@@ -1,0 +1,34 @@
+[
+    {
+        "id": "M1",
+        "catalog": "Messier",
+        "type": "Supernova Remnant",
+        "subtype": "SNR",
+        "ra": "05h 34m 31.9s",
+        "dec": "+22° 00' 52\"",
+        "ra_deg": 83.633,
+        "dec_deg": 22.014,
+        "magnitude": 8.4,
+        "surface_brightness": 11.9,
+        "size": "6' x 4'",
+        "distance_ly": 6500,
+        "constellation": "Tau",
+        "notes": "Rák-köd"
+    },
+    {
+        "id": "M31",
+        "catalog": "Messier",
+        "type": "Galaxy",
+        "subtype": "SA(s)b",
+        "ra": "00h 42m 44.3s",
+        "dec": "+41° 16' 09\"",
+        "ra_deg": 10.684,
+        "dec_deg": 41.269,
+        "magnitude": 3.4,
+        "surface_brightness": 13.5,
+        "size": "190' x 60'",
+        "distance_ly": 2540000,
+        "constellation": "And",
+        "notes": "Androméda-köd"
+    }
+]
