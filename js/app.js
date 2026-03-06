@@ -1,12 +1,15 @@
-import { storage, TimeService } from './utils.js';
+import { storage, TimeService, showInfoModal, createInfoBtn } from './utils.js';
 import { createDashboard } from './dashboard.js';
 import { createCalculator } from './calculator/index.js';
+import { createCatalog } from './components/catalog.js';
 import { createDropdown } from './components/dropdown.js';
 
 const app = document.getElementById('app');
 let isNightMode = storage.get('nightMode', false);
 let activeTab = storage.get('activeTab', 'dashboard');
 let userLocation = storage.get('location', { latitude: 47.4979, longitude: 19.0402 }); // Default Budapest
+
+window.showInfo = (title, content) => showInfoModal(title, content, isNightMode);
 
 function render() {
     app.innerHTML = '';
@@ -26,7 +29,7 @@ function render() {
     
     const title = document.createElement('h1');
     title.className = `text-2xl font-bold tracking-widest uppercase ${isNightMode ? 'text-red-500' : 'text-white'}`;
-    title.textContent = "AstroTool 2.0";
+    title.textContent = "AstroTool";
     
     const controls = document.createElement('div');
     controls.className = "flex gap-2 items-center";
@@ -63,7 +66,6 @@ function render() {
     const locDropdown = createDropdown('Helyzet', locHtml, isNightMode);
     
     // Attach event listener to the save button inside the dropdown
-    // We need to do this after the dropdown is added to the DOM, or we can just query it from the created element.
     setTimeout(() => {
         const saveBtn = document.getElementById('loc-save');
         if (saveBtn) {
@@ -94,9 +96,8 @@ function render() {
         F: storage.get('F', 1000),
         A: storage.get('A', 200),
         B: storage.get('B', 1),
-        e: storage.get('e', 25),
-        p: storage.get('p', 4.3),
-        w: storage.get('w', 22.3)
+        a: storage.get('a', 50),
+        bortle: storage.get('bortle', 4)
     };
 
     const updateGlobal = (key, val) => {
@@ -107,32 +108,28 @@ function render() {
 
     globalSettings.innerHTML = `
         <div class="flex items-center gap-2 mb-3 ${isNightMode ? 'text-red-500' : 'text-blue-300'} font-bold uppercase tracking-wider text-xs">
-            Globális Távcső Beállítások
+            Globális Paraméterek
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             <div>
-                <label class="astro-label">Fókusz (F) mm</label>
+                <label class="astro-label">Fókusz (F) mm ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben. Meghatározza az alapnagyítást és a látómezőt. Példa: Egy 200/1000-es Newton távcsőnél ez 1000 mm.')}</label>
                 <input type="number" id="g-F" value="${gData.F}" class="astro-input">
             </div>
             <div>
-                <label class="astro-label">Apertúra (A) mm</label>
+                <label class="astro-label">Apertúra (A) mm ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben. Minél nagyobb, annál több fényt gyűjt és annál jobb a felbontása. Példa: Egy 200/1000-es Newton távcsőnél ez 200 mm.')}</label>
                 <input type="number" id="g-A" value="${gData.A}" class="astro-input">
             </div>
             <div>
-                <label class="astro-label">Barlow (B) x</label>
+                <label class="astro-label">Barlow/Reducer (B) x ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó (Barlow) vagy fókuszcsökkentő (Reducer) szorzója. Ha nem használsz ilyet, hagyd 1-en. Példa: Egy 2x Barlow lencse esetén írj be 2-t, egy 0.5x reducer esetén 0.5-öt.')}</label>
                 <input type="number" id="g-B" value="${gData.B}" class="astro-input" step="0.1">
             </div>
             <div>
-                <label class="astro-label">Okulár (e) mm</label>
-                <input type="number" id="g-e" value="${gData.e}" class="astro-input" step="0.1">
+                <label class="astro-label">Okulár AFoV (a) ° ${createInfoBtn('Okulár Látszólagos Látómező', 'Az okulár látszólagos látómezeje fokban (Apparent Field of View). Ezt a gyártó adja meg. Példa: Egy Plössl okulár általában 50°, egy nagylátószögű (UWA) 82°.')}</label>
+                <input type="number" id="g-a" value="${gData.a}" class="astro-input" step="1">
             </div>
             <div>
-                <label class="astro-label">Pixel (p) µm</label>
-                <input type="number" id="g-p" value="${gData.p}" class="astro-input" step="0.1">
-            </div>
-            <div>
-                <label class="astro-label">Szenzor W (w) mm</label>
-                <input type="number" id="g-w" value="${gData.w}" class="astro-input" step="0.1">
+                <label class="astro-label">Bortle skála (1-9) ${createInfoBtn('Bortle Skála', 'Az éjszakai égbolt fényszennyezettségét mérő skála. 1 = Tökéletesen sötét ég, 9 = Belső városi égbolt. Befolyásolja a határmagnitúdót és az expozíciós időt.')}</label>
+                <input type="number" id="g-bortle" value="${gData.bortle}" class="astro-input" min="1" max="9" step="0.1">
             </div>
         </div>
     `;
@@ -152,7 +149,8 @@ function render() {
     
     const tabs = [
         { id: 'dashboard', label: 'Műszerfal' },
-        { id: 'calculator', label: 'Kalkulátorok' }
+        { id: 'calculator', label: 'Kalkulátorok' },
+        { id: 'catalog', label: 'Katalógus' }
     ];
 
     tabs.forEach(tab => {
@@ -181,9 +179,17 @@ function render() {
         content.appendChild(createDashboard(userLocation, sunData, { ...moonData, ...moonPos }, isNightMode));
     } else if (activeTab === 'calculator') {
         content.appendChild(createCalculator(isNightMode));
+    } else if (activeTab === 'catalog') {
+        content.appendChild(createCatalog(isNightMode));
     }
 
     app.appendChild(content);
+
+    // Footer
+    const footer = document.createElement('footer');
+    footer.className = "mt-12 text-center text-xs opacity-50 py-4 border-t border-white/10";
+    footer.innerHTML = `AstroTool v1.5`;
+    app.appendChild(footer);
 }
 
 // Initialize

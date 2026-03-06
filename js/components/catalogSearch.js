@@ -1,4 +1,5 @@
 import { catalogService } from '../services/catalogService.js';
+import { createInfoBtn } from '../utils.js';
 
 export function createCatalogSearch(isNightMode) {
     const container = document.createElement('div');
@@ -9,7 +10,7 @@ export function createCatalogSearch(isNightMode) {
     const btnClass = `px-4 py-2 rounded font-bold text-xs uppercase tracking-wider transition-all ${isNightMode ? 'bg-red-900/50 hover:bg-red-800 text-red-500' : 'bg-blue-600 hover:bg-blue-700 text-white'}`;
 
     container.innerHTML = `
-        <h3 class="font-bold uppercase text-xs mb-4 ${headerColor}">Katalógus Kereső</h3>
+        <h3 class="font-bold uppercase text-xs mb-4 ${headerColor}">Katalógus Kereső ${createInfoBtn('Katalógus Kereső', 'Kereshetsz csillagkép nevére vagy IAU kódjára (pl. Orion, UMa, Boötes). A rendszer automatikusan betölti a szükséges katalógusokat (Messier, NGC, IC, Caldwell, Melotte, WDS, HR) és kilistázza a csillagképben található objektumokat.')}</h3>
         <div class="flex gap-2 mb-4">
             <input type="text" id="search-input" placeholder="Csillagkép (pl. Ori, Boötes)" class="${inputClass} flex-1">
             <button id="search-btn" class="${btnClass}">Keresés</button>
@@ -99,7 +100,25 @@ export function createCatalogSearch(isNightMode) {
         searchBtn.disabled = true;
         
         try {
-            const results = await catalogService.searchByConstellation(query);
+            let results = [];
+            if (query.toLowerCase().startsWith('const:')) {
+                const constQuery = query.substring(6).trim();
+                results = await catalogService.searchByConstellation(constQuery);
+            } else {
+                // Try normal search first
+                results = await catalogService.search(query);
+                
+                // If no results or query is 3 chars (like UMa), try constellation
+                if (results.length === 0 || query.length === 3 || query.length > 3) {
+                    const constResults = await catalogService.searchByConstellation(query);
+                    if (constResults.length > 0) {
+                        // Merge results, keeping unique IDs
+                        const existingIds = new Set(results.map(r => r.id));
+                        const uniqueConstResults = constResults.filter(r => !existingIds.has(r.id));
+                        results = results.concat(uniqueConstResults);
+                    }
+                }
+            }
             renderResults(results);
         } catch (e) {
             resultsDiv.innerHTML = '<div class="text-sm text-red-500 col-span-full text-center py-4">Hiba történt a keresés során.</div>';

@@ -1,8 +1,8 @@
-import { storage } from '../utils.js';
+import { storage, createInfoBtn } from '../utils.js';
 
 export function createExposureCalc(isNightMode) {
     const card = document.createElement('div');
-    card.className = "astro-card";
+    card.className = "astro-card h-full flex flex-col";
     
     let data = {
         F: storage.get('F', 1000),
@@ -24,24 +24,24 @@ export function createExposureCalc(isNightMode) {
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Expó Kalkulátor</h3>
-        <div class="space-y-3 mb-4">
+        <div class="space-y-3 mb-4 flex-grow">
             <div class="grid grid-cols-3 gap-2">
                 <div>
-                    <label class="${labelClass}">ISO (i)</label>
+                    <label class="${labelClass}">ISO (i) ${createInfoBtn('ISO / Gain', 'A kamera érzékenysége. Magasabb érték = rövidebb expozíció, de több zaj.')}</label>
                     <input type="number" id="exp-iso" value="${data.iso}" class="${inputClass}">
                 </div>
                 <div>
-                    <label class="${labelClass}">Filter (FF)</label>
+                    <label class="${labelClass}">Filter (FF) ${createInfoBtn('Szűrő Faktor (Filter Factor)', 'A használt szűrő fényelnyelési tényezője. Ha nincs szűrő, az érték 1. Egy erős keskenysávú szűrőnél lehet 10 vagy több is.')}</label>
                     <input type="number" id="exp-ff" value="${data.ff}" class="${inputClass}">
                 </div>
                 <div>
-                    <label class="${labelClass}">Sky Brightness (sb)</label>
+                    <label class="${labelClass}">Sky Brightness (sb) ${createInfoBtn('Égbolt Fényessége (Sky Brightness)', 'Az égbolt háttérfényessége magnitúdó/ívmásodperc²-ben. Sötét égen kb. 21-22, városban 17-18.')}</label>
                     <input type="number" id="exp-sb" value="${data.sb}" class="${inputClass}">
                 </div>
             </div>
         </div>
-        <div class="pt-3 border-t border-white/10">
-            <div class="${labelClass}">Becsült Expó Idő</div>
+        <div class="pt-3 border-t border-white/10 mt-auto">
+            <div class="${labelClass}">Becsült Expó Idő ${createInfoBtn('Becsült Expozíciós Idő', 'A megadott paraméterek alapján számított ideális expozíciós idő másodpercben (tájékoztató jellegű).')}</div>
             <div id="exp-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
         </div>
     `;

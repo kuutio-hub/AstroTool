@@ -19,6 +19,25 @@ export const catalogService = {
         }
     },
 
+    async search(query) {
+        if (!query || query.length < 2) return [];
+        const lowerQuery = query.toLowerCase();
+        const catalogs = ['messier', 'ngc', 'ic', 'melotte', 'caldwell', 'wds', 'hr'];
+        let results = [];
+
+        for (const cat of catalogs) {
+            const data = await this.loadCatalog(cat);
+            const matches = data.filter(obj => 
+                (obj.name && obj.name.toLowerCase().includes(lowerQuery)) ||
+                (obj.id && obj.id.toLowerCase().includes(lowerQuery))
+            );
+            results = results.concat(matches);
+            if (results.length > 50) break; // Limit results
+        }
+
+        return results.slice(0, 50);
+    },
+
     async searchByConstellation(constellationCode) {
         const code = this._normalizeConstellation(constellationCode);
         if (!code) return [];
@@ -28,7 +47,7 @@ export const catalogService = {
 
         for (const cat of catalogs) {
             const data = await this.loadCatalog(cat);
-            const matches = data.filter(obj => obj.constellation.toLowerCase() === code.toLowerCase());
+            const matches = data.filter(obj => obj.constellation && obj.constellation.toLowerCase() === code.toLowerCase());
             results = results.concat(matches);
         }
 
@@ -45,7 +64,8 @@ export const catalogService = {
             "lyra": "Lyr", "lyr": "Lyr",
             "ursa minor": "UMi", "umi": "UMi",
             "perseus": "Per", "per": "Per",
-            "coma berenices": "Com", "com": "Com"
+            "coma berenices": "Com", "com": "Com",
+            "ursa major": "UMa", "uma": "UMa"
             // Add more as needed
         };
         return map[input.toLowerCase()] || input;

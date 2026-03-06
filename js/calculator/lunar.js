@@ -1,8 +1,8 @@
-import { storage } from '../utils.js';
+import { storage, createInfoBtn } from '../utils.js';
 
 export function createLunarCalc(isNightMode) {
     const card = document.createElement('div');
-    card.className = "astro-card";
+    card.className = "astro-card h-full flex flex-col";
     
     let data = {
         F: storage.get('F', 1000),
@@ -35,18 +35,18 @@ export function createLunarCalc(isNightMode) {
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Hold/Nap Geometria</h3>
-        <div class="text-xs opacity-70 mb-4 italic">A paraméterek a globális beállításokból jönnek.</div>
-        <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10">
+        <div class="text-xs opacity-70 mb-4 italic flex-grow">A paraméterek a globális beállításokból és az okulár/fotós modulokból jönnek.</div>
+        <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div class="col-span-2">
-                <div class="${labelClass}">Vizuális Látómező (Hold felszín)</div>
+                <div class="${labelClass}">Vizuális Látómező (Hold felszín) ${createInfoBtn('Vizuális Látómező a Holdon', 'Megmutatja, hogy a távcsőbe nézve mekkora területet (kilométerben) látsz a Hold felszínéből egyszerre.')}</div>
                 <div id="lun-vis" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">1 km a Holdon (Fotós)</div>
+                <div class="${labelClass}">1 km a Holdon (Fotós) ${createInfoBtn('Holdi felbontás', 'Megmutatja, hogy a Hold felszínén egy 1 kilométeres kráter hány pixelt foglal el a kamera szenzorán.')}</div>
                 <div id="lun-img" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">1 pixel a Napon (Fotós)</div>
+                <div class="${labelClass}">1 pixel a Napon (Fotós) ${createInfoBtn('Nap felbontás', 'Megmutatja, hogy a kamera egyetlen pixele hány kilométeres területet fed le a Nap felszínén (pl. napfoltok méretezéséhez).')}</div>
                 <div id="sun-img" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
         </div>

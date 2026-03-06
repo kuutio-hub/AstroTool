@@ -15,54 +15,54 @@ export function renderMoonPhaseIcon(illumination, isWaxing, isNightMode = false)
     const topY = 5;
     const botY = 95;
     
-    // Terminator shift from center: d = (2 * ill - 1) * r
-    // If ill = 0, d = -r
-    // If ill = 0.5, d = 0
-    // If ill = 1, d = r
-    const d = (2 * ill - 1) * r;
+    // Calculate terminator horizontal radius
+    // When ill = 0.5, rx = 0 (straight line)
+    // When ill = 0 or 1, rx = r (full circle)
+    const rx = +(r * Math.abs(1 - 2 * ill)).toFixed(3);
     
-    // The terminator is an ellipse with radii rx = Math.abs(d) and ry = r
-    const rx = Math.abs(d).toFixed(3);
+    let darkPath = "";
     
-    let lightPath = "";
+    // The base dark half-circle
+    // For waxing, the dark half is on the left (A r r 0 0 0 cx botY)
+    // For waning, the dark half is on the right (A r r 0 0 1 cx botY)
+    const baseSweep = isWaxing ? 0 : 1;
     
+    // The terminator ellipse
+    // If ill < 0.5, the terminator curves into the light side (adding to the dark half)
+    // If ill > 0.5, the terminator curves into the dark side (subtracting from the dark half)
+    // The sweep flag for the terminator depends on both waxing/waning and illumination level
+    let termSweep;
     if (isWaxing) {
-        // Waxing: Light from RIGHT
-        // Base right half circle: M 50,5 A 45,45 0 0,1 50,95
-        // Terminator goes from bottom to top.
-        // If ill > 0.5, light extends into the left half -> sweep left (1)
-        // If ill < 0.5, light is only a crescent on the right -> sweep right (0)
-        const sweep = ill > 0.5 ? 1 : 0;
-        lightPath = `M ${cx},${topY} A ${r},${r} 0 0,1 ${cx},${botY} A ${rx},${r} 0 0,${sweep} ${cx},${topY} Z`;
+        termSweep = ill < 0.5 ? 1 : 0;
     } else {
-        // Waning: Light from LEFT
-        // Base left half circle: M 50,5 A 45,45 0 0,0 50,95
-        // Terminator goes from bottom to top.
-        // If ill > 0.5, light extends into the right half -> sweep right (0)
-        // If ill < 0.5, light is only a crescent on the left -> sweep left (1)
-        const sweep = ill > 0.5 ? 0 : 1;
-        lightPath = `M ${cx},${topY} A ${r},${r} 0 0,0 ${cx},${botY} A ${rx},${r} 0 0,${sweep} ${cx},${topY} Z`;
+        termSweep = ill < 0.5 ? 0 : 1;
     }
 
     // Special cases for almost new or almost full moon to avoid rendering glitches
     if (ill < 0.001) {
-        lightPath = ""; // No light part
+        darkPath = `M ${cx},${topY} A ${r},${r} 0 1,0 ${cx},${botY} A ${r},${r} 0 1,0 ${cx},${topY} Z`; // Full dark circle
     } else if (ill > 0.999) {
-        lightPath = `M ${cx},${topY} A ${r},${r} 0 1,1 ${cx},${botY} A ${r},${r} 0 1,1 ${cx},${topY} Z`; // Full light circle
+        darkPath = ""; // No dark part
+    } else {
+        // SVG Arc command: A rx ry x-axis-rotation large-arc-flag sweep-flag x y
+        // We use two arcs to draw the dark region.
+        // Arc 1: The outer edge of the dark region (always a semicircle with radius r)
+        // Arc 2: The terminator line (an ellipse with radii rx and r)
+        darkPath = `M ${cx},${topY} A ${r},${r} 0 0,${baseSweep} ${cx},${botY} A ${rx},${r} 0 0,${termSweep} ${cx},${topY} Z`;
     }
     
     // Colors
-    const lightColor = isNightMode ? '#ff4d4d' : '#ffffff';
-    const darkColor = isNightMode ? '#1a0000' : '#0f172a';
-    const glowColor = isNightMode ? 'rgba(255, 77, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)';
+    const lightColor = isNightMode ? '#ef4444' : '#e2e8f0'; // red-500 or slate-200
+    const darkColor = isNightMode ? '#1a0505' : '#0f172a'; // very dark red or slate-900
+    const glowColor = isNightMode ? 'rgba(239, 68, 68, 0.5)' : 'rgba(255, 255, 255, 0.8)';
     
     return `
-    <svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px ${glowColor});">
-        <!-- Base Moon (Dark part) -->
-        <circle cx="50" cy="50" r="45" fill="${darkColor}" />
+    <svg viewBox="0 0 100 100" class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px ${glowColor});">
+        <!-- Base Moon (Light part) -->
+        <circle cx="50" cy="50" r="45" fill="${lightColor}" />
         
-        <!-- Light part (Dynamic SVG Path) -->
-        <path d="${lightPath}" fill="${lightColor}" />
+        <!-- Dark part (Dynamic SVG Path) -->
+        <path d="${darkPath}" fill="${darkColor}" />
         
         <!-- Subtle outline for better definition -->
         <circle cx="50" cy="50" r="45" fill="none" stroke="${lightColor}" stroke-width="0.5" opacity="0.3" />

@@ -188,9 +188,15 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     container.appendChild(sunCard);
     container.appendChild(moonCard);
 
-    // Analemma Full Width
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(container);
+    
+    const bottomGrid = document.createElement('div');
+    bottomGrid.className = "grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4";
+    
+    // Analemma
     const analemmaContainer = document.createElement('div');
-    analemmaContainer.className = "astro-card col-span-1 md:col-span-2 lg:col-span-3 mt-4";
+    analemmaContainer.className = "astro-card h-full flex flex-col";
     analemmaContainer.innerHTML = `
         <div class="flex items-center gap-2 mb-4 ${headerColor} font-bold uppercase tracking-wider text-xs">
             Analemma (Éves Napút)
@@ -198,10 +204,10 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     `;
     analemmaContainer.appendChild(createAnalemma(location, isNightMode));
     
-    const wrapper = document.createElement('div');
-    wrapper.appendChild(container);
-    wrapper.appendChild(analemmaContainer);
-    wrapper.appendChild(createCatalogSearch(isNightMode));
+    bottomGrid.appendChild(analemmaContainer);
+    bottomGrid.appendChild(createCatalogSearch(isNightMode));
+
+    wrapper.appendChild(bottomGrid);
 
     return wrapper;
 }

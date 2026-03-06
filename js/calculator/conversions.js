@@ -1,14 +1,14 @@
-import { storage, formatNum, TimeService } from '../utils.js';
+import { storage, formatNum, TimeService, createInfoBtn } from '../utils.js';
 
 export function createConversionsCalc(isNightMode) {
     const card = document.createElement('div');
-    card.className = "astro-card";
+    card.className = "astro-card h-full flex flex-col";
     
     let data = {
         H: storage.get('H', 0),
         M: storage.get('M', 0),
         S: storage.get('S', 0),
-        pc: storage.get('pc', 1),
+        dist: storage.get('dist', 1), // Unified distance value (stored as parsec internally)
         raH: storage.get('raH', 0),
         raM: storage.get('raM', 0),
         raS: storage.get('raS', 0),
@@ -21,8 +21,9 @@ export function createConversionsCalc(isNightMode) {
         // Hour Angle to Degrees
         const deg = (data.H + data.M/60 + data.S/3600) * 15;
         
-        // Parsec to Light Years
-        const ly = data.pc * 3.26;
+        // Distance conversions
+        const pc = data.dist;
+        const ly = pc * 3.26156;
         const km = ly * 9.461e12;
 
         // RA/DEC to Alt/Az
@@ -57,32 +58,54 @@ export function createConversionsCalc(isNightMode) {
         if (Math.sin(haRad) > 0) azDeg = 360 - azDeg;
 
         card.querySelector('#conv-deg').textContent = deg.toFixed(4) + '°';
-        card.querySelector('#conv-ly').textContent = formatNum(ly) + ' ly';
-        card.querySelector('#conv-km').textContent = km.toExponential(2) + ' km';
         card.querySelector('#conv-alt').textContent = altDeg.toFixed(2) + '°';
         card.querySelector('#conv-az').textContent = azDeg.toFixed(2) + '°';
+        
+        // Update input fields without triggering events, only if not focused
+        const pcInput = card.querySelector('#conv-pc');
+        const lyInput = card.querySelector('#conv-ly-in');
+        const kmInput = card.querySelector('#conv-km-in');
+        
+        if (document.activeElement !== pcInput) pcInput.value = pc.toFixed(4);
+        if (document.activeElement !== lyInput) lyInput.value = ly.toFixed(4);
+        if (document.activeElement !== kmInput) kmInput.value = km.toExponential(4);
     };
 
     const inputClass = "astro-input";
     const labelClass = "astro-label";
 
     card.innerHTML = `
-        <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Konverziók</h3>
-        <div class="space-y-4 mb-4">
+        <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Astrometria / Konverziók</h3>
+        <div class="space-y-4 mb-4 flex-grow">
             <div>
-                <label class="${labelClass}">Óraszög (RA) -> Fok</label>
+                <label class="${labelClass}">Óraszög (RA) -> Fok ${createInfoBtn('Óraszög', 'Az égi koordinátákat gyakran órában, percben és másodpercben adják meg (1 óra = 15 fok).')}</label>
                 <div class="grid grid-cols-3 gap-2">
                     <input type="number" id="conv-H" value="${data.H}" class="${inputClass}" placeholder="h">
                     <input type="number" id="conv-M" value="${data.M}" class="${inputClass}" placeholder="m">
                     <input type="number" id="conv-S" value="${data.S}" class="${inputClass}" placeholder="s">
                 </div>
             </div>
-            <div>
-                <label class="${labelClass}">Távolság (Parsec)</label>
-                <input type="number" id="conv-pc" value="${data.pc}" class="${inputClass}">
+            
+            <div class="pt-2 border-t border-white/10">
+                <label class="${labelClass}">Távolság Konverzió ${createInfoBtn('Távolság', 'Írj be egy értéket bármelyik mezőbe, a többi automatikusan frissül. 1 Parsec = 3.26 Fényév.')}</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <div class="text-[10px] uppercase opacity-50 mb-1">Parsec</div>
+                        <input type="number" id="conv-pc" value="${data.dist}" class="${inputClass}">
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase opacity-50 mb-1">Fényév</div>
+                        <input type="number" id="conv-ly-in" class="${inputClass}">
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase opacity-50 mb-1">Kilométer</div>
+                        <input type="number" id="conv-km-in" class="${inputClass}">
+                    </div>
+                </div>
             </div>
-            <div>
-                <label class="${labelClass}">RA/DEC -> Alt/Az (Aktuális idő/hely)</label>
+
+            <div class="pt-2 border-t border-white/10">
+                <label class="${labelClass}">RA/DEC -> Alt/Az (Aktuális idő/hely) ${createInfoBtn('Alt/Az Konverzió', 'Kiszámítja egy égitest aktuális magasságát (Alt) és irányszögét (Az) a megadott RA/DEC koordináták és a te jelenlegi helyzeted alapján.')}</label>
                 <div class="grid grid-cols-3 gap-2 mb-2">
                     <input type="number" id="conv-raH" value="${data.raH}" class="${inputClass}" placeholder="RA h">
                     <input type="number" id="conv-raM" value="${data.raM}" class="${inputClass}" placeholder="RA m">
@@ -95,18 +118,10 @@ export function createConversionsCalc(isNightMode) {
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10">
+        <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
                 <div class="${labelClass}">Fok (Óraszög)</div>
                 <div id="conv-deg" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
-            </div>
-            <div>
-                <div class="${labelClass}">Fényév</div>
-                <div id="conv-ly" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
-            </div>
-            <div>
-                <div class="${labelClass}">Kilométer</div>
-                <div id="conv-km" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div></div>
             <div>
@@ -122,9 +137,24 @@ export function createConversionsCalc(isNightMode) {
 
     card.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', (e) => {
-            const key = e.target.id.split('-')[1];
-            data[key] = parseFloat(e.target.value) || 0;
-            storage.set(key, data[key]);
+            const id = e.target.id;
+            const val = parseFloat(e.target.value) || 0;
+            
+            if (id === 'conv-pc') {
+                data.dist = val;
+            } else if (id === 'conv-ly-in') {
+                data.dist = val / 3.26156;
+            } else if (id === 'conv-km-in') {
+                data.dist = val / (3.26156 * 9.461e12);
+            } else {
+                const key = id.split('-')[1];
+                data[key] = val;
+            }
+            
+            storage.set('dist', data.dist);
+            // Save other keys
+            ['H', 'M', 'S', 'raH', 'raM', 'raS', 'decD', 'decM', 'decS'].forEach(k => storage.set(k, data[k]));
+            
             update();
         });
     });
