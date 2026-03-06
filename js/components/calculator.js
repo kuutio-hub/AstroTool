@@ -61,8 +61,8 @@ export function createCalculator(isNightMode) {
     const createCard = (id, title, value, unit, description, formula, explanation, extraSettingsHTML = '') => {
         const isExpanded = expandedCard === id;
         const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white border-slate-300 shadow-sm';
-        const textColor = isNightMode ? 'text-red-500' : 'text-slate-700';
-        const labelColor = isNightMode ? 'text-red-800' : 'text-slate-500';
+        const textColor = isNightMode ? 'text-red-500' : 'text-slate-900';
+        const labelColor = isNightMode ? 'text-red-800' : 'text-slate-700';
         const infoBg = isNightMode ? 'bg-red-950/20' : 'bg-slate-100/50';
 
         const card = document.createElement('div');
@@ -133,8 +133,8 @@ export function createCalculator(isNightMode) {
         tabs.querySelector('#tab-converter').onclick = () => { activeTab = 'converter'; expandedCard = null; render(); };
         container.appendChild(tabs);
 
-        const inputClass = `w-full p-2 rounded text-sm font-mono font-bold outline-none border transition-all ${isNightMode ? 'bg-black border-red-900/50 text-red-500 focus:border-red-500' : 'bg-slate-100 border-slate-300 text-slate-900 focus:border-blue-400'}`;
-        const labelClass = `block text-[9px] font-bold uppercase tracking-wider mb-1 ${isNightMode ? 'text-red-800' : 'text-slate-600'}`;
+        const inputClass = `w-full p-2 rounded text-sm font-mono font-bold outline-none border transition-all ${isNightMode ? 'bg-black border-red-900/50 text-red-500 focus:border-red-500' : 'bg-slate-100 border-slate-400 text-slate-900 focus:border-blue-500'}`;
+        const labelClass = `block text-[9px] font-bold uppercase tracking-wider mb-1 ${isNightMode ? 'text-red-800' : 'text-slate-700'}`;
 
         if (activeTab === 'visual') {
             // --- VISUAL CALCULATIONS ---
@@ -410,7 +410,7 @@ export function createCalculator(isNightMode) {
                             <option value="1000000" ${data.distMult === 1000000 ? 'selected' : ''}>Millió (M)</option>
                         </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono ${textColor}">
                         <div>${formatNum(resPc)} pc</div>
                         <div>${formatNum(resLy)} ly</div>
                         <div>${formatNum(resKm)} km</div>

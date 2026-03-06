@@ -222,7 +222,7 @@ export function createAnalemma(location, isNightMode) {
         path.setAttribute("d", `M ${points.path.map(p => `${p.x},${p.y}`).join(' L ')} Z`);
         path.setAttribute("fill", "none");
         path.setAttribute("stroke", lineColor);
-        path.setAttribute("stroke-width", viewBox.w / 500);
+        path.setAttribute("stroke-width", viewBox.w / 150); // Thicker line (was 500)
         path.setAttribute("filter", "url(#glow)");
         path.setAttribute("opacity", "0.8");
         svg.appendChild(path);
@@ -233,11 +233,11 @@ export function createAnalemma(location, isNightMode) {
             t.setAttribute("x", m.x);
             t.setAttribute("y", m.y);
             // Offset label slightly
-            t.setAttribute("dy", -viewBox.w / 50); 
-            t.setAttribute("font-size", viewBox.w / 25); // Larger font (was 30)
+            t.setAttribute("dy", -viewBox.w / 40); 
+            t.setAttribute("font-size", viewBox.w / 15); // Much larger font (was 25)
             t.setAttribute("text-anchor", "middle");
             t.setAttribute("fill", textColor);
-            t.setAttribute("opacity", "0.8");
+            t.setAttribute("opacity", "0.9");
             t.setAttribute("font-weight", "bold");
             t.setAttribute("class", "font-mono");
             t.textContent = m.name;
@@ -247,9 +247,9 @@ export function createAnalemma(location, isNightMode) {
             const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c.setAttribute("cx", m.x);
             c.setAttribute("cy", m.y);
-            c.setAttribute("r", viewBox.w / 400);
+            c.setAttribute("r", viewBox.w / 200); // Larger dot
             c.setAttribute("fill", textColor);
-            c.setAttribute("opacity", "0.5");
+            c.setAttribute("opacity", "0.7");
             svg.appendChild(c);
         });
 
@@ -258,12 +258,12 @@ export function createAnalemma(location, isNightMode) {
             if (p.isCurrent) return;
 
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            g.setAttribute("opacity", "0.6");
+            g.setAttribute("opacity", "0.8");
             
             const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c.setAttribute("cx", p.x);
             c.setAttribute("cy", p.y);
-            c.setAttribute("r", viewBox.w / 300);
+            c.setAttribute("r", viewBox.w / 150); // Larger dot
             c.setAttribute("fill", dotColor);
             g.appendChild(c);
 
@@ -271,8 +271,8 @@ export function createAnalemma(location, isNightMode) {
             if (viewBox.w < 150 || isFullScreen) {
                 const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 t.setAttribute("x", p.x);
-                t.setAttribute("y", p.y - viewBox.w / 60);
-                t.setAttribute("font-size", viewBox.w / 50);
+                t.setAttribute("y", p.y - viewBox.w / 40);
+                t.setAttribute("font-size", viewBox.w / 25); // Larger font
                 t.setAttribute("text-anchor", "middle");
                 t.setAttribute("fill", textColor);
                 t.setAttribute("class", "font-bold uppercase tracking-tighter");
@@ -291,39 +291,39 @@ export function createAnalemma(location, isNightMode) {
             const c1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c1.setAttribute("cx", current.x);
             c1.setAttribute("cy", current.y);
-            c1.setAttribute("r", viewBox.w / 100);
+            c1.setAttribute("r", viewBox.w / 40); // Larger sun (was 100)
             c1.setAttribute("fill", currentSunColor);
             c1.setAttribute("stroke", "white");
-            c1.setAttribute("stroke-width", viewBox.w / 600);
+            c1.setAttribute("stroke-width", viewBox.w / 300);
             g.appendChild(c1);
 
             const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c2.setAttribute("cx", current.x);
             c2.setAttribute("cy", current.y);
-            c2.setAttribute("r", viewBox.w / 50);
+            c2.setAttribute("r", viewBox.w / 20); // Larger glow
             c2.setAttribute("fill", currentSunColor);
             c2.setAttribute("opacity", "0.3");
             g.appendChild(c2);
 
             // Crosshairs
             const l1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            l1.setAttribute("x1", current.x - viewBox.w / 30);
+            l1.setAttribute("x1", current.x - viewBox.w / 15);
             l1.setAttribute("y1", current.y);
-            l1.setAttribute("x2", current.x + viewBox.w / 30);
+            l1.setAttribute("x2", current.x + viewBox.w / 15);
             l1.setAttribute("y2", current.y);
             l1.setAttribute("stroke", currentSunColor);
-            l1.setAttribute("stroke-width", viewBox.w / 800);
-            l1.setAttribute("opacity", "0.5");
+            l1.setAttribute("stroke-width", viewBox.w / 400);
+            l1.setAttribute("opacity", "0.7");
             g.appendChild(l1);
 
             const l2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
             l2.setAttribute("x1", current.x);
-            l2.setAttribute("y1", current.y - viewBox.w / 30);
+            l2.setAttribute("y1", current.y - viewBox.w / 15);
             l2.setAttribute("x2", current.x);
-            l2.setAttribute("y2", current.y + viewBox.w / 30);
+            l2.setAttribute("y2", current.y + viewBox.w / 15);
             l2.setAttribute("stroke", currentSunColor);
-            l2.setAttribute("stroke-width", viewBox.w / 800);
-            l2.setAttribute("opacity", "0.5");
+            l2.setAttribute("stroke-width", viewBox.w / 400);
+            l2.setAttribute("opacity", "0.7");
             g.appendChild(l2);
 
             svg.appendChild(g);

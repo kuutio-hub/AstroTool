@@ -85,9 +85,8 @@ export const FullscreenIcon = (className = "w-6 h-6") => `
 </svg>`;
 
 export const MoonPhaseIcon = (phase, isNightMode) => {
-    const bgFill = isNightMode ? "#1a1a1a" : "#334155";
-    const litFill = isNightMode ? "#ef4444" : "#fbbf24"; 
-    const glowColor = isNightMode ? "#ef4444" : "#fbbf24";
+    const bgFill = isNightMode ? "#1a1a1a" : "#1e293b"; // Dark slate for day mode
+    const litFill = isNightMode ? "#ef4444" : "#fbbf24"; // Red or Amber
     
     // Filter definition
     const filterDef = `
@@ -99,14 +98,41 @@ export const MoonPhaseIcon = (phase, isNightMode) => {
         </defs>
     `;
 
-    // Simplified SVG for phase
     if (phase < 0.03 || phase > 0.97) { // New Moon
         return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/></svg>`;
-    } else if (phase < 0.5) { // Waxing (Right side lit)
-        // Draw full dark circle, then draw lit part on RIGHT
-        return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<g filter="url(#moonGlow)"><circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/><path d="M50 5 A45 45 0 0 1 50 95 A${45 * Math.abs(Math.cos(phase * 2 * Math.PI))} 45 0 0 ${phase < 0.25 ? '0' : '1'} 50 5" fill="${litFill}"/></g></svg>`;
-    } else { // Waning (Left side lit)
-        // Draw full dark circle, then draw lit part on LEFT
-        return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<g filter="url(#moonGlow)"><circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/><path d="M50 5 A45 45 0 0 0 50 95 A${45 * Math.abs(Math.cos(phase * 2 * Math.PI))} 45 0 0 ${phase < 0.75 ? '1' : '0'} 50 5" fill="${litFill}"/></g></svg>`;
+    } 
+    if (phase >= 0.47 && phase <= 0.53) { // Full Moon
+        return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}<g filter="url(#moonGlow)"><circle cx="50" cy="50" r="45" fill="${litFill}" stroke="currentColor" stroke-width="2"/></g></svg>`;
     }
+
+    // Calculate terminator ellipse radius (0 to 45)
+    const rx = 45 * Math.abs(Math.cos(phase * Math.PI * 2));
+    let d = "";
+
+    if (phase < 0.5) {
+        // Waxing (Right side lit)
+        if (phase <= 0.25) {
+            // Crescent: outer right arc, inner right arc
+            d = `M 50 5 A 45 45 0 0 1 50 95 A ${rx} 45 0 0 0 50 5 Z`;
+        } else {
+            // Gibbous: outer right arc, outer left arc (terminator)
+            d = `M 50 5 A 45 45 0 0 1 50 95 A ${rx} 45 0 0 1 50 5 Z`;
+        }
+    } else {
+        // Waning (Left side lit)
+        if (phase <= 0.75) {
+            // Gibbous: outer left arc, outer right arc (terminator)
+            d = `M 50 5 A 45 45 0 0 0 50 95 A ${rx} 45 0 0 0 50 5 Z`;
+        } else {
+            // Crescent: outer left arc, inner left arc
+            d = `M 50 5 A 45 45 0 0 0 50 95 A ${rx} 45 0 0 1 50 5 Z`;
+        }
+    }
+
+    return `<svg viewBox="0 0 100 100" class="w-16 h-16">${filterDef}
+        <circle cx="50" cy="50" r="45" fill="${bgFill}" stroke="currentColor" stroke-width="2"/>
+        <g filter="url(#moonGlow)">
+            <path d="${d}" fill="${litFill}" />
+        </g>
+    </svg>`;
 };

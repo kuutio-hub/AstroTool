@@ -1,7 +1,8 @@
 
-import { SunIcon, MoonIcon, ChevronDownIcon, ChevronUpIcon, MoonPhaseIcon, GlobeIcon } from '../icons.js';
+import { SunIcon, MoonIcon, ChevronDownIcon, ChevronUpIcon, GlobeIcon } from '../icons.js';
 import { formatTime, formatDate, TimeService } from '../utils.js';
 import { createAnalemma } from './analemma.js';
+import { renderMoonPhaseIcon } from './moonPhase.js';
 
 export function createDashboard(location, sunData, moonData, isNightMode) {
     const container = document.createElement('div');
@@ -145,7 +146,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                         ${createDataRow("Kor", `${moonData.age.toFixed(1)} nap`)}
                         
                         <div class="flex justify-center my-6 text-${isNightMode ? 'red-500' : 'yellow-500'} filter drop-shadow-lg">
-                            ${MoonPhaseIcon(moonData.phase, isNightMode)}
+                            ${renderMoonPhaseIcon(moonData.fraction, moonData.phase < 0.5, isNightMode)}
                         </div>
                         <div class="text-center font-bold uppercase tracking-widest text-sm ${isNightMode ? 'text-red-500' : 'text-slate-800'}">
                             ${phaseName}
