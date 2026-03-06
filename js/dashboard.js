@@ -147,42 +147,63 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     // Elongation
     const elongation = moonData.phase * 360;
 
-    // Find next major phase
-    const getNextPhase = () => {
+    // Find next major phases
+    const getNextPhases = (count = 4) => {
         const now = TimeService.now();
         const sc = window.SunCalc;
-        if (!sc) return null;
+        if (!sc) return [];
         
-        // Search for next 0, 0.25, 0.5, 0.75 phase
         const targets = [0, 0.25, 0.5, 0.75];
         const targetNames = ["Újhold", "Első Negyed", "Telihold", "Utolsó Negyed"];
         
-        let bestT = Infinity;
-        let bestName = "";
+        const results = [];
+        let searchDate = new Date(now.getTime());
         
-        for (let i = 0; i < 30; i++) { // Search next 30 days
-            const d = new Date(now.getTime() + i * 86400000);
-            const p = sc.getMoonIllumination(d).phase;
-            
-            for (let j = 0; j < 4; j++) {
-                const diff = Math.abs(p - targets[j]);
-                if (diff < 0.03) { // Close enough for daily search
-                    // Refine search within that day
-                    for (let h = 0; h < 24; h++) {
-                        const dh = new Date(d.getTime() + h * 3600000);
-                        const ph = sc.getMoonIllumination(dh).phase;
-                        if (Math.abs(ph - targets[j]) < 0.005) {
-                            return { name: targetNames[j], date: dh };
+        for (let k = 0; k < count; k++) {
+            let foundInLoop = false;
+            for (let i = 0; i < 40; i++) {
+                const d = new Date(searchDate.getTime() + i * 86400000);
+                const p = sc.getMoonIllumination(d).phase;
+                
+                for (let j = 0; j < 4; j++) {
+                    const diff = Math.abs(p - targets[j]);
+                    if (diff < 0.03) {
+                        for (let h = 0; h < 24; h++) {
+                            const dh = new Date(d.getTime() + h * 3600000);
+                            if (dh <= now) continue;
+                            const ph = sc.getMoonIllumination(dh).phase;
+                            if (Math.abs(ph - targets[j]) < 0.005) {
+                                if (!results.some(r => Math.abs(r.date - dh) < 3600000)) {
+                                    results.push({ name: targetNames[j], date: dh });
+                                    searchDate = new Date(dh.getTime() + 86400000);
+                                    foundInLoop = true;
+                                    break;
+                                }
+                            }
                         }
                     }
+                    if (foundInLoop) break;
                 }
+                if (foundInLoop) break;
             }
         }
-        return null;
+        return results;
     };
 
-    const nextPhase = getNextPhase();
+    const nextPhases = getNextPhases(4);
+    const nextPhase = nextPhases[0];
     const nextPhaseStr = nextPhase ? `${nextPhase.name}: ${formatDate(nextPhase.date)}` : '';
+    
+    const morePhasesContent = nextPhases.map(p => `
+        <div class="flex justify-between border-b border-white/5 py-2">
+            <span class="font-bold">${p.name}</span>
+            <span class="font-mono text-xs">${formatDate(p.date)} ${formatTime(p.date)}</span>
+        </div>
+    `).join('');
+
+    window.showMorePhases = () => {
+        window.showInfo('Következő Holdfázisok', `<div class="space-y-1">${morePhasesContent}</div>`);
+    };
 
     moonCard.innerHTML = `
         <div>
@@ -220,7 +241,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
             <div class="border-t border-white/5 pt-2 mt-2">
                 <div class="flex justify-between items-center">
                     <span class="astro-label mb-0">Következő esemény</span>
-                    <span class="font-mono font-bold text-[10px] ${valueColor}">${nextPhaseStr}</span>
+                    <button onclick="window.showMorePhases()" class="font-mono font-bold text-[10px] ${valueColor} hover:underline decoration-dotted underline-offset-2">${nextPhaseStr} ▾</button>
                 </div>
                 <div class="flex justify-between items-center mt-1">
                     <span class="astro-label mb-0">Elongáció / Méret</span>

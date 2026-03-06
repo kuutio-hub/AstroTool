@@ -38,7 +38,7 @@ export function showInfoModal(title, content, isNightMode) {
 }
 
 export function createInfoBtn(title, content) {
-    return `<button type="button" class="inline-block ml-1 opacity-50 hover:opacity-100 transition-opacity focus:outline-none" onclick="window.showInfo('${title}', '${content.replace(/'/g, "\\'")}')">${InfoIcon("w-3 h-3")}</button>`;
+    return `<button type="button" class="inline-block ml-1 p-1 -m-1 opacity-50 hover:opacity-100 transition-opacity focus:outline-none" onclick="window.showInfo('${title}', '${content.replace(/'/g, "\\'")}')">${InfoIcon("w-4 h-4")}</button>`;
 }
 
 export const storage = {
