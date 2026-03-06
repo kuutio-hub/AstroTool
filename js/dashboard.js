@@ -1,5 +1,5 @@
 import { SunIcon, MoonIcon, GlobeIcon } from './icons.js';
-import { formatTime, formatDate, TimeService } from './utils.js';
+import { formatTime, formatDate, formatNum, TimeService } from './utils.js';
 import { createAnalemma } from './components/analemma.js';
 import { renderMoonPhaseIcon } from './components/moonphase.js';
 
@@ -134,7 +134,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const isWaxing = moonData.phase < 0.5;
     const illumPercent = (moonData.fraction * 100).toFixed(1);
     
-    const moonTimes = SunCalc.getMoonTimes(TimeService.now(), location.latitude, location.longitude);
+    const moonTimes = window.SunCalc ? window.SunCalc.getMoonTimes(TimeService.now(), location.latitude, location.longitude) : { rise: null, set: null };
     const moonRise = moonTimes.rise ? formatTime(moonTimes.rise) : '-';
     const moonSet = moonTimes.set ? formatTime(moonTimes.set) : '-';
     
@@ -188,15 +188,9 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     container.appendChild(sunCard);
     container.appendChild(moonCard);
 
-    const wrapper = document.createElement('div');
-    wrapper.appendChild(container);
-    
-    const bottomGrid = document.createElement('div');
-    bottomGrid.className = "grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4";
-    
-    // Analemma
+    // Analemma Full Width
     const analemmaContainer = document.createElement('div');
-    analemmaContainer.className = "astro-card h-full flex flex-col";
+    analemmaContainer.className = "astro-card col-span-1 md:col-span-2 lg:col-span-3 mt-4";
     analemmaContainer.innerHTML = `
         <div class="flex items-center gap-2 mb-4 ${headerColor} font-bold uppercase tracking-wider text-xs">
             Analemma (Éves Napút)
@@ -204,10 +198,10 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     `;
     analemmaContainer.appendChild(createAnalemma(location, isNightMode));
     
-    bottomGrid.appendChild(analemmaContainer);
-    bottomGrid.appendChild(createCatalogSearch(isNightMode));
-
-    wrapper.appendChild(bottomGrid);
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(container);
+    wrapper.appendChild(analemmaContainer);
+    wrapper.appendChild(createCatalogSearch(isNightMode));
 
     return wrapper;
 }

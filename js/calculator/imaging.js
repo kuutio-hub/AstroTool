@@ -43,39 +43,39 @@ export function createImagingCalc(isNightMode) {
         card.querySelector('#img-diag').textContent = diag.toFixed(1) + ' mm';
     };
 
-    const inputClass = "astro-input";
-    const labelClass = "astro-label";
+    const inputClass = "astro-input p-1 text-xs";
+    const labelClass = "astro-label text-[10px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Fotós Kalkulátor</h3>
         <div class="space-y-3 mb-4 flex-grow">
             <div>
-                <label class="${labelClass}">Seeing (Légköri nyugodtság) " ${createInfoBtn('Seeing', 'A légkör nyugodtságát jelzi ívmásodpercben. Átlagos éjszakákon 2.0" - 3.0" közötti. Meghatározza, hogy milyen felbontású képet érdemes készíteni (Nyquist-kritérium).')}</label>
+                <label class="${labelClass}">Seeing " ${createInfoBtn('Seeing', 'A légkör nyugodtságát jelzi ívmásodpercben.')}</label>
                 <input type="number" id="img-seeing" value="${data.seeing}" class="${inputClass}" step="0.1">
             </div>
             
             <details class="mt-4 border border-white/10 rounded overflow-hidden">
-                <summary class="bg-black/20 px-3 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
+                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
                     Haladó beállítások (Szenzor)
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="${labelClass}">Szenzor W (mm) ${createInfoBtn('Szenzor Szélesség', 'A kamera szenzorának fizikai szélessége milliméterben. Pl. APS-C esetén kb. 22.3 mm.')}</label>
+                            <label class="${labelClass}">Szenzor W (mm) ${createInfoBtn('Szenzor Szélesség', 'A kamera szenzorának fizikai szélessége milliméterben.')}</label>
                             <input type="number" id="img-w" value="${data.w}" class="${inputClass}" step="0.1">
                         </div>
                         <div>
-                            <label class="${labelClass}">Szenzor H (mm) ${createInfoBtn('Szenzor Magasság', 'A kamera szenzorának fizikai magassága milliméterben. Pl. APS-C esetén kb. 14.9 mm.')}</label>
+                            <label class="${labelClass}">Szenzor H (mm) ${createInfoBtn('Szenzor Magasság', 'A kamera szenzorának fizikai magassága milliméterben.')}</label>
                             <input type="number" id="img-h" value="${data.h}" class="${inputClass}" step="0.1">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="${labelClass}">Pixel (µm) ${createInfoBtn('Pixel Méret', 'A kamera egyetlen pixelének mérete mikrométerben. Pl. 3.76 vagy 4.3. Kisebb pixel = nagyobb felbontás, de kevesebb fény.')}</label>
+                            <label class="${labelClass}">Pixel (µm) ${createInfoBtn('Pixel Méret', 'A kamera egyetlen pixelének mérete mikrométerben.')}</label>
                             <input type="number" id="img-p" value="${data.p}" class="${inputClass}" step="0.1">
                         </div>
                         <div>
-                            <label class="${labelClass}">Binning ${createInfoBtn('Binning', 'Több pixel összevonása egy nagyobb pixellé (pl. 2x2). Növeli az érzékenységet, de csökkenti a felbontást.')}</label>
+                            <label class="${labelClass}">Binning ${createInfoBtn('Binning', 'Több pixel összevonása egy nagyobb pixellé.')}</label>
                             <input type="number" id="img-bin" value="${data.bin}" class="${inputClass}" min="1" step="1">
                         </div>
                     </div>

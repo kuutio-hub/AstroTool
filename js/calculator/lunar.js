@@ -31,11 +31,11 @@ export function createLunarCalc(isNightMode) {
         card.querySelector('#sun-img').textContent = sunKmPerPixel.toFixed(0) + ' km/px';
     };
 
-    const labelClass = "astro-label";
+    const labelClass = "astro-label text-[10px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Hold/Nap Geometria</h3>
-        <div class="text-xs opacity-70 mb-4 italic flex-grow">A paraméterek a globális beállításokból és az okulár/fotós modulokból jönnek.</div>
+        <div class="flex-grow"></div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div class="col-span-2">
                 <div class="${labelClass}">Vizuális Látómező (Hold felszín) ${createInfoBtn('Vizuális Látómező a Holdon', 'Megmutatja, hogy a távcsőbe nézve mekkora területet (kilométerben) látsz a Hold felszínéből egyszerre.')}</div>

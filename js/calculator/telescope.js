@@ -35,23 +35,23 @@ export function createTelescopeCalc(isNightMode) {
         card.querySelector('#light-res').textContent = Math.round(lightGathering) + 'x';
     };
 
-    const inputClass = "astro-input";
-    const labelClass = "astro-label";
+    const inputClass = "astro-input p-1 text-xs";
+    const labelClass = "astro-label text-[10px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Teleszkóp Kalkulátor</h3>
-        <div class="text-xs opacity-70 mb-4 italic flex-grow">A fő paraméterek a fejlécből jönnek.
-            <details class="mt-4 border border-white/10 rounded overflow-hidden not-italic">
-                <summary class="bg-black/20 px-3 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
+        <div class="flex-grow">
+            <details class="mb-4 border border-white/10 rounded overflow-hidden">
+                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
                     Haladó beállítások
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div>
-                        <label class="${labelClass}">Központi kitakarás (Obstruction) % ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest. Csökkenti a kontrasztot és a fénygyűjtő képességet. Lencsés távcsöveknél 0%.')}</label>
+                        <label class="${labelClass}">Központi kitakarás % ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest.')}</label>
                         <input type="number" id="tel-obs" value="${data.obs}" class="${inputClass}" min="0" max="100">
                     </div>
                     <div>
-                        <label class="${labelClass}">Transzmisszió (Fényáteresztés) % ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége. Egy átlagos távcsőnél kb. 85-90%. Befolyásolja a határmagnitúdót.')}</label>
+                        <label class="${labelClass}">Transzmisszió % ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége.')}</label>
                         <input type="number" id="tel-trans" value="${data.trans}" class="${inputClass}" min="1" max="100">
                     </div>
                 </div>

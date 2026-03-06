@@ -61,7 +61,7 @@ export function createConversionsCalc(isNightMode) {
         card.querySelector('#conv-alt').textContent = altDeg.toFixed(2) + '°';
         card.querySelector('#conv-az').textContent = azDeg.toFixed(2) + '°';
         
-        // Update input fields without triggering events, only if not focused
+        // Update input fields without triggering events
         const pcInput = card.querySelector('#conv-pc');
         const lyInput = card.querySelector('#conv-ly-in');
         const kmInput = card.querySelector('#conv-km-in');
@@ -71,8 +71,8 @@ export function createConversionsCalc(isNightMode) {
         if (document.activeElement !== kmInput) kmInput.value = km.toExponential(4);
     };
 
-    const inputClass = "astro-input";
-    const labelClass = "astro-label";
+    const inputClass = "astro-input p-1 text-xs";
+    const labelClass = "astro-label text-[10px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Astrometria / Konverziók</h3>

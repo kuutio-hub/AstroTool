@@ -37,7 +37,8 @@ export function createAnalemma(location, isNightMode) {
         for (let d = 0; d < 365; d++) {
             // 12:00 UTC is base. We add offset in hours.
             const date = new Date(Date.UTC(year, 0, d, 12 + Math.floor(timeOffsetHours), (timeOffsetHours % 1) * 60, 0));
-            const pos = SunCalc.getPosition(date, location.latitude, location.longitude);
+            const sunCalc = window.SunCalc || { getPosition: () => ({ azimuth: 0, altitude: 0 }) };
+            const pos = sunCalc.getPosition(date, location.latitude, location.longitude);
             
             // Convert azimuth to degrees (-180 to 180 from South)
             let az = pos.azimuth * 180 / Math.PI;
@@ -139,7 +140,8 @@ export function createAnalemma(location, isNightMode) {
 
         // Draw Current Sun Position
         const now = new Date();
-        const currentPos = SunCalc.getPosition(now, location.latitude, location.longitude);
+        const sunCalc = window.SunCalc || { getPosition: () => ({ azimuth: 0, altitude: 0 }) };
+        const currentPos = sunCalc.getPosition(now, location.latitude, location.longitude);
         const currAz = currentPos.azimuth * 180 / Math.PI;
         const currAlt = currentPos.altitude * 180 / Math.PI;
         

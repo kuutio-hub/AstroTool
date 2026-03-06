@@ -19,23 +19,23 @@ export function createExposureCalc(isNightMode) {
         card.querySelector('#exp-res').textContent = exposure.toExponential(2) + ' s';
     };
 
-    const inputClass = "astro-input";
-    const labelClass = "astro-label";
+    const inputClass = "astro-input p-1 text-xs";
+    const labelClass = "astro-label text-[10px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Expó Kalkulátor</h3>
         <div class="space-y-3 mb-4 flex-grow">
             <div class="grid grid-cols-3 gap-2">
                 <div>
-                    <label class="${labelClass}">ISO (i) ${createInfoBtn('ISO / Gain', 'A kamera érzékenysége. Magasabb érték = rövidebb expozíció, de több zaj.')}</label>
+                    <label class="${labelClass}">ISO ${createInfoBtn('ISO / Gain', 'A kamera érzékenysége.')}</label>
                     <input type="number" id="exp-iso" value="${data.iso}" class="${inputClass}">
                 </div>
                 <div>
-                    <label class="${labelClass}">Filter (FF) ${createInfoBtn('Szűrő Faktor (Filter Factor)', 'A használt szűrő fényelnyelési tényezője. Ha nincs szűrő, az érték 1. Egy erős keskenysávú szűrőnél lehet 10 vagy több is.')}</label>
+                    <label class="${labelClass}">Filter ${createInfoBtn('Szűrő Faktor', 'A használt szűrő fényelnyelési tényezője.')}</label>
                     <input type="number" id="exp-ff" value="${data.ff}" class="${inputClass}">
                 </div>
                 <div>
-                    <label class="${labelClass}">Sky Brightness (sb) ${createInfoBtn('Égbolt Fényessége (Sky Brightness)', 'Az égbolt háttérfényessége magnitúdó/ívmásodperc²-ben. Sötét égen kb. 21-22, városban 17-18.')}</label>
+                    <label class="${labelClass}">Sky Br. ${createInfoBtn('Égbolt Fényessége', 'Az égbolt háttérfényessége magnitúdó/ívmásodperc²-ben.')}</label>
                     <input type="number" id="exp-sb" value="${data.sb}" class="${inputClass}">
                 </div>
             </div>

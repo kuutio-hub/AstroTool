@@ -15,11 +15,10 @@ export function createEyepieceCalc(isNightMode) {
     };
 
     const update = () => {
-        const effF = data.F * data.B;
-        const mag = effF / data.e;
-        const ep = data.A / mag; // Exit pupil = Aperture / Magnification
-        const fov = data.a / mag; // TFOV = AFOV / Magnification
-        const maxFov = (data.b / effF) * 57.3;
+        const mag = (data.F / data.e) * data.B;
+        const ep = (data.A * data.e) / data.F; // Exit pupil
+        const fov = (data.a * data.e) / (data.F * data.B);
+        const maxFov = (data.b / data.F) * 57.3;
         const driftTime = (fov * 4) / Math.cos(data.dec * Math.PI / 180); // Drift time in minutes
 
         card.querySelector('#mag-res').textContent = mag.toFixed(1) + 'x';
@@ -29,28 +28,28 @@ export function createEyepieceCalc(isNightMode) {
         card.querySelector('#drift-res').textContent = driftTime.toFixed(1) + ' min';
     };
 
-    const inputClass = "astro-input";
-    const labelClass = "astro-label";
+    const inputClass = "astro-input p-1 text-xs";
+    const labelClass = "astro-label text-[10px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Okulár Kalkulátor</h3>
         <div class="space-y-3 mb-4 flex-grow">
             <div>
-                <label class="${labelClass}">Okulár fókusz (e) mm ${createInfoBtn('Okulár Fókusztávolsága', 'Az okulár fókusztávolsága milliméterben. Meghatározza a nagyítást. Kisebb szám = nagyobb nagyítás.')}</label>
+                <label class="${labelClass}">Okulár fókusz (e) mm ${createInfoBtn('Okulár Fókusztávolsága', 'Az okulár fókusztávolsága milliméterben. Meghatározza a nagyítást.')}</label>
                 <input type="number" id="ep-e" value="${data.e}" class="${inputClass}">
             </div>
             
             <details class="mt-4 border border-white/10 rounded overflow-hidden">
-                <summary class="bg-black/20 px-3 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
+                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
                     Haladó beállítások
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div>
-                        <label class="${labelClass}">Mezőrekesz (b) mm ${createInfoBtn('Mezőrekesz (Field Stop)', 'Az okulár belsejében lévő fizikai gyűrű átmérője, amely korlátozza a maximális látómezőt. Általában a gyártó adja meg.')}</label>
+                        <label class="${labelClass}">Mezőrekesz (b) mm ${createInfoBtn('Mezőrekesz (Field Stop)', 'Az okulár belsejében lévő fizikai gyűrű átmérője.')}</label>
                         <input type="number" id="ep-b" value="${data.b}" class="${inputClass}">
                     </div>
                     <div>
-                        <label class="${labelClass}">Deklináció (Dec) ° ${createInfoBtn('Deklináció', 'Az égitest égi egyenlítőtől mért távolsága fokban. Szükséges az átvonulási (drift) idő pontos kiszámításához.')}</label>
+                        <label class="${labelClass}">Deklináció (Dec) ° ${createInfoBtn('Deklináció', 'Az égitest égi egyenlítőtől mért távolsága fokban.')}</label>
                         <input type="number" id="ep-dec" value="${data.dec}" class="${inputClass}">
                     </div>
                 </div>

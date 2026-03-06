@@ -1,3 +1,4 @@
+import { SunIcon, MoonIcon, GlobeIcon, InfoIcon } from './icons.js';
 import { storage, TimeService, showInfoModal, createInfoBtn } from './utils.js';
 import { createDashboard } from './dashboard.js';
 import { createCalculator } from './calculator/index.js';
@@ -34,6 +35,13 @@ function render() {
     const controls = document.createElement('div');
     controls.className = "flex gap-2 items-center";
 
+    // Wiki Button
+    const wikiBtn = document.createElement('button');
+    wikiBtn.className = `p-2 rounded astro-card hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-white'}`;
+    wikiBtn.innerHTML = InfoIcon("w-5 h-5");
+    wikiBtn.title = "Információ & Wiki";
+    wikiBtn.onclick = () => showWiki();
+
     // Theme Toggle
     const themeBtn = document.createElement('button');
     themeBtn.className = `px-4 py-2 rounded astro-card font-bold text-xs uppercase tracking-wider hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-white'}`;
@@ -44,104 +52,69 @@ function render() {
         render();
     };
 
-    // Location Settings Dropdown
-    const locHtml = `
-        <div class="p-4 w-64">
-            <h3 class="font-bold uppercase text-xs mb-3 ${isNightMode ? 'text-red-500' : 'text-white'}">Helyzet Beállítása</h3>
-            <div class="space-y-3">
-                <div>
-                    <label class="astro-label">Szélesség (Lat)</label>
-                    <input type="number" id="loc-lat" value="${userLocation.latitude}" step="0.0001" class="astro-input">
-                </div>
-                <div>
-                    <label class="astro-label">Hosszúság (Lon)</label>
-                    <input type="number" id="loc-lon" value="${userLocation.longitude}" step="0.0001" class="astro-input">
-                </div>
-                <button id="loc-save" class="w-full mt-2 px-4 py-2 rounded bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all ${isNightMode ? 'bg-red-900 hover:bg-red-800 text-red-500' : ''}">
-                    Mentés
-                </button>
-            </div>
-        </div>
-    `;
-    const locDropdown = createDropdown('Helyzet', locHtml, isNightMode);
-    
-    // Attach event listener to the save button inside the dropdown
-    setTimeout(() => {
-        const saveBtn = document.getElementById('loc-save');
-        if (saveBtn) {
-            saveBtn.onclick = () => {
-                const lat = parseFloat(document.getElementById('loc-lat').value);
-                const lon = parseFloat(document.getElementById('loc-lon').value);
-                if (!isNaN(lat) && !isNaN(lon)) {
-                    userLocation = { latitude: lat, longitude: lon };
-                    storage.set('location', userLocation);
-                    render();
-                }
-            };
-        }
-    }, 0);
-
-    controls.appendChild(locDropdown);
+    controls.appendChild(wikiBtn);
     controls.appendChild(themeBtn);
     
     header.appendChild(title);
     header.appendChild(controls);
     app.appendChild(header);
 
-    // Global Settings Bar
-    const globalSettings = document.createElement('div');
-    globalSettings.className = `astro-card mb-6 p-4`;
-    
-    let gData = {
-        F: storage.get('F', 1000),
-        A: storage.get('A', 200),
-        B: storage.get('B', 1),
-        a: storage.get('a', 50),
-        bortle: storage.get('bortle', 4)
-    };
+    // Global Settings Bar (Only on Calculator tab)
+    if (activeTab === 'calculator') {
+        const globalSettings = document.createElement('div');
+        globalSettings.className = `astro-card mb-4 p-3 animate-fade-in`;
+        
+        let gData = {
+            F: storage.get('F', 1000),
+            A: storage.get('A', 200),
+            B: storage.get('B', 1),
+            a: storage.get('a', 50),
+            bortle: storage.get('bortle', 4)
+        };
 
-    const updateGlobal = (key, val) => {
-        gData[key] = val;
-        storage.set(key, val);
-        window.dispatchEvent(new CustomEvent('astro-settings-changed', { detail: gData }));
-    };
+        const updateGlobal = (key, val) => {
+            gData[key] = val;
+            storage.set(key, val);
+            window.dispatchEvent(new CustomEvent('astro-settings-changed', { detail: gData }));
+        };
 
-    globalSettings.innerHTML = `
-        <div class="flex items-center gap-2 mb-3 ${isNightMode ? 'text-red-500' : 'text-blue-300'} font-bold uppercase tracking-wider text-xs">
-            Globális Paraméterek
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <div>
-                <label class="astro-label">Fókusz (F) mm ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben. Meghatározza az alapnagyítást és a látómezőt. Példa: Egy 200/1000-es Newton távcsőnél ez 1000 mm.')}</label>
-                <input type="number" id="g-F" value="${gData.F}" class="astro-input">
+        globalSettings.innerHTML = `
+            <div class="flex items-center gap-2 mb-2 ${isNightMode ? 'text-red-500' : 'text-blue-300'} font-bold uppercase tracking-wider text-[10px]">
+                Globális Paraméterek
             </div>
-            <div>
-                <label class="astro-label">Apertúra (A) mm ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben. Minél nagyobb, annál több fényt gyűjt és annál jobb a felbontása. Példa: Egy 200/1000-es Newton távcsőnél ez 200 mm.')}</label>
-                <input type="number" id="g-A" value="${gData.A}" class="astro-input">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                <div>
+                    <label class="astro-label text-[9px]">Fókusz (F) mm ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben.')}</label>
+                    <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs">
+                </div>
+                <div>
+                    <label class="astro-label text-[9px]">Apertúra (A) mm ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben.')}</label>
+                    <input type="number" id="g-A" value="${gData.A}" class="astro-input p-1 text-xs">
+                </div>
+                <div>
+                    <label class="astro-label text-[9px]">Barlow (B) x ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó vagy fókuszcsökkentő szorzója.')}</label>
+                    <input type="number" id="g-B" value="${gData.B}" class="astro-input p-1 text-xs" step="0.1">
+                </div>
+                <div>
+                    <label class="astro-label text-[9px]">Okulár AFoV (a) ° ${createInfoBtn('Okulár Látszólagos Látómező', 'Az okulár látszólagos látómezeje fokban.')}</label>
+                    <input type="number" id="g-a" value="${gData.a}" class="astro-input p-1 text-xs" step="1">
+                </div>
+                <div>
+                    <label class="astro-label text-[9px]">Bortle (1-9) ${createInfoBtn('Bortle Skála', 'Az éjszakai égbolt fényszennyezettségét mérő skála.')}</label>
+                    <input type="number" id="g-bortle" value="${gData.bortle}" class="astro-input p-1 text-xs" min="1" max="9" step="0.1">
+                </div>
             </div>
-            <div>
-                <label class="astro-label">Barlow/Reducer (B) x ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó (Barlow) vagy fókuszcsökkentő (Reducer) szorzója. Ha nem használsz ilyet, hagyd 1-en. Példa: Egy 2x Barlow lencse esetén írj be 2-t, egy 0.5x reducer esetén 0.5-öt.')}</label>
-                <input type="number" id="g-B" value="${gData.B}" class="astro-input" step="0.1">
-            </div>
-            <div>
-                <label class="astro-label">Okulár AFoV (a) ° ${createInfoBtn('Okulár Látszólagos Látómező', 'Az okulár látszólagos látómezeje fokban (Apparent Field of View). Ezt a gyártó adja meg. Példa: Egy Plössl okulár általában 50°, egy nagylátószögű (UWA) 82°.')}</label>
-                <input type="number" id="g-a" value="${gData.a}" class="astro-input" step="1">
-            </div>
-            <div>
-                <label class="astro-label">Bortle skála (1-9) ${createInfoBtn('Bortle Skála', 'Az éjszakai égbolt fényszennyezettségét mérő skála. 1 = Tökéletesen sötét ég, 9 = Belső városi égbolt. Befolyásolja a határmagnitúdót és az expozíciós időt.')}</label>
-                <input type="number" id="g-bortle" value="${gData.bortle}" class="astro-input" min="1" max="9" step="0.1">
-            </div>
-        </div>
-    `;
+        `;
 
-    globalSettings.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const key = e.target.id.split('-')[1];
-            updateGlobal(key, parseFloat(e.target.value) || 0);
+        globalSettings.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const key = e.target.id.split('-')[1];
+                updateGlobal(key, parseFloat(e.target.value) || 0);
+            });
         });
-    });
 
-    app.appendChild(globalSettings);
+        app.appendChild(globalSettings);
+    }
 
     // Navigation
     const nav = document.createElement('nav');
@@ -172,9 +145,10 @@ function render() {
     
     if (activeTab === 'dashboard') {
         const now = TimeService.now();
-        const sunData = SunCalc.getTimes(now, userLocation.latitude, userLocation.longitude);
-        const moonData = SunCalc.getMoonIllumination(now);
-        const moonPos = SunCalc.getMoonPosition(now, userLocation.latitude, userLocation.longitude);
+        const sunCalc = window.SunCalc || { getTimes: () => ({}), getMoonIllumination: () => ({}), getMoonPosition: () => ({}) };
+        const sunData = sunCalc.getTimes(now, userLocation.latitude, userLocation.longitude);
+        const moonData = sunCalc.getMoonIllumination(now);
+        const moonPos = sunCalc.getMoonPosition(now, userLocation.latitude, userLocation.longitude);
         
         content.appendChild(createDashboard(userLocation, sunData, { ...moonData, ...moonPos }, isNightMode));
     } else if (activeTab === 'calculator') {
@@ -188,8 +162,67 @@ function render() {
     // Footer
     const footer = document.createElement('footer');
     footer.className = "mt-12 text-center text-xs opacity-50 py-4 border-t border-white/10";
-    footer.innerHTML = `AstroTool v1.5`;
+    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • Minden jog fenntartva.`;
     app.appendChild(footer);
+}
+
+function showWiki() {
+    const content = `
+        <div class="space-y-4">
+            <p>Az <b>AstroTool</b> egy amatőrcsillagászok számára készült segédeszköz, amely segít a megfigyelések tervezésében és a technikai számításokban.</p>
+            
+            <section>
+                <h4 class="font-bold text-xs uppercase mb-1">Funkciók:</h4>
+                <ul class="list-disc list-inside space-y-1">
+                    <li><b>Műszerfal:</b> Valós idejű Nap és Hold adatok, analemma és katalógus kereső.</li>
+                    <li><b>Kalkulátorok:</b> Távcső, okulár és asztrofotós paraméterek számítása.</li>
+                    <li><b>Katalógus:</b> Messier, Melotte és NGC objektumok adatbázisa.</li>
+                </ul>
+            </section>
+
+            <section class="border-t border-white/10 pt-3">
+                <h4 class="font-bold text-xs uppercase mb-2">Egyedi Helyzet:</h4>
+                <p class="mb-2">Ha az automatikus helymeghatározás nem megfelelő, itt megadhatod manuálisan:</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="astro-label">Lat</label>
+                        <input type="number" id="wiki-lat" value="${userLocation.latitude}" step="0.0001" class="astro-input">
+                    </div>
+                    <div>
+                        <label class="astro-label">Lon</label>
+                        <input type="number" id="wiki-lon" value="${userLocation.longitude}" step="0.0001" class="astro-input">
+                    </div>
+                </div>
+                <button id="wiki-save-loc" class="w-full mt-2 px-4 py-2 rounded bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all ${isNightMode ? 'bg-red-900 hover:bg-red-800 text-red-500' : ''}">
+                    Helyzet Mentése
+                </button>
+            </section>
+
+            <section class="border-t border-white/10 pt-3">
+                <h4 class="font-bold text-xs uppercase mb-1">Támogatás:</h4>
+                <p>Hamarosan...</p>
+            </section>
+        </div>
+    `;
+    showInfoModal('AstroTool Wiki', content, isNightMode);
+    
+    // Attach save listener
+    setTimeout(() => {
+        const btn = document.getElementById('wiki-save-loc');
+        if (btn) {
+            btn.onclick = () => {
+                const lat = parseFloat(document.getElementById('wiki-lat').value);
+                const lon = parseFloat(document.getElementById('wiki-lon').value);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    userLocation = { latitude: lat, longitude: lon };
+                    storage.set('location', userLocation);
+                    const modal = document.getElementById('info-modal');
+                    if (modal) modal.remove();
+                    render();
+                }
+            };
+        }
+    }, 0);
 }
 
 // Initialize
@@ -198,19 +231,39 @@ async function init() {
     
     // Try to get location if not set
     if (!storage.get('location')) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    userLocation = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-                    storage.set('location', userLocation);
-                    render();
-                },
-                (err) => console.warn('Geolocation failed', err)
-            );
-        }
+        showInfoModal('Helymeghatározás', `
+            <div class="space-y-3">
+                <p>Az AstroTool-nak szüksége van a földrajzi helyzetedre a pontos Nap és Hold adatok kiszámításához.</p>
+                <p>Kérlek, engedélyezd a hozzáférést a következő ablakban!</p>
+                <button id="allow-geo" class="w-full px-4 py-2 rounded bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all ${isNightMode ? 'bg-red-900 hover:bg-red-800 text-red-500' : ''}">
+                    Értettem, engedélyezem
+                </button>
+            </div>
+        `, isNightMode);
+
+        document.getElementById('allow-geo').onclick = () => {
+            const modal = document.getElementById('info-modal');
+            if (modal) modal.remove();
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        userLocation = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                        storage.set('location', userLocation);
+                        render();
+                    },
+                    (err) => {
+                        console.warn('Geolocation failed', err);
+                        render(); // Fallback to default
+                    }
+                );
+            } else {
+                render();
+            }
+        };
+    } else {
+        render();
     }
-    
-    render();
 }
 
 init();
