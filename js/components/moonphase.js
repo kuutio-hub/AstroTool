@@ -33,9 +33,9 @@ export function renderMoonPhaseIcon(illumination, isWaxing, isNightMode = false)
     // The sweep flag for the terminator depends on both waxing/waning and illumination level
     let termSweep;
     if (isWaxing) {
-        termSweep = ill < 0.5 ? 1 : 0;
-    } else {
         termSweep = ill < 0.5 ? 0 : 1;
+    } else {
+        termSweep = ill < 0.5 ? 1 : 0;
     }
 
     // Special cases for almost new or almost full moon to avoid rendering glitches

@@ -111,12 +111,12 @@ export function createCatalog(isNightMode) {
                 const paginationDiv = document.createElement('div');
                 paginationDiv.className = "flex justify-center items-center gap-4 pt-4 text-xs font-bold";
                 
-                const btnClass = `px-3 py-1 rounded ${isNightMode ? 'bg-red-900/30 hover:bg-red-900/50' : 'bg-slate-200 hover:bg-slate-300'}`;
+                const btnClass = `px-4 py-2 rounded-lg transition-all uppercase tracking-widest text-[10px] ${isNightMode ? 'bg-red-900/40 text-red-500 hover:bg-red-800/60' : 'bg-slate-700 text-white hover:bg-slate-600'}`;
                 
                 paginationDiv.innerHTML = `
-                    <button id="prev-btn" class="${btnClass} ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" ${currentPage === 1 ? 'disabled' : ''}>&lt; Előző</button>
-                    <span class="opacity-70">${currentPage} / ${totalPages}</span>
-                    <button id="next-btn" class="${btnClass} ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" ${currentPage === totalPages ? 'disabled' : ''}>Következő &gt;</button>
+                    <button id="prev-btn" class="${btnClass} ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : ''}" ${currentPage === 1 ? 'disabled' : ''}>&lt; Előző</button>
+                    <span class="opacity-70 font-mono">${currentPage} / ${totalPages}</span>
+                    <button id="next-btn" class="${btnClass} ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : ''}" ${currentPage === totalPages ? 'disabled' : ''}>Következő &gt;</button>
                 `;
                 
                 paginationDiv.querySelector('#prev-btn').onclick = () => {

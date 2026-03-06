@@ -29,7 +29,7 @@ function render() {
     header.className = "flex justify-between items-center mb-6";
     
     const title = document.createElement('h1');
-    title.className = `text-2xl font-bold tracking-widest uppercase ${isNightMode ? 'text-red-500' : 'text-white'}`;
+    title.className = `text-2xl font-black tracking-tighter uppercase ${isNightMode ? 'text-red-500' : 'text-white'}`;
     title.textContent = "AstroTool";
     
     const controls = document.createElement('div');
@@ -67,9 +67,7 @@ function render() {
         let gData = {
             F: storage.get('F', 1000),
             A: storage.get('A', 200),
-            B: storage.get('B', 1),
-            a: storage.get('a', 50),
-            bortle: storage.get('bortle', 4)
+            B: storage.get('B', 1)
         };
 
         const updateGlobal = (key, val) => {
@@ -82,7 +80,7 @@ function render() {
             <div class="flex items-center gap-2 mb-2 ${isNightMode ? 'text-red-500' : 'text-blue-300'} font-bold uppercase tracking-wider text-[10px]">
                 Globális Paraméterek
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <div class="grid grid-cols-3 gap-2">
                 <div>
                     <label class="astro-label text-[9px]">Fókusz (F) mm ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben.')}</label>
                     <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs">
@@ -94,14 +92,6 @@ function render() {
                 <div>
                     <label class="astro-label text-[9px]">Barlow (B) x ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó vagy fókuszcsökkentő szorzója.')}</label>
                     <input type="number" id="g-B" value="${gData.B}" class="astro-input p-1 text-xs" step="0.1">
-                </div>
-                <div>
-                    <label class="astro-label text-[9px]">Okulár AFoV (a) ° ${createInfoBtn('Okulár Látszólagos Látómező', 'Az okulár látszólagos látómezeje fokban.')}</label>
-                    <input type="number" id="g-a" value="${gData.a}" class="astro-input p-1 text-xs" step="1">
-                </div>
-                <div>
-                    <label class="astro-label text-[9px]">Bortle (1-9) ${createInfoBtn('Bortle Skála', 'Az éjszakai égbolt fényszennyezettségét mérő skála.')}</label>
-                    <input type="number" id="g-bortle" value="${gData.bortle}" class="astro-input p-1 text-xs" min="1" max="9" step="0.1">
                 </div>
             </div>
         `;
@@ -161,8 +151,8 @@ function render() {
 
     // Footer
     const footer = document.createElement('footer');
-    footer.className = "mt-12 text-center text-xs opacity-50 py-4 border-t border-white/10";
-    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • Minden jog fenntartva.`;
+    footer.className = "mt-12 py-6 border-t border-white/10 text-center opacity-40 text-[10px] uppercase tracking-widest";
+    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • Minden jog fenntartva`;
     app.appendChild(footer);
 }
 

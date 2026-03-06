@@ -34,22 +34,29 @@ export function createEyepieceCalc(isNightMode) {
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Okulár Kalkulátor</h3>
         <div class="space-y-3 mb-4 flex-grow">
-            <div>
-                <label class="${labelClass}">Okulár fókusz (e) mm ${createInfoBtn('Okulár Fókusztávolsága', 'Az okulár fókusztávolsága milliméterben. Meghatározza a nagyítást.')}</label>
-                <input type="number" id="ep-e" value="${data.e}" class="${inputClass}">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="${labelClass}">Fókusz (e) mm ${createInfoBtn('Okulár Fókusztávolsága', 'Az okulár fókusztávolsága milliméterben. Meghatározza a nagyítást. Kisebb szám = nagyobb nagyítás.')}</label>
+                    <input type="number" id="ep-e" value="${data.e}" class="${inputClass}">
+                </div>
+                <div>
+                    <label class="${labelClass}">AFoV (a) ° ${createInfoBtn('Látszólagos Látómező', 'Az okulár látszólagos látómezeje fokban (Apparent Field of View). Ezt a gyártó adja meg. Példa: Plössl 50°, UWA 82°.')}</label>
+                    <input type="number" id="ep-a" value="${data.a}" class="${inputClass}">
+                </div>
             </div>
             
-            <details class="mt-4 border border-white/10 rounded overflow-hidden">
-                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
-                    Haladó beállítások
+            <details class="mt-4 border border-white/10 rounded overflow-hidden group">
+                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors flex justify-between items-center ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
+                    <span>Haladó</span>
+                    <svg class="w-3 h-3 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div>
-                        <label class="${labelClass}">Mezőrekesz (b) mm ${createInfoBtn('Mezőrekesz (Field Stop)', 'Az okulár belsejében lévő fizikai gyűrű átmérője.')}</label>
+                        <label class="${labelClass}">Mezőrekesz (b) mm ${createInfoBtn('Mezőrekesz (Field Stop)', 'Az okulár belsejében lévő fizikai gyűrű átmérője, amely korlátozza a maximális látómezőt.')}</label>
                         <input type="number" id="ep-b" value="${data.b}" class="${inputClass}">
                     </div>
                     <div>
-                        <label class="${labelClass}">Deklináció (Dec) ° ${createInfoBtn('Deklináció', 'Az égitest égi egyenlítőtől mért távolsága fokban.')}</label>
+                        <label class="${labelClass}">Deklináció (Dec) ° ${createInfoBtn('Deklináció', 'Az égitest égi egyenlítőtől mért távolsága fokban. Szükséges az átvonulási (drift) idő pontos kiszámításához.')}</label>
                         <input type="number" id="ep-dec" value="${data.dec}" class="${inputClass}">
                     </div>
                 </div>

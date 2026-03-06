@@ -17,15 +17,10 @@ export function createConversionsCalc(isNightMode) {
         decS: storage.get('decS', 0)
     };
 
-    const update = () => {
+    const updateAstro = () => {
         // Hour Angle to Degrees
         const deg = (data.H + data.M/60 + data.S/3600) * 15;
         
-        // Distance conversions
-        const pc = data.dist;
-        const ly = pc * 3.26156;
-        const km = ly * 9.461e12;
-
         // RA/DEC to Alt/Az
         const loc = storage.get('location', { latitude: 47.4979, longitude: 19.0402 });
         const now = TimeService.now();
@@ -60,19 +55,47 @@ export function createConversionsCalc(isNightMode) {
         card.querySelector('#conv-deg').textContent = deg.toFixed(4) + '°';
         card.querySelector('#conv-alt').textContent = altDeg.toFixed(2) + '°';
         card.querySelector('#conv-az').textContent = azDeg.toFixed(2) + '°';
+    };
+
+    const updateAll = (sourceKey, value) => {
+        if (isNaN(value) || value === null) return;
         
-        // Update input fields without triggering events
-        const pcInput = card.querySelector('#conv-pc');
-        const lyInput = card.querySelector('#conv-ly-in');
-        const kmInput = card.querySelector('#conv-km-in');
-        
-        if (document.activeElement !== pcInput) pcInput.value = pc.toFixed(4);
-        if (document.activeElement !== lyInput) lyInput.value = ly.toFixed(4);
-        if (document.activeElement !== kmInput) kmInput.value = km.toExponential(4);
+        // Convert source to meters first
+        let meters = 0;
+        switch(sourceKey) {
+            case 'm': meters = value; break;
+            case 'km': meters = value * 1000; break;
+            case 'au': meters = value * 1.495978707e11; break;
+            case 'ly': meters = value * 9.4607304725808e15; break;
+            case 'pc': meters = value * 3.08567758149137e16; break;
+        }
+
+        // Update all other fields
+        const units = {
+            m: meters,
+            km: meters / 1000,
+            au: meters / 1.495978707e11,
+            ly: meters / 9.4607304725808e15,
+            pc: meters / 3.08567758149137e16
+        };
+
+        Object.keys(units).forEach(key => {
+            const input = card.querySelector(`#conv-${key}`);
+            if (input && document.activeElement !== input) {
+                const val = units[key];
+                if (val === 0) {
+                    input.value = "0";
+                } else if (val > 1e9 || (val < 0.0001 && val > 0)) {
+                    input.value = val.toExponential(4);
+                } else {
+                    input.value = val.toFixed(6).replace(/\.?0+$/, ""); // Remove trailing zeros
+                }
+            }
+        });
     };
 
     const inputClass = "astro-input p-1 text-xs";
-    const labelClass = "astro-label text-[10px]";
+    const labelClass = "astro-label text-[9px]";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Astrometria / Konverziók</h3>
@@ -87,19 +110,27 @@ export function createConversionsCalc(isNightMode) {
             </div>
             
             <div class="pt-2 border-t border-white/10">
-                <label class="${labelClass}">Távolság Konverzió ${createInfoBtn('Távolság', 'Írj be egy értéket bármelyik mezőbe, a többi automatikusan frissül. 1 Parsec = 3.26 Fényév.')}</label>
-                <div class="grid grid-cols-3 gap-2">
+                <label class="${labelClass}">Távolság Konverzió ${createInfoBtn('Távolság', 'Írj be egy értéket bármelyik mezőbe, a többi automatikusan frissül.')}</label>
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <div class="text-[10px] uppercase opacity-50 mb-1">Parsec</div>
-                        <input type="number" id="conv-pc" value="${data.dist}" class="${inputClass}">
+                        <div class="text-[9px] uppercase opacity-50 mb-1">Méter</div>
+                        <input type="number" id="conv-m" class="${inputClass}">
                     </div>
                     <div>
-                        <div class="text-[10px] uppercase opacity-50 mb-1">Fényév</div>
-                        <input type="number" id="conv-ly-in" class="${inputClass}">
+                        <div class="text-[9px] uppercase opacity-50 mb-1">Kilométer</div>
+                        <input type="number" id="conv-km" class="${inputClass}">
                     </div>
                     <div>
-                        <div class="text-[10px] uppercase opacity-50 mb-1">Kilométer</div>
-                        <input type="number" id="conv-km-in" class="${inputClass}">
+                        <div class="text-[9px] uppercase opacity-50 mb-1">AU</div>
+                        <input type="number" id="conv-au" class="${inputClass}">
+                    </div>
+                    <div>
+                        <div class="text-[9px] uppercase opacity-50 mb-1">Fényév</div>
+                        <input type="number" id="conv-ly" class="${inputClass}">
+                    </div>
+                    <div class="col-span-2">
+                        <div class="text-[9px] uppercase opacity-50 mb-1">Parsec</div>
+                        <input type="number" id="conv-pc" class="${inputClass}">
                     </div>
                 </div>
             </div>
@@ -140,28 +171,22 @@ export function createConversionsCalc(isNightMode) {
             const id = e.target.id;
             const val = parseFloat(e.target.value) || 0;
             
-            if (id === 'conv-pc') {
-                data.dist = val;
-            } else if (id === 'conv-ly-in') {
-                data.dist = val / 3.26156;
-            } else if (id === 'conv-km-in') {
-                data.dist = val / (3.26156 * 9.461e12);
+            if (id.startsWith('conv-m') || id.startsWith('conv-km') || id.startsWith('conv-au') || id.startsWith('conv-ly') || id.startsWith('conv-pc')) {
+                const key = id.split('-')[1];
+                updateAll(key, val);
             } else {
                 const key = id.split('-')[1];
                 data[key] = val;
+                // Save other keys
+                ['H', 'M', 'S', 'raH', 'raM', 'raS', 'decD', 'decM', 'decS'].forEach(k => storage.set(k, data[k]));
+                updateAstro();
             }
-            
-            storage.set('dist', data.dist);
-            // Save other keys
-            ['H', 'M', 'S', 'raH', 'raM', 'raS', 'decD', 'decM', 'decS'].forEach(k => storage.set(k, data[k]));
-            
-            update();
         });
     });
 
     // Update Alt/Az periodically since it depends on time
-    setInterval(update, 1000);
+    setInterval(updateAstro, 1000);
 
-    update();
+    updateAstro();
     return card;
 }

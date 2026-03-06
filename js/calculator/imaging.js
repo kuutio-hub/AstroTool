@@ -11,6 +11,7 @@ export function createImagingCalc(isNightMode) {
         h: storage.get('h', 14.9), // Sensor height
         p: storage.get('p', 4.3),   // Pixel size
         seeing: storage.get('seeing', 2.0), // Seeing limit in arcsec
+        seeingMode: storage.get('seeingMode', 'arcsec'), // 'arcsec' or 'scale'
         bin: storage.get('bin', 1) // Binning
     };
 
@@ -41,6 +42,24 @@ export function createImagingCalc(isNightMode) {
         card.querySelector('#img-res').textContent = res.toFixed(2) + '"/px';
         card.querySelector('#img-sampling').textContent = samplingStatus;
         card.querySelector('#img-diag').textContent = diag.toFixed(1) + ' mm';
+        
+        // Update seeing input label/value if in scale mode
+        const seeingInput = card.querySelector('#img-seeing');
+        const seeingLabel = card.querySelector('#seeing-label-text');
+        if (data.seeingMode === 'scale') {
+            const scaleVal = (5.5 - data.seeing) / 0.5;
+            seeingInput.value = scaleVal.toFixed(1);
+            seeingInput.step = "0.5";
+            seeingInput.min = "1";
+            seeingInput.max = "10";
+            seeingLabel.textContent = 'Seeing Skála (1-10)';
+        } else {
+            seeingInput.value = data.seeing.toFixed(1);
+            seeingInput.step = "0.1";
+            seeingInput.min = "0.1";
+            seeingInput.max = "10";
+            seeingLabel.textContent = 'Seeing (Ívmásodperc)';
+        }
     };
 
     const inputClass = "astro-input p-1 text-xs";
@@ -50,13 +69,17 @@ export function createImagingCalc(isNightMode) {
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Fotós Kalkulátor</h3>
         <div class="space-y-3 mb-4 flex-grow">
             <div>
-                <label class="${labelClass}">Seeing " ${createInfoBtn('Seeing', 'A légkör nyugodtságát jelzi ívmásodpercben.')}</label>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="${labelClass} mb-0"><span id="seeing-label-text">Seeing</span> ${createInfoBtn('Seeing', 'A légkör nyugodtságát jelzi. Átváltható ívmásodperc (arcsec) és 1-10-es skála között. 10: tökéletes, 1: nagyon rossz.')}</label>
+                    <button id="toggle-seeing-mode" class="text-[9px] uppercase font-bold opacity-50 hover:opacity-100 transition-all border border-white/10 px-1 rounded">Váltás</button>
+                </div>
                 <input type="number" id="img-seeing" value="${data.seeing}" class="${inputClass}" step="0.1">
             </div>
             
-            <details class="mt-4 border border-white/10 rounded overflow-hidden">
-                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
-                    Haladó beállítások (Szenzor)
+            <details class="mt-4 border border-white/10 rounded overflow-hidden group">
+                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors flex justify-between items-center ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
+                    <span>Szenzor Paraméterek</span>
+                    <svg class="w-3 h-3 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div class="grid grid-cols-2 gap-2">
@@ -113,11 +136,24 @@ export function createImagingCalc(isNightMode) {
     card.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', (e) => {
             const key = e.target.id.split('-')[1];
-            data[key] = parseFloat(e.target.value) || 0;
+            let val = parseFloat(e.target.value) || 0;
+            
+            if (key === 'seeing' && data.seeingMode === 'scale') {
+                // Convert scale back to arcsec
+                val = 5.5 - (val * 0.5);
+            }
+            
+            data[key] = val;
             storage.set(key, data[key]);
             update();
         });
     });
+
+    card.querySelector('#toggle-seeing-mode').onclick = () => {
+        data.seeingMode = data.seeingMode === 'arcsec' ? 'scale' : 'arcsec';
+        storage.set('seeingMode', data.seeingMode);
+        update();
+    };
 
     window.addEventListener('astro-settings-changed', (e) => {
         data = { ...data, ...e.detail };

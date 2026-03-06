@@ -138,11 +138,51 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const moonRise = moonTimes.rise ? formatTime(moonTimes.rise) : '-';
     const moonSet = moonTimes.set ? formatTime(moonTimes.set) : '-';
     
+    // Moon transit (meridian)
+    const moonTransit = moonTimes.main ? formatTime(moonTimes.main) : (moonTimes.transit ? formatTime(moonTimes.transit) : '-');
+
     const moonDistKm = moonData.distance * 6371;
     const moonSizeDeg = Math.atan(3474 / moonDistKm) * (180 / Math.PI);
     
     // Elongation
     const elongation = moonData.phase * 360;
+
+    // Find next major phase
+    const getNextPhase = () => {
+        const now = TimeService.now();
+        const sc = window.SunCalc;
+        if (!sc) return null;
+        
+        // Search for next 0, 0.25, 0.5, 0.75 phase
+        const targets = [0, 0.25, 0.5, 0.75];
+        const targetNames = ["Újhold", "Első Negyed", "Telihold", "Utolsó Negyed"];
+        
+        let bestT = Infinity;
+        let bestName = "";
+        
+        for (let i = 0; i < 30; i++) { // Search next 30 days
+            const d = new Date(now.getTime() + i * 86400000);
+            const p = sc.getMoonIllumination(d).phase;
+            
+            for (let j = 0; j < 4; j++) {
+                const diff = Math.abs(p - targets[j]);
+                if (diff < 0.03) { // Close enough for daily search
+                    // Refine search within that day
+                    for (let h = 0; h < 24; h++) {
+                        const dh = new Date(d.getTime() + h * 3600000);
+                        const ph = sc.getMoonIllumination(dh).phase;
+                        if (Math.abs(ph - targets[j]) < 0.005) {
+                            return { name: targetNames[j], date: dh };
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    };
+
+    const nextPhase = getNextPhase();
+    const nextPhaseStr = nextPhase ? `${nextPhase.name}: ${formatDate(nextPhase.date)}` : '';
 
     moonCard.innerHTML = `
         <div>
@@ -164,6 +204,10 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                         <div class="font-mono font-bold text-xs ${valueColor}">${moonRise} / ${moonSet}</div>
                     </div>
                     <div>
+                        <div class="astro-label">Delelés</div>
+                        <div class="font-mono font-bold text-xs ${valueColor}">${moonTransit}</div>
+                    </div>
+                    <div>
                         <div class="astro-label">Megvilágítás</div>
                         <div class="font-mono font-bold text-xs ${valueColor}">${illumPercent}%</div>
                     </div>
@@ -171,14 +215,16 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                         <div class="astro-label">Távolság</div>
                         <div class="font-mono font-bold text-xs ${valueColor}">${formatNum(moonDistKm)} km</div>
                     </div>
-                    <div>
-                        <div class="astro-label">Látszó méret</div>
-                        <div class="font-mono font-bold text-xs ${valueColor}">${moonSizeDeg.toFixed(2)}°</div>
-                    </div>
-                    <div class="col-span-2">
-                        <div class="astro-label">Elongáció</div>
-                        <div class="font-mono font-bold text-xs ${valueColor}">${elongation.toFixed(1)}°</div>
-                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-2 mt-2">
+                <div class="flex justify-between items-center">
+                    <span class="astro-label mb-0">Következő esemény</span>
+                    <span class="font-mono font-bold text-[10px] ${valueColor}">${nextPhaseStr}</span>
+                </div>
+                <div class="flex justify-between items-center mt-1">
+                    <span class="astro-label mb-0">Elongáció / Méret</span>
+                    <span class="font-mono font-bold text-[10px] ${valueColor}">${elongation.toFixed(1)}° / ${moonSizeDeg.toFixed(2)}°</span>
                 </div>
             </div>
         </div>

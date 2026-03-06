@@ -40,18 +40,24 @@ export function createTelescopeCalc(isNightMode) {
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Teleszkóp Kalkulátor</h3>
-        <div class="flex-grow">
-            <details class="mb-4 border border-white/10 rounded overflow-hidden">
-                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
-                    Haladó beállítások
+        <div class="space-y-3 mb-4 flex-grow">
+            <div>
+                <label class="${labelClass}">Bortle Skála (1-9) ${createInfoBtn('Bortle Skála', 'Az égbolt fényszennyezettségét mérő skála. 1: tökéletesen sötét, 9: belváros. Meghatározza a határmagnitúdót.')}</label>
+                <input type="number" id="tel-bortle" value="${data.bortle}" class="${inputClass}" min="1" max="9" step="0.1">
+            </div>
+            
+            <details class="mb-4 border border-white/10 rounded overflow-hidden group">
+                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors flex justify-between items-center ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
+                    <span>Paraméterek</span>
+                    <svg class="w-3 h-3 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div>
-                        <label class="${labelClass}">Központi kitakarás % ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest.')}</label>
+                        <label class="${labelClass}">Központi kitakarás % ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest. Csökkenti a kontrasztot.')}</label>
                         <input type="number" id="tel-obs" value="${data.obs}" class="${inputClass}" min="0" max="100">
                     </div>
                     <div>
-                        <label class="${labelClass}">Transzmisszió % ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége.')}</label>
+                        <label class="${labelClass}">Transzmisszió % ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége. Általában 85-95%.')}</label>
                         <input type="number" id="tel-trans" value="${data.trans}" class="${inputClass}" min="1" max="100">
                     </div>
                 </div>
