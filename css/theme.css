@@ -1,0 +1,85 @@
+/* Custom styles for AstroTool 2.0 */
+body.day-mode {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #ffffff;
+}
+
+body.night-mode {
+    background-color: #000000;
+    color: #ff4d4d;
+}
+
+/* Inputs and selects */
+.astro-input {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.astro-input:focus {
+    border-color: #3b82f6;
+}
+
+body.night-mode .astro-input {
+    border-color: rgba(255, 77, 77, 0.3);
+    color: #ff4d4d;
+}
+
+body.night-mode .astro-input:focus {
+    border-color: #ff4d4d;
+}
+
+.astro-card {
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+body.night-mode .astro-card {
+    background-color: rgba(20, 0, 0, 0.8);
+    border-color: rgba(255, 77, 77, 0.2);
+}
+
+.astro-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+body.night-mode .astro-label {
+    color: rgba(255, 77, 77, 0.7);
+}
+
+/* Hide scrollbar for tabs */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Dropdown specific */
+.astro-dropdown-menu {
+    background-color: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.night-mode .astro-dropdown-menu {
+    background-color: #1a0000;
+    border-color: rgba(255, 77, 77, 0.2);
+}
