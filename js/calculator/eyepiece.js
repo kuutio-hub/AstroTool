@@ -64,23 +64,23 @@ export function createEyepieceCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Nagyítás ${createInfoBtn('Nagyítás', 'Hányszorosára nagyítja a távcső a képet. Képlet: M = F / e * B (F: távcső fókusz, e: okulár fókusz, B: Barlow).')}</div>
+                <div class="${labelClass}">Nagyítás ${createInfoBtn('Nagyítás', 'Hányszorosára nagyítja a távcső a képet. Képlet: M = (F ÷ e) × B (F: távcső fókusz, e: okulár fókusz, B: Barlow).')}</div>
                 <div id="mag-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Kilépő Pupilla ${createInfoBtn('Kilépő Pupilla', 'A távcsőből kilépő fénynyaláb átmérője. Képlet: EP = A / M (A: apertúra, M: nagyítás). Ha nagyobb, mint a szemed pupillája (kb. 7mm), fényt veszítesz.')}</div>
+                <div class="${labelClass}">Kilépő Pupilla ${createInfoBtn('Kilépő Pupilla', 'A távcsőből kilépő fénynyaláb átmérője. Képlet: EP = A ÷ M (A: apertúra, M: nagyítás).')}</div>
                 <div id="ep-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Valós Látómező ${createInfoBtn('Valós Látómező (TFOV)', 'Az égboltnak az a része fokban, amit ténylegesen látsz a távcsőben. Képlet: TFoV = AFoV / M.')}</div>
+                <div class="${labelClass}">Valós Látómező ${createInfoBtn('Valós Látómező (TFOV)', 'Az égboltnak az a része fokban, amit ténylegesen látsz a távcsőben. Képlet: TFoV = AFoV ÷ M.')}</div>
                 <div id="fov-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Max Látómező ${createInfoBtn('Maximális Látómező', 'A távcső és az okulár mezőrekesze által fizikailag megengedett legnagyobb látómező. Képlet: FoV_max = (b / F) * 57.3')}</div>
+                <div class="${labelClass}">Max Látómező ${createInfoBtn('Maximális Látómező', 'A távcső és az okulár mezőrekesze által fizikailag megengedett legnagyobb látómező. Képlet: FoV_max = (b ÷ F) × 57.3')}</div>
                 <div id="maxfov-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">
-                <div class="${labelClass}">Drift Idő (Átvonulás) ${createInfoBtn('Drift Idő', 'Mennyi idő alatt vonul át egy égitest a látómezőn kikapcsolt óragép esetén. Képlet: T = (TFoV * 4) / cos(Dec)')}</div>
+                <div class="${labelClass}">Drift Idő (Átvonulás) ${createInfoBtn('Drift Idő', 'Mennyi idő alatt vonul át egy égitest a látómezőn kikapcsolt óragép esetén. Képlet: T = (TFoV × 4) ÷ cos(Dec)')}</div>
                 <div id="drift-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
         </div>

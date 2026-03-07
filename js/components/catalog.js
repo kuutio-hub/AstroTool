@@ -1,5 +1,5 @@
-
-import { catalogs, constellations, objectTypes } from '../catalogs.js';
+import { catalogService } from '../services/catalogService.js';
+import { constellations, objectTypes } from '../catalogs.js';
 import { CatalogIcon, InfoIcon, ChevronDownIcon, ChevronUpIcon } from '../icons.js';
 
 export function createCatalog(isNightMode) {
@@ -13,9 +13,11 @@ export function createCatalog(isNightMode) {
     let expandedItem = null;
     let currentPage = 1;
     const itemsPerPage = 25;
+    let currentResults = [];
+    let isLoading = false;
 
     // Render Function
-    function render() {
+    async function render() {
         container.innerHTML = '';
         
         const textColor = isNightMode ? 'text-red-500' : 'text-white';
@@ -24,7 +26,7 @@ export function createCatalog(isNightMode) {
         const filtersDiv = document.createElement('div');
         filtersDiv.className = "space-y-2 mb-4 animate-fade-in";
         filtersDiv.innerHTML = `
-            <input type="text" placeholder="Keresés (pl. M42, Orion)..." class="astro-input" value="${searchTerm}">
+            <input type="text" id="cat-search" placeholder="Keresés (pl. M42, Orion)..." class="astro-input" value="${searchTerm}">
             <div class="flex gap-2">
                 <select id="const-filter" class="astro-input text-xs">
                     <option value="ALL">Minden csillagkép</option>
@@ -37,9 +39,14 @@ export function createCatalog(isNightMode) {
             </div>
         `;
 
-        filtersDiv.querySelector('input').oninput = (e) => { searchTerm = e.target.value; currentPage = 1; renderList(); };
-        filtersDiv.querySelector('#const-filter').onchange = (e) => { selectedConst = e.target.value; currentPage = 1; renderList(); };
-        filtersDiv.querySelector('#type-filter').onchange = (e) => { selectedType = e.target.value; currentPage = 1; renderList(); };
+        const triggerSearch = () => {
+            currentPage = 1;
+            fetchAndRender();
+        };
+
+        filtersDiv.querySelector('#cat-search').oninput = (e) => { searchTerm = e.target.value; triggerSearch(); };
+        filtersDiv.querySelector('#const-filter').onchange = (e) => { selectedConst = e.target.value; triggerSearch(); };
+        filtersDiv.querySelector('#type-filter').onchange = (e) => { selectedType = e.target.value; triggerSearch(); };
 
         container.appendChild(filtersDiv);
 
@@ -48,27 +55,49 @@ export function createCatalog(isNightMode) {
         listDiv.className = "space-y-2";
         container.appendChild(listDiv);
 
+        async function fetchAndRender() {
+            if (isLoading) return;
+            isLoading = true;
+            listDiv.innerHTML = `<div class="text-center opacity-50 text-xs py-8 animate-pulse">Adatok lekérése...</div>`;
+
+            try {
+                // Fetch from server
+                let results = [];
+                if (searchTerm.length >= 2) {
+                    results = await catalogService.search(searchTerm);
+                } else if (selectedConst !== 'ALL') {
+                    results = await catalogService.searchByConstellation(selectedConst);
+                } else {
+                    // Default to Messier if no filters
+                    results = await catalogService.getByCatalog('messier');
+                }
+
+                // Client-side type filtering
+                if (selectedType !== 'ALL') {
+                    results = results.filter(item => item.type === selectedType || item.subtype === selectedType);
+                }
+
+                currentResults = results;
+                renderList();
+            } catch (error) {
+                listDiv.innerHTML = `<div class="text-center text-red-500 text-xs py-8">Hiba történt az adatok betöltésekor.</div>`;
+            } finally {
+                isLoading = false;
+            }
+        }
+
         function renderList() {
             listDiv.innerHTML = '';
             
-            const filtered = catalogs.filter(item => {
-                const matchSearch = item.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    item.desc.toLowerCase().includes(searchTerm.toLowerCase());
-                const matchConst = selectedConst === 'ALL' || item.const === selectedConst;
-                const matchType = selectedType === 'ALL' || item.type === selectedType;
-                return matchSearch && matchConst && matchType;
-            });
-
-            if (filtered.length === 0) {
+            if (currentResults.length === 0) {
                 listDiv.innerHTML = `<div class="text-center opacity-50 text-xs py-4">Nincs találat.</div>`;
                 return;
             }
 
             // Pagination Logic
-            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const totalPages = Math.ceil(currentResults.length / itemsPerPage);
             const startIndex = (currentPage - 1) * itemsPerPage;
-            const displayList = filtered.slice(startIndex, startIndex + itemsPerPage);
+            const displayList = currentResults.slice(startIndex, startIndex + itemsPerPage);
 
             displayList.forEach(item => {
                 const isExpanded = expandedItem === item.id;
@@ -81,7 +110,7 @@ export function createCatalog(isNightMode) {
                             <div class="font-mono font-bold text-lg ${textColor}">${item.id}</div>
                             <div>
                                 <div class="font-bold text-xs uppercase tracking-wider">${item.name || item.id}</div>
-                                <div class="text-[10px] opacity-60">${objectTypes[item.type] || item.type} • ${constellations[item.const] || item.const}</div>
+                                <div class="text-[10px] opacity-60">${item.type} • ${constellations[item.constellation] || item.constellation}</div>
                             </div>
                         </div>
                         <div class="${isNightMode ? 'text-red-800' : 'text-slate-400'}">
@@ -90,10 +119,11 @@ export function createCatalog(isNightMode) {
                     </div>
                     ${isExpanded ? `
                         <div class="mt-3 pt-3 border-t border-current/10 text-xs space-y-1 animate-fade-in">
-                            <div class="flex justify-between"><span class="astro-label mb-0">NGC:</span> <span class="font-mono">${item.ngc}</span></div>
-                            <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.mag} mag</span></div>
-                            <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size}'</span></div>
-                            <div class="mt-2 italic opacity-80">${item.desc}</div>
+                            <div class="flex justify-between"><span class="astro-label mb-0">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
+                            <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.magnitude} mag</span></div>
+                            <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size}</span></div>
+                            <div class="flex justify-between"><span class="astro-label mb-0">Távolság:</span> <span class="font-mono">${item.distance_ly ? formatNum(item.distance_ly) + ' ly' : '-'}</span></div>
+                            <div class="mt-2 italic opacity-80">${item.notes || ''}</div>
                         </div>
                     ` : ''}
                 `;
@@ -139,9 +169,16 @@ export function createCatalog(isNightMode) {
             }
         }
 
-        renderList();
+        await fetchAndRender();
     }
 
     render();
     return container;
+}
+
+// Helper for formatting large numbers
+function formatNum(num) {
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'k';
+    return num.toString();
 }

@@ -107,7 +107,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                 </div>
                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
                     <span class="astro-label mb-0">Távolság / Látszó méret</span>
-                    <span class="font-mono font-bold ${valueColor}">${formatNum(sunDistKm)} km / ${sunSizeDeg.toFixed(2)}°</span>
+                    <span class="font-mono font-bold ${valueColor}">${formatNum(sunDistKm)} km / ${sunSizeDeg.toFixed(3)}°</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="astro-label mb-0">Ekliptikai hosszúság</span>
@@ -158,59 +158,37 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         const results = [];
         let searchDate = new Date(now.getTime());
         
-        // Find the very next phase first
-        let firstPhase = null;
-        let minDiff = Infinity;
-        
-        for (let i = 0; i < 30; i++) {
-            const d = new Date(now.getTime() + i * 86400000);
-            for (let h = 0; h < 24; h++) {
-                const dh = new Date(d.getTime() + h * 3600000);
-                if (dh <= now) continue;
-                const ph = sc.getMoonIllumination(dh).phase;
-                for (let j = 0; j < 4; j++) {
-                    const diff = Math.abs(ph - targets[j]);
-                    if (diff < 0.005) {
-                        firstPhase = { name: targetNames[j], date: dh, targetIdx: j };
-                        break;
-                    }
-                }
-                if (firstPhase) break;
-            }
-            if (firstPhase) break;
-        }
-
-        if (!firstPhase) return [];
-
-        results.push(firstPhase);
-        
-        // Now find the next 3 in sequence
-        let currentIdx = firstPhase.targetIdx;
-        let lastDate = firstPhase.date;
-
-        for (let k = 1; k < count; k++) {
-            currentIdx = (currentIdx + 1) % 4;
-            const targetP = targets[currentIdx];
-            
-            // Search starting from last found date
+        // Find the next 4 phases in sequence
+        for (let k = 0; k < count; k++) {
             let found = false;
-            for (let i = 1; i < 15; i++) { // Next phase is roughly 7 days away
-                const d = new Date(lastDate.getTime() + i * 86400000);
+            // Search day by day for up to 45 days (to cover a full cycle + buffer)
+            for (let i = 0; i < 45; i++) {
+                const d = new Date(searchDate.getTime() + i * 86400000);
                 for (let h = 0; h < 24; h++) {
                     const dh = new Date(d.getTime() + h * 3600000);
+                    if (dh <= now && k === 0) continue;
+                    
                     const ph = sc.getMoonIllumination(dh).phase;
-                    if (Math.abs(ph - targetP) < 0.005) {
-                        results.push({ name: targetNames[currentIdx], date: dh });
-                        lastDate = dh;
-                        found = true;
-                        break;
+                    for (let j = 0; j < 4; j++) {
+                        // Check if this phase is already in results to avoid duplicates
+                        const isAlreadyFound = results.some(r => r.name === targetNames[j]);
+                        if (isAlreadyFound) continue;
+
+                        if (Math.abs(ph - targets[j]) < 0.005) {
+                            results.push({ name: targetNames[j], date: dh, targetIdx: j });
+                            searchDate = dh;
+                            found = true;
+                            break;
+                        }
                     }
+                    if (found) break;
                 }
                 if (found) break;
             }
         }
         
-        return results;
+        // Sort by date to be sure
+        return results.sort((a, b) => a.date - b.date);
     };
 
     const nextPhases = getNextPhases(4);

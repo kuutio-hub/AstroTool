@@ -8,15 +8,16 @@ export function createAnalemma(location, isNightMode) {
     // Analemma settings
     let useLocalTime = false;
     
-    // Calculate initial offset for local solar noon in UTC
+    // Calculate initial offset for local solar noon in UTC (rounded to whole hour)
     const getSolarNoonOffset = () => {
         const now = TimeService.now();
         const sc = window.SunCalc;
         if (!sc) return 0;
         const times = sc.getTimes(now, location.latitude, location.longitude);
         const noon = times.solarNoon;
-        // Offset from 12:00 UTC base
-        return (noon.getUTCHours() + noon.getUTCMinutes() / 60 + noon.getUTCSeconds() / 3600) - 12;
+        // Offset from 12:00 UTC base, rounded to whole hour
+        const exactOffset = (noon.getUTCHours() + noon.getUTCMinutes() / 60 + noon.getUTCSeconds() / 3600) - 12;
+        return Math.round(exactOffset);
     };
 
     let timeOffsetHours = getSolarNoonOffset();
@@ -33,10 +34,9 @@ export function createAnalemma(location, isNightMode) {
         const controls = document.createElement('div');
         controls.className = "flex flex-wrap gap-4 items-center justify-center mb-6 z-10 w-full px-4";
         
-        const displayHours = 12 + timeOffsetHours;
+        const displayHours = (12 + timeOffsetHours + 24) % 24;
         const h = Math.floor(displayHours);
-        const m = Math.round((displayHours - h) * 60);
-        const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        const timeStr = `${h.toString().padStart(2, '0')}:00`;
 
         controls.innerHTML = `
             <div class="flex items-center gap-2">
@@ -59,8 +59,8 @@ export function createAnalemma(location, isNightMode) {
             </div>
         `;
         
-        controls.querySelector('#offset-down').onclick = () => { timeOffsetHours -= 0.5; render(); };
-        controls.querySelector('#offset-up').onclick = () => { timeOffsetHours += 0.5; render(); };
+        controls.querySelector('#offset-down').onclick = () => { timeOffsetHours -= 1; render(); };
+        controls.querySelector('#offset-up').onclick = () => { timeOffsetHours += 1; render(); };
         controls.querySelector('#mode-toggle').onclick = () => { useLocalTime = !useLocalTime; render(); };
         
         container.appendChild(controls);

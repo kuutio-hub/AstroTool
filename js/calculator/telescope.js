@@ -43,7 +43,7 @@ export function createTelescopeCalc(isNightMode) {
         <div class="space-y-3 mb-4 flex-grow">
             <div>
                 <label class="${labelClass}">Bortle Skála (1-9) ${createInfoBtn('Bortle Skála', 'Az égbolt fényszennyezettségét mérő skála. 1: tökéletesen sötét, 9: belváros. Meghatározza a határmagnitúdót.')}</label>
-                <input type="number" id="tel-bortle" value="${data.bortle}" class="${inputClass}" min="1" max="9" step="0.1">
+                <input type="number" id="tel-bortle" value="${data.bortle}" class="${inputClass}" min="1" max="9" step="1">
             </div>
             
             <details class="mb-4 border border-white/10 rounded overflow-hidden group">
@@ -65,23 +65,23 @@ export function createTelescopeCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Fényerő ${createInfoBtn('Fényerő (F-szám)', 'A fókusztávolság és az apertúra hányadosa. Képlet: f/ratio = F / A. Kisebb szám = "gyorsabb" távcső.')}</div>
+                <div class="${labelClass}">Fényerő ${createInfoBtn('Fényerő (F-szám)', 'A fókusztávolság és az apertúra hányadosa. Képlet: f/ratio = F ÷ A. Kisebb szám = "gyorsabb" távcső.')}</div>
                 <div id="fratio-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Határmagnitúdó ${createInfoBtn('Határmagnitúdó', 'A leghalványabb csillag, amit még éppen meg lehet pillantani. Képlet alapja: NELM + 5 * log10(A_eff / 7).')}</div>
+                <div class="${labelClass}">Határmagnitúdó ${createInfoBtn('Határmagnitúdó', 'A leghalványabb csillag, amit még éppen meg lehet pillantani. Képlet alapja: NELM + 5 × log₁₀(A_eff ÷ 7).')}</div>
                 <div id="mag-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Dawes Határ ${createInfoBtn('Dawes Határ', 'A távcső elméleti felbontóképessége ívmásodpercben. Képlet: R = 116 / A.')}</div>
+                <div class="${labelClass}">Dawes Határ ${createInfoBtn('Dawes Határ', 'A távcső elméleti felbontóképessége ívmásodpercben. Képlet: R = 116 ÷ A.')}</div>
                 <div id="dawes-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Rayleigh Határ ${createInfoBtn('Rayleigh Határ', 'Szigorúbb elméleti felbontási határ. Képlet: R = 138 / A.')}</div>
+                <div class="${labelClass}">Rayleigh Határ ${createInfoBtn('Rayleigh Határ', 'Szigorúbb elméleti felbontási határ. Képlet: R = 138 ÷ A.')}</div>
                 <div id="rayleigh-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">
-                <div class="${labelClass}">Fénygyűjtő Képesség ${createInfoBtn('Fénygyűjtő Képesség', 'Megmutatja, hogy a távcső hányszor több fényt gyűjt össze, mint az emberi szem. Képlet: LGP = (A_eff / 7)^2 * trans')}</div>
+                <div class="${labelClass}">Fénygyűjtő Képesség ${createInfoBtn('Fénygyűjtő Képesség', 'Megmutatja, hogy a távcső hányszor több fényt gyűjt össze, mint az emberi szem. Képlet: LGP = (A_eff ÷ 7)² × trans')}</div>
                 <div id="light-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
         </div>

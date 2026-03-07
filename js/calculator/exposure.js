@@ -39,7 +39,7 @@ export function createExposureCalc(isNightMode) {
                 </div>
                 <div>
                     <label class="${labelClass}">Bortle ${createInfoBtn('Bortle Skála', 'Az égbolt fényszennyezettsége. Befolyásolja az ideális expozíciós időt.')}</label>
-                    <input type="number" id="exp-bortle" value="${data.bortle}" class="${inputClass}" min="1" max="9" step="0.1">
+                    <input type="number" id="exp-bortle" value="${data.bortle}" class="${inputClass}" min="1" max="9" step="1">
                 </div>
             </div>
             
@@ -61,7 +61,7 @@ export function createExposureCalc(isNightMode) {
             </details>
         </div>
         <div class="pt-3 border-t border-white/10 mt-auto">
-            <div class="${labelClass}">Becsült Expó Idő ${createInfoBtn('Becsült Expozíciós Idő', 'A megadott paraméterek alapján számított ideális expozíciós idő másodpercben. Képlet: T ∝ (ff / ISO) * (f/ratio)^2 * 2.512^sb')}</div>
+            <div class="${labelClass}">Becsült Expó Idő ${createInfoBtn('Becsült Expozíciós Idő', 'A megadott paraméterek alapján számított ideális expozíciós idő másodpercben. Képlet: T ∝ (ff ÷ ISO) × (f/ratio)² × 2.512^sb')}</div>
             <div id="exp-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
         </div>
     `;

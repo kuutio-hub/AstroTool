@@ -82,12 +82,12 @@ function render() {
             </div>
             <div class="grid grid-cols-3 gap-2">
                 <div>
-                    <label class="astro-label text-[9px] block truncate">Fókusztávolság (mm) ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben (F).')}</label>
-                    <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs w-full">
-                </div>
-                <div>
                     <label class="astro-label text-[9px] block truncate">Apertúra (mm) ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben (A).')}</label>
                     <input type="number" id="g-A" value="${gData.A}" class="astro-input p-1 text-xs w-full">
+                </div>
+                <div>
+                    <label class="astro-label text-[9px] block truncate">Fókusztávolság (mm) ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben (F).')}</label>
+                    <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs w-full">
                 </div>
                 <div>
                     <label class="astro-label text-[9px] block truncate">Barlow / Reducer (x) ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó vagy fókuszcsökkentő szorzója (B).')}</label>
@@ -164,9 +164,9 @@ function showWiki() {
             <section>
                 <h4 class="font-bold text-xs uppercase mb-1">Funkciók:</h4>
                 <ul class="list-disc list-inside space-y-1">
-                    <li><b>Műszerfal:</b> Valós idejű Nap és Hold adatok, analemma és katalógus kereső.</li>
-                    <li><b>Kalkulátorok:</b> Távcső, okulár és asztrofotós paraméterek számítása.</li>
-                    <li><b>Katalógus:</b> Messier, Melotte és NGC objektumok adatbázisa.</li>
+                    <li><b>Műszerfal:</b> Valós idejű Nap és Hold adatok, analemma és események.</li>
+                    <li><b>Kalkulátorok:</b> Távcső, okulár és asztrofotós paraméterek számítása valódi fizikai képletek alapján.</li>
+                    <li><b>Katalógus:</b> Szerver-oldali szűréssel ellátott mélyég-objektum adatbázis (Messier, NGC, stb.).</li>
                 </ul>
             </section>
 

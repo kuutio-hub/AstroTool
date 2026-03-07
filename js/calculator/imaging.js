@@ -107,23 +107,23 @@ export function createImagingCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Effektív Fókusz ${createInfoBtn('Effektív Fókusz', 'A távcső és a Barlow/Reducer együttes fókusztávolsága. Képlet: F_eff = F * B')}</div>
+                <div class="${labelClass}">Effektív Fókusz ${createInfoBtn('Effektív Fókusz', 'A távcső és a Barlow/Reducer együttes fókusztávolsága. Képlet: F_eff = F × B')}</div>
                 <div id="img-effF" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Felbontás ${createInfoBtn('Képpont Felbontás', 'Egy pixel hány ívmásodpercnyi területet fed le az égen. Képlet: R = (p * bin / F_eff) * 206.3. Ideális esetben a Seeing értékének harmada (Nyquist).')}</div>
+                <div class="${labelClass}">Felbontás ${createInfoBtn('Képpont Felbontás', 'Egy pixel hány ívmásodpercnyi területet fed le az égen. Képlet: R = (p × bin ÷ F_eff) × 206.3.')}</div>
                 <div id="img-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Látómező (Fok) ${createInfoBtn('Látómező (Fok)', 'A kamera által rögzített terület mérete az égen fokban. Képlet: FoV = (S / F_eff) * 57.3')}</div>
+                <div class="${labelClass}">Látómező (Fok) ${createInfoBtn('Látómező (Fok)', 'A kamera által rögzített terület mérete az égen fokban. Képlet: FoV = (S ÷ F_eff) × 57.3')}</div>
                 <div id="img-fov" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Látómező (Ívperc) ${createInfoBtn('Látómező (Ívperc)', 'A kamera által rögzített terület mérete az égen ívpercben (1 fok = 60 ívperc).')}</div>
+                <div class="${labelClass}">Látómező (Ívperc) ${createInfoBtn('Látómező (Ívperc)', 'A kamera által rögzített terület mérete az égen ívpercben (1° = 60′).')}</div>
                 <div id="img-fov-arcmin" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Szenzor Átló ${createInfoBtn('Szenzor Átló', 'A szenzor átlója milliméterben. Képlet: d = sqrt(w^2 + h^2)')}</div>
+                <div class="${labelClass}">Szenzor Átló ${createInfoBtn('Szenzor Átló', 'A szenzor átlója milliméterben. Képlet: d = √(w² + h²)')}</div>
                 <div id="img-diag" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">
