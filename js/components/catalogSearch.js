@@ -1,11 +1,12 @@
 import { catalogService } from '../services/catalogService.js';
 import { createInfoBtn } from '../utils.js';
+import { constellations } from '../catalogs.js';
 
 export function createCatalogSearch(isNightMode) {
     const container = document.createElement('div');
     container.className = "astro-card col-span-1 md:col-span-2 lg:col-span-3";
 
-    const headerColor = isNightMode ? "text-red-500" : "text-blue-300";
+    const headerColor = isNightMode ? "text-red-500 glow-text" : "text-blue-300";
     const inputClass = "astro-input";
     const btnClass = `px-4 py-2 rounded font-bold text-xs uppercase tracking-wider transition-all ${isNightMode ? 'bg-red-900/50 hover:bg-red-800 text-red-500' : 'bg-blue-600 hover:bg-blue-700 text-white'}`;
 
@@ -60,6 +61,8 @@ export function createCatalogSearch(isNightMode) {
                 `;
             }
 
+            const constName = constellations[obj.constellation] || obj.constellation;
+
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-2 border-b border-white/10 pb-2">
                     <div class="font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}">${obj.id}</div>
@@ -72,7 +75,7 @@ export function createCatalogSearch(isNightMode) {
                     </div>
                     <div class="flex justify-between">
                         <span class="opacity-70">Csillagkép:</span>
-                        <span class="font-mono font-bold">${obj.constellation}</span>
+                        <span class="font-mono font-bold truncate ml-2 text-right" title="${constName}">${constName}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="opacity-70">Fényesség:</span>

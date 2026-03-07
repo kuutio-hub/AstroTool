@@ -52,9 +52,9 @@ export function renderMoonPhaseIcon(illumination, isWaxing, isNightMode = false)
     }
     
     // Colors
-    const lightColor = isNightMode ? '#ef4444' : '#e2e8f0'; // red-500 or slate-200
-    const darkColor = isNightMode ? '#1a0505' : '#0f172a'; // very dark red or slate-900
-    const glowColor = isNightMode ? 'rgba(239, 68, 68, 0.5)' : 'rgba(255, 255, 255, 0.8)';
+    const lightColor = isNightMode ? '#ff0000' : '#e2e8f0'; // true red or slate-200
+    const darkColor = isNightMode ? '#000000' : '#0f172a'; // pure black or slate-900
+    const glowColor = isNightMode ? 'rgba(255, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)';
     
     return `
     <svg viewBox="0 0 100 100" class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px ${glowColor});">

@@ -161,21 +161,21 @@ export const ngc = [
 export const catalogs = [...messier, ...melotte, ...ngc];
 
 export const constellations = {
-    'And': 'Andromeda', 'Ant': 'Antlia', 'Aps': 'Apus', 'Aql': 'Aquila', 'Aqr': 'Aquarius', 'Ara': 'Ara',
-    'Ari': 'Aries', 'Aur': 'Auriga', 'Boo': 'Boötes', 'Cae': 'Caelum', 'Cam': 'Camelopardalis', 'Cnc': 'Cancer',
-    'CVn': 'Canes Venatici', 'CMa': 'Canis Major', 'CMi': 'Canis Minor', 'Cap': 'Capricornus', 'Car': 'Carina',
-    'Cas': 'Cassiopeia', 'Cen': 'Centaurus', 'Cep': 'Cepheus', 'Cet': 'Cetus', 'Cha': 'Chamaeleon', 'Cir': 'Circinus',
-    'Col': 'Columba', 'Com': 'Coma Berenices', 'CrA': 'Corona Australis', 'CrB': 'Corona Borealis', 'Crv': 'Corvus',
-    'Crt': 'Crater', 'Cru': 'Crux', 'Cyg': 'Cygnus', 'Del': 'Delphinus', 'Dor': 'Dorado', 'Dra': 'Draco',
-    'Equ': 'Equuleus', 'Eri': 'Eridanus', 'For': 'Fornax', 'Gem': 'Gemini', 'Gru': 'Grus', 'Her': 'Hercules',
-    'Hor': 'Horologium', 'Hya': 'Hydra', 'Hyi': 'Hydrus', 'Ind': 'Indus', 'Lac': 'Lacerta', 'Leo': 'Leo',
-    'LMi': 'Leo Minor', 'Lep': 'Lepus', 'Lib': 'Libra', 'Lup': 'Lupus', 'Lyn': 'Lynx', 'Lyr': 'Lyra',
-    'Men': 'Mensa', 'Mic': 'Microscopium', 'Mon': 'Monoceros', 'Mus': 'Musca', 'Nor': 'Norma', 'Oct': 'Octans',
-    'Oph': 'Ophiuchus', 'Ori': 'Orion', 'Pav': 'Pavo', 'Peg': 'Pegasus', 'Per': 'Perseus', 'Phe': 'Phoenix',
-    'Pic': 'Pictor', 'Psc': 'Pisces', 'PsA': 'Piscis Austrinus', 'Pup': 'Puppis', 'Pyx': 'Pyxis', 'Ret': 'Reticulum',
-    'Sge': 'Sagitta', 'Sgr': 'Sagittarius', 'Sco': 'Scorpius', 'Scl': 'Sculptor', 'Sct': 'Scutum', 'Ser': 'Serpens',
-    'Sex': 'Sextans', 'Tau': 'Taurus', 'Tel': 'Telescopium', 'Tri': 'Triangulum', 'TrA': 'Triangulum Australe',
-    'Tuc': 'Tucana', 'UMa': 'Ursa Major', 'UMi': 'Ursa Minor', 'Vel': 'Vela', 'Vir': 'Virgo', 'Vol': 'Volans', 'Vul': 'Vulpecula'
+    'And': 'Androméda (Andromeda, And)', 'Ant': 'Légszivattyú (Antlia, Ant)', 'Aps': 'Paradicsommadár (Apus, Aps)', 'Aql': 'Sas (Aquila, Aql)', 'Aqr': 'Vízöntő (Aquarius, Aqr)', 'Ara': 'Oltár (Ara, Ara)',
+    'Ari': 'Kos (Aries, Ari)', 'Aur': 'Szekeres (Auriga, Aur)', 'Boo': 'Ökörhajcsár (Boötes, Boo)', 'Cae': 'Véső (Caelum, Cae)', 'Cam': 'Zsiráf (Camelopardalis, Cam)', 'Cnc': 'Rák (Cancer, Cnc)',
+    'CVn': 'Vadászebek (Canes Venatici, CVn)', 'CMa': 'Nagy Kutya (Canis Major, CMa)', 'CMi': 'Kis Kutya (Canis Minor, CMi)', 'Cap': 'Bak (Capricornus, Cap)', 'Car': 'Hajógerinc (Carina, Car)',
+    'Cas': 'Kassziopeia (Cassiopeia, Cas)', 'Cen': 'Kentaur (Centaurus, Cen)', 'Cep': 'Cefeusz (Cepheus, Cep)', 'Cet': 'Cethal (Cetus, Cet)', 'Cha': 'Kaméleon (Chamaeleon, Cha)', 'Cir': 'Körző (Circinus, Cir)',
+    'Col': 'Galamb (Columba, Col)', 'Com': 'Bereniké Haja (Coma Berenices, Com)', 'CrA': 'Déli Korona (Corona Australis, CrA)', 'CrB': 'Északi Korona (Corona Borealis, CrB)', 'Crv': 'Holló (Corvus, Crv)',
+    'Crt': 'Serleg (Crater, Crt)', 'Cru': 'Dél Keresztje (Crux, Cru)', 'Cyg': 'Hattyú (Cygnus, Cyg)', 'Del': 'Delfin (Delphinus, Del)', 'Dor': 'Aranyhal (Dorado, Dor)', 'Dra': 'Sárkány (Draco, Dra)',
+    'Equ': 'Csikó (Equuleus, Equ)', 'Eri': 'Eridánusz (Eridanus, Eri)', 'For': 'Kemence (Fornax, For)', 'Gem': 'Ikrek (Gemini, Gem)', 'Gru': 'Daru (Grus, Gru)', 'Her': 'Herkules (Hercules, Her)',
+    'Hor': 'Ingaóra (Horologium, Hor)', 'Hya': 'Északi Vízikígyó (Hydra, Hya)', 'Hyi': 'Déli Vízikígyó (Hydrus, Hyi)', 'Ind': 'Indián (Indus, Ind)', 'Lac': 'Gyík (Lacerta, Lac)', 'Leo': 'Oroszlán (Leo, Leo)',
+    'LMi': 'Kis Oroszlán (Leo Minor, LMi)', 'Lep': 'Nyúl (Lepus, Lep)', 'Lib': 'Mérleg (Libra, Lib)', 'Lup': 'Farkas (Lupus, Lup)', 'Lyn': 'Hiúz (Lynx, Lyn)', 'Lyr': 'Lant (Lyra, Lyr)',
+    'Men': 'Táblahegy (Mensa, Men)', 'Mic': 'Mikroszkóp (Microscopium, Mic)', 'Mon': 'Egyszarvú (Monoceros, Mon)', 'Mus': 'Légy (Musca, Mus)', 'Nor': 'Szögmérő (Norma, Nor)', 'Oct': 'Oktáns (Octans, Oct)',
+    'Oph': 'Kígyótartó (Ophiuchus, Oph)', 'Ori': 'Orion (Orion, Ori)', 'Pav': 'Páva (Pavo, Pav)', 'Peg': 'Pegazus (Pegasus, Peg)', 'Per': 'Perzeusz (Perseus, Per)', 'Phe': 'Főnix (Phoenix, Phe)',
+    'Pic': 'Festő (Pictor, Pic)', 'Psc': 'Halak (Pisces, Psc)', 'PsA': 'Déli Hal (Piscis Austrinus, PsA)', 'Pup': 'Hajófara (Puppis, Pup)', 'Pyx': 'Tájoló (Pyxis, Pyx)', 'Ret': 'Háló (Reticulum, Ret)',
+    'Sge': 'Nyíl (Sagitta, Sge)', 'Sgr': 'Nyilas (Sagittarius, Sgr)', 'Sco': 'Skorpió (Scorpius, Sco)', 'Scl': 'Szobrász (Sculptor, Scl)', 'Sct': 'Pajzs (Scutum, Sct)', 'Ser': 'Kígyó (Serpens, Ser)',
+    'Sex': 'Szextáns (Sextans, Sex)', 'Tau': 'Bika (Taurus, Tau)', 'Tel': 'Távcső (Telescopium, Tel)', 'Tri': 'Háromszög (Triangulum, Tri)', 'TrA': 'Déli Háromszög (Triangulum Australe, TrA)',
+    'Tuc': 'Tukán (Tucana, Tuc)', 'UMa': 'Nagy Medve (Ursa Major, UMa)', 'UMi': 'Kis Medve (Ursa Minor, UMi)', 'Vel': 'Vitorla (Vela, Vel)', 'Vir': 'Szűz (Virgo, Vir)', 'Vol': 'Repülőhal (Volans, Vol)', 'Vul': 'Kis Róka (Vulpecula, Vul)'
 };
 
 export const objectTypes = {

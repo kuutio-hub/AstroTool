@@ -1,6 +1,18 @@
 import { catalogService } from '../services/catalogService.js';
 import { constellations, objectTypes } from '../catalogs.js';
 import { CatalogIcon, InfoIcon, ChevronDownIcon, ChevronUpIcon } from '../icons.js';
+import { storage, TimeService, calculateAltAz, formatNum } from '../utils.js';
+
+const TypeIcons = {
+    'GAL': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v4h-2zm0 6h2v2h-2z"></path></svg>`,
+    'PN': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-width="2" stroke-dasharray="4 4"></circle><circle cx="12" cy="12" r="3" fill="currentColor"></circle></svg>`,
+    'NB': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>`,
+    'OC': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="16" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="6" cy="14" r="1.5" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg>`,
+    'GC': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor" opacity="0.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`,
+    'SNR': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+    'DS': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="8" cy="12" r="3" fill="currentColor"/><circle cx="16" cy="12" r="2" fill="currentColor"/></svg>`,
+    'STAR': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>`
+};
 
 export function createCatalog(isNightMode) {
     const container = document.createElement('div');
@@ -11,11 +23,15 @@ export function createCatalog(isNightMode) {
     let selectedCatalog = ''; // No default catalog
     let selectedConst = 'ALL';
     let selectedType = 'ALL';
+    let sortBy = 'default'; // 'default' or 'altitude'
     let expandedItem = null;
     let currentPage = 1;
     const itemsPerPage = 25;
     let currentResults = [];
     let isLoading = false;
+    
+    // Distance unit state for expanded items
+    const distanceUnits = {}; // { itemId: 'ly' | 'pc' | 'km' }
 
     // Render Function
     async function render() {
@@ -41,13 +57,19 @@ export function createCatalog(isNightMode) {
                 <input type="text" id="cat-search" placeholder="Keresés..." class="astro-input flex-[2]" value="${searchTerm}">
             </div>
             <div class="flex gap-2">
-                <select id="const-filter" class="astro-input text-xs">
+                <select id="const-filter" class="astro-input text-xs flex-1">
                     <option value="ALL">Minden csillagkép</option>
-                    ${Object.entries(constellations).sort((a,b) => a[1].localeCompare(b[1])).map(([code, name]) => `<option value="${code}" ${selectedConst === code ? 'selected' : ''}>${name} (${code})</option>`).join('')}
+                    ${Object.entries(constellations).sort((a,b) => a[1].localeCompare(b[1])).map(([code, name]) => `<option value="${code}" ${selectedConst === code ? 'selected' : ''}>${name}</option>`).join('')}
                 </select>
-                <select id="type-filter" class="astro-input text-xs">
+                <select id="type-filter" class="astro-input text-xs flex-1">
                     <option value="ALL">Minden típus</option>
                     ${Object.entries(objectTypes).map(([code, name]) => `<option value="${code}" ${selectedType === code ? 'selected' : ''}>${name}</option>`).join('')}
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <select id="sort-filter" class="astro-input text-xs flex-1">
+                    <option value="default" ${sortBy === 'default' ? 'selected' : ''}>Alapértelmezett sorrend</option>
+                    <option value="altitude" ${sortBy === 'altitude' ? 'selected' : ''}>Láthatóság szerint (Zenittől lefelé)</option>
                 </select>
             </div>
         `;
@@ -61,6 +83,7 @@ export function createCatalog(isNightMode) {
         filtersDiv.querySelector('#cat-search').oninput = (e) => { searchTerm = e.target.value; triggerSearch(); };
         filtersDiv.querySelector('#const-filter').onchange = (e) => { selectedConst = e.target.value; triggerSearch(); };
         filtersDiv.querySelector('#type-filter').onchange = (e) => { selectedType = e.target.value; triggerSearch(); };
+        filtersDiv.querySelector('#sort-filter').onchange = (e) => { sortBy = e.target.value; triggerSearch(); };
 
         container.appendChild(filtersDiv);
 
@@ -105,6 +128,23 @@ export function createCatalog(isNightMode) {
                                itemSubtype.includes(typeLabel);
                     });
                 }
+                
+                // Pre-calculate AltAz for sorting and displaying
+                const loc = storage.get('location', { latitude: 47.4979, longitude: 19.0402 });
+                const now = TimeService.now();
+                
+                results = results.map(item => {
+                    const pos = calculateAltAz(item.ra, item.dec, loc.latitude, loc.longitude, now);
+                    return { ...item, pos };
+                });
+
+                if (sortBy === 'altitude') {
+                    results.sort((a, b) => {
+                        const altA = a.pos ? a.pos.alt : -90;
+                        const altB = b.pos ? b.pos.alt : -90;
+                        return altB - altA; // Descending (Zenith to Horizon)
+                    });
+                }
 
                 currentResults = results;
                 renderList();
@@ -136,13 +176,27 @@ export function createCatalog(isNightMode) {
                 const commonName = item.common_name || item.name || item.id;
                 const otherIds = item.other_ids ? ` • ${item.other_ids}` : '';
                 
+                const typeIcon = TypeIcons[item.type] || TypeIcons['STAR'];
+                const typeName = objectTypes[item.type] || item.type;
+                
+                let visibilityHtml = '';
+                if (item.pos) {
+                    if (item.pos.alt > 0) {
+                        visibilityHtml = `<span class="${isNightMode ? 'text-red-500 glow-text' : 'text-green-500'} font-bold ml-2">Látható (${item.pos.alt.toFixed(1)}°)</span>`;
+                    } else {
+                        visibilityHtml = `<span class="text-red-500 opacity-70 ml-2">Horizont alatt</span>`;
+                    }
+                }
+
                 itemEl.innerHTML = `
                     <div class="flex justify-between items-center cursor-pointer p-4">
                         <div class="flex items-center gap-3">
                             <div class="font-mono font-bold text-lg ${textColor}">${item.id}</div>
                             <div>
-                                <div class="font-bold text-xs uppercase tracking-wider">${commonName}${otherIds}</div>
-                                <div class="text-[10px] opacity-60">${item.type} • ${constellations[item.constellation] || item.constellation}</div>
+                                <div class="font-bold text-sm uppercase tracking-wider ${isNightMode ? 'glow-text' : ''}">${commonName}${otherIds}</div>
+                                <div class="flex items-center gap-1 mt-1 text-sm opacity-90">
+                                    ${typeIcon} <span class="font-bold">${typeName}</span> <span class="opacity-70 mx-1">•</span> ${constellations[item.constellation] || item.constellation}
+                                </div>
                             </div>
                         </div>
                         <div class="${isNightMode ? 'text-red-800' : 'text-slate-400'}">
@@ -151,15 +205,30 @@ export function createCatalog(isNightMode) {
                     </div>
                     ${isExpanded ? `
                         <div class="px-4 pb-4 animate-fade-in">
-                            <div class="pt-3 border-t border-current/10 text-xs space-y-1">
+                            <div class="pt-3 border-t border-white/10 text-xs space-y-2">
                                 <div class="flex justify-between"><span class="astro-label mb-0">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
                                 <div class="flex justify-between"><span class="astro-label mb-0">RA:</span> <span class="font-mono">${item.ra || '-'}</span></div>
                                 <div class="flex justify-between"><span class="astro-label mb-0">Dec:</span> <span class="font-mono">${item.dec || '-'}</span></div>
                                 <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
                                 <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size || '-'}</span></div>
-                                <div class="flex justify-between"><span class="astro-label mb-0">Távolság:</span> <span class="font-mono">${item.distance_ly ? formatNum(item.distance_ly) + ' ly' : '-'}</span></div>
-                                ${item.description ? `<div class="mt-2 text-[11px] leading-relaxed opacity-90">${item.description}</div>` : ''}
-                                <div class="mt-2 italic opacity-80">${item.notes || ''}</div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span class="astro-label mb-0">Távolság:</span> 
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono" id="dist-val-${item.id}">-</span>
+                                        <select id="dist-unit-${item.id}" class="astro-input p-0 text-[10px] w-auto bg-transparent border-none">
+                                            <option value="ly">Fényév</option>
+                                            <option value="pc">Parsec</option>
+                                            <option value="km">Kilométer</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between"><span class="astro-label mb-0">Jelenlegi Helyzet:</span> <span class="font-mono">${item.pos ? `Alt: ${item.pos.alt.toFixed(1)}° | Az: ${item.pos.az.toFixed(1)}°` : '-'}${visibilityHtml}</span></div>
+
+                                ${item.description ? `<div class="mt-3 p-2 rounded bg-white/5 text-[11px] leading-relaxed opacity-90 border-l-2 ${isNightMode ? 'border-red-500' : 'border-blue-500'}">${item.description}</div>` : ''}
+                                ${item.notes ? `<div class="mt-2 text-[10px] italic opacity-80">${item.notes}</div>` : ''}
+                                
                                 <div class="mt-3 flex gap-2">
                                     <button class="copy-coords-btn flex-1 py-2 rounded bg-white/5 hover:bg-white/10 transition-colors text-[10px] uppercase tracking-widest font-bold" data-ra="${item.ra}" data-dec="${item.dec}">
                                         Koordináták másolása
@@ -179,6 +248,42 @@ export function createCatalog(isNightMode) {
                 };
 
                 if (isExpanded) {
+                    // Distance Conversion Logic
+                    const distSelect = itemEl.querySelector(`#dist-unit-${item.id}`);
+                    const distValEl = itemEl.querySelector(`#dist-val-${item.id}`);
+                    
+                    if (!distanceUnits[item.id]) distanceUnits[item.id] = 'ly';
+                    distSelect.value = distanceUnits[item.id];
+                    
+                    const updateDistance = () => {
+                        if (!item.distance_ly) {
+                            distValEl.textContent = '-';
+                            return;
+                        }
+                        const unit = distSelect.value;
+                        distanceUnits[item.id] = unit;
+                        let val = item.distance_ly;
+                        let suffix = ' ly';
+                        
+                        if (unit === 'pc') {
+                            val = val / 3.26156;
+                            if (val >= 1e9) { val = val / 1e9; suffix = ' Gpc'; }
+                            else if (val >= 1e6) { val = val / 1e6; suffix = ' Mpc'; }
+                            else if (val >= 1e3) { val = val / 1e3; suffix = ' kpc'; }
+                            else { suffix = ' pc'; }
+                        } else if (unit === 'km') {
+                            val = val * 9.461e12;
+                            suffix = ' km';
+                            distValEl.textContent = val.toExponential(2) + suffix;
+                            return;
+                        }
+                        
+                        distValEl.textContent = val.toLocaleString('hu-HU', { maximumFractionDigits: 2 }) + suffix;
+                    };
+                    
+                    distSelect.onchange = updateDistance;
+                    updateDistance();
+
                     itemEl.querySelector('.copy-coords-btn').onclick = (e) => {
                         e.stopPropagation();
                         const ra = e.target.dataset.ra;
@@ -239,11 +344,4 @@ export function createCatalog(isNightMode) {
 
     render();
     return container;
-}
-
-// Helper for formatting large numbers
-function formatNum(num) {
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'k';
-    return num.toString();
 }

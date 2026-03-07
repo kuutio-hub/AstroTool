@@ -51,9 +51,11 @@ export function createPositionCalc(isNightMode) {
     function parseDec(str) {
         const match = str.match(/([+-]?\d+)°\s*(\d+\.?\d*)'/);
         if (!match) return null;
-        const d = parseFloat(match[1]);
+        const dStr = match[1];
+        const d = parseFloat(dStr);
         const m = parseFloat(match[2]);
-        return d >= 0 ? d + m / 60 : d - m / 60;
+        const sign = dStr.startsWith('-') ? -1 : 1;
+        return sign * (Math.abs(d) + m / 60);
     }
 
     function calculate() {

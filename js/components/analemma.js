@@ -26,9 +26,9 @@ export function createAnalemma(location, isNightMode) {
         container.innerHTML = '';
         
         const headerColor = isNightMode ? "text-red-500" : "text-blue-300";
-        const textColor = isNightMode ? "#ff4d4d" : "#ffffff";
-        const pathColor = isNightMode ? "#ff4d4d" : "#fbbf24";
-        const gridColor = isNightMode ? "rgba(255, 77, 77, 0.15)" : "rgba(255, 255, 255, 0.15)";
+        const textColor = isNightMode ? "#ff0000" : "#ffffff";
+        const pathColor = isNightMode ? "#ff0000" : "#fbbf24";
+        const gridColor = isNightMode ? "rgba(255, 0, 0, 0.2)" : "rgba(255, 255, 255, 0.15)";
 
         // Controls
         const controls = document.createElement('div');

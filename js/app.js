@@ -9,6 +9,7 @@ const app = document.getElementById('app');
 let isNightMode = storage.get('nightMode', false);
 let activeTab = storage.get('activeTab', 'dashboard');
 let userLocation = storage.get('location', { latitude: 47.4979, longitude: 19.0402 }); // Default Budapest
+let dimLevel = storage.get('dimLevel', 0); // 0 to 0.9
 
 window.showInfo = (title, content) => showInfoModal(title, content, isNightMode);
 
@@ -18,9 +19,23 @@ window.switchTab = (tabId) => {
     render();
 };
 
+function updateDimLevel(change) {
+    dimLevel = Math.max(0, Math.min(0.9, dimLevel + change));
+    storage.set('dimLevel', dimLevel);
+    document.documentElement.style.setProperty('--dim-level', dimLevel);
+}
+
 function render() {
     app.innerHTML = '';
     
+    // Dim overlay
+    if (!document.getElementById('dim-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'dim-overlay';
+        document.body.appendChild(overlay);
+    }
+    document.documentElement.style.setProperty('--dim-level', dimLevel);
+
     // Apply theme
     if (isNightMode) {
         document.body.classList.add('night-mode');
@@ -35,22 +50,47 @@ function render() {
     header.className = "flex justify-between items-center mb-6";
     
     const title = document.createElement('h1');
-    title.className = `text-2xl font-black tracking-tighter uppercase ${isNightMode ? 'text-red-500' : 'text-white'}`;
+    title.className = `text-2xl font-black tracking-tighter uppercase ${isNightMode ? 'text-red-500 glow-text' : 'text-white'}`;
     title.textContent = "AstroTool";
     
     const controls = document.createElement('div');
     controls.className = "flex gap-2 items-center";
 
+    // Dim Controls (Only in Night Mode)
+    if (isNightMode) {
+        const dimContainer = document.createElement('div');
+        dimContainer.className = "flex items-center gap-1 bg-black/50 rounded p-1 border border-red-900/50";
+        
+        const dimMinus = document.createElement('button');
+        dimMinus.className = "w-6 h-6 flex items-center justify-center text-red-500 hover:bg-red-900/30 rounded font-bold";
+        dimMinus.textContent = "-";
+        dimMinus.onclick = () => updateDimLevel(0.1); // Increase dim = darker
+        
+        const dimIcon = document.createElement('div');
+        dimIcon.className = "w-4 h-4 text-red-500 opacity-70";
+        dimIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+        
+        const dimPlus = document.createElement('button');
+        dimPlus.className = "w-6 h-6 flex items-center justify-center text-red-500 hover:bg-red-900/30 rounded font-bold";
+        dimPlus.textContent = "+";
+        dimPlus.onclick = () => updateDimLevel(-0.1); // Decrease dim = brighter
+        
+        dimContainer.appendChild(dimMinus);
+        dimContainer.appendChild(dimIcon);
+        dimContainer.appendChild(dimPlus);
+        controls.appendChild(dimContainer);
+    }
+
     // Wiki Button
     const wikiBtn = document.createElement('button');
-    wikiBtn.className = `p-2 rounded astro-card hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-white'}`;
+    wikiBtn.className = `p-2 rounded astro-card hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500 glow-box' : 'text-white'}`;
     wikiBtn.innerHTML = InfoIcon("w-5 h-5");
     wikiBtn.title = "Információ & Wiki";
     wikiBtn.onclick = () => showWiki();
 
     // Theme Toggle
     const themeBtn = document.createElement('button');
-    themeBtn.className = `px-4 py-2 rounded astro-card font-bold text-xs uppercase tracking-wider hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-white'}`;
+    themeBtn.className = `px-4 py-2 rounded astro-card font-bold text-xs uppercase tracking-wider hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500 glow-box' : 'text-white'}`;
     themeBtn.textContent = isNightMode ? 'Nappali Mód' : 'Éjszakai Mód';
     themeBtn.onclick = () => {
         isNightMode = !isNightMode;

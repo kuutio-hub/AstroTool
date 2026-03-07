@@ -1,12 +1,33 @@
 /* Custom styles for AstroTool 2.0 */
+:root {
+    --dim-level: 0;
+}
+
+#dim-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, var(--dim-level));
+    pointer-events: none;
+    z-index: 9999;
+    transition: background-color 0.3s ease;
+}
+
 body.day-mode {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
     color: #ffffff;
 }
 
 body.night-mode {
-    background-color: #000000;
-    color: #ff4d4d;
+    background-color: #000000 !important;
+    color: #ff0000 !important;
+}
+
+body.night-mode .glow-text {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.4) !important;
+}
+
+body.night-mode .glow-box {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.1) !important;
 }
 
 /* Inputs and selects */
@@ -15,39 +36,49 @@ body.night-mode {
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
     padding: 0.5rem;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     width: 100%;
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
     font-family: monospace;
     font-weight: bold;
+    appearance: none;
 }
 
 .astro-input:focus {
     border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-body.night-mode .astro-input {
-    border-color: rgba(255, 77, 77, 0.3);
-    color: #ff4d4d;
+body.night-mode .astro-input,
+body.night-mode select,
+body.night-mode input {
+    background-color: #000000 !important;
+    border-color: #ff0000 !important;
+    color: #ff0000 !important;
+    box-shadow: none !important;
 }
 
 body.night-mode .astro-input:focus {
-    border-color: #ff4d4d;
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2) !important;
 }
 
 .astro-card {
     background-color: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     padding: 1rem;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
     transition: all 0.3s ease;
 }
 
 body.night-mode .astro-card {
-    background-color: rgba(20, 0, 0, 0.8);
-    border-color: rgba(255, 77, 77, 0.2);
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    border-color: rgba(255, 0, 0, 0.3) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
 .astro-label {
@@ -60,8 +91,93 @@ body.night-mode .astro-card {
     color: rgba(255, 255, 255, 0.7);
 }
 
-body.night-mode .astro-label {
-    color: rgba(255, 77, 77, 0.7);
+body.night-mode .astro-label,
+body.night-mode .opacity-70,
+body.night-mode .opacity-60,
+body.night-mode .opacity-50,
+body.night-mode .opacity-40,
+body.night-mode .opacity-30,
+body.night-mode .opacity-20,
+body.night-mode .opacity-10,
+body.night-mode .text-white\/50,
+body.night-mode .text-white\/70,
+body.night-mode .text-white\/80,
+body.night-mode .text-white\/10,
+body.night-mode .text-white\/20,
+body.night-mode .text-white\/30,
+body.night-mode .text-white\/40,
+body.night-mode .text-white\/60,
+body.night-mode .text-white\/90 {
+    color: #ff0000 !important;
+    opacity: 0.9 !important;
+}
+
+/* Global Night Mode Overrides for Tailwind classes */
+body.night-mode .text-white,
+body.night-mode [class*="text-slate-"],
+body.night-mode [class*="text-gray-"],
+body.night-mode [class*="text-zinc-"],
+body.night-mode [class*="text-neutral-"],
+body.night-mode [class*="text-blue-"],
+body.night-mode [class*="text-red-"],
+body.night-mode [class*="text-green-"],
+body.night-mode [class*="text-yellow-"] {
+    color: #ff0000 !important;
+}
+
+/* Ensure opacity doesn't make red look greyish */
+body.night-mode .opacity-50,
+body.night-mode .opacity-60,
+body.night-mode .opacity-70,
+body.night-mode .opacity-80,
+body.night-mode .opacity-90 {
+    opacity: 1 !important;
+}
+
+body.night-mode .bg-blue-600,
+body.night-mode .bg-red-900,
+body.night-mode [class*="bg-red-"],
+body.night-mode [class*="bg-blue-"],
+body.night-mode [class*="bg-white/"],
+body.night-mode [class*="bg-black/"] {
+    background-color: rgba(255, 0, 0, 0.1) !important;
+    border: 1px solid rgba(255, 0, 0, 0.4) !important;
+}
+
+body.night-mode .border-white\/10,
+body.night-mode .border-white\/5,
+body.night-mode .border-current\/10,
+body.night-mode [class*="border-white/"],
+body.night-mode [class*="border-red-"],
+body.night-mode [class*="border-blue-"],
+body.night-mode .border-b-2 {
+    border-color: rgba(255, 0, 0, 0.5) !important;
+}
+
+body.night-mode svg {
+    stroke: #ff0000 !important;
+}
+
+body.night-mode svg text {
+    fill: #ff0000 !important;
+    opacity: 0.8 !important;
+}
+
+body.night-mode svg[fill="currentColor"],
+body.night-mode svg path[fill="currentColor"] {
+    fill: #ff0000 !important;
+}
+
+body.night-mode ::placeholder {
+    color: rgba(255, 0, 0, 0.6) !important;
+}
+
+body.night-mode .shadow-sm,
+body.night-mode .shadow-md,
+body.night-mode .shadow-lg,
+body.night-mode .shadow-xl,
+body.night-mode .shadow-2xl {
+    box-shadow: 0 4px 20px rgba(255, 0, 0, 0.15) !important;
 }
 
 /* Hide scrollbar for tabs */
@@ -77,11 +193,14 @@ body.night-mode .astro-label {
 .astro-dropdown-menu {
     background-color: #1e293b;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 body.night-mode .astro-dropdown-menu {
-    background-color: #1a0000;
-    border-color: rgba(255, 77, 77, 0.2);
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    border-color: #ff0000 !important;
+    box-shadow: 0 10px 25px -5px rgba(255, 0, 0, 0.3) !important;
 }
 
 @keyframes fade-in {
