@@ -122,43 +122,7 @@ export const melotte = [
     { id: 'Mel 22', ngc: 'M45', const: 'Tau', type: 'OC', mag: 1.6, size: '110', name: 'Fiastyúk', desc: 'Nyílthalmaz' }
 ];
 
-// Selected NGC Objects (Top 50 Non-Messier)
-export const ngc = [
-    { id: 'NGC 869', ngc: 'NGC 869', const: 'Per', type: 'OC', mag: 5.3, size: '30', name: 'Ikerhalmaz (h Per)', desc: 'Nyílthalmaz' },
-    { id: 'NGC 884', ngc: 'NGC 884', const: 'Per', type: 'OC', mag: 6.1, size: '30', name: 'Ikerhalmaz (chi Per)', desc: 'Nyílthalmaz' },
-    { id: 'NGC 457', ngc: 'NGC 457', const: 'Cas', type: 'OC', mag: 6.4, size: '13', name: 'Bagoly-halmaz', desc: 'Nyílthalmaz' },
-    { id: 'NGC 7789', ngc: 'NGC 7789', const: 'Cas', type: 'OC', mag: 6.7, size: '16', name: 'Caroline rózsája', desc: 'Nyílthalmaz' },
-    { id: 'NGC 253', ngc: 'NGC 253', const: 'Scl', type: 'GAL', mag: 7.2, size: '28x7', name: 'Szobrász-galaxis', desc: 'Spirálgalaxis' },
-    { id: 'NGC 2403', ngc: 'NGC 2403', const: 'Cam', type: 'GAL', mag: 8.4, size: '22x12', name: '', desc: 'Spirálgalaxis' },
-    { id: 'NGC 2903', ngc: 'NGC 2903', const: 'Leo', type: 'GAL', mag: 8.9, size: '13x6', name: '', desc: 'Spirálgalaxis' },
-    { id: 'NGC 6946', ngc: 'NGC 6946', const: 'Cep', type: 'GAL', mag: 8.8, size: '11x10', name: 'Tűzijáték-galaxis', desc: 'Spirálgalaxis' },
-    { id: 'NGC 7331', ngc: 'NGC 7331', const: 'Peg', type: 'GAL', mag: 9.5, size: '10x4', name: '', desc: 'Spirálgalaxis' },
-    { id: 'NGC 2392', ngc: 'NGC 2392', const: 'Gem', type: 'PN', mag: 9.1, size: '0.8', name: 'Eszkimó-köd', desc: 'Planetáris köd' },
-    { id: 'NGC 6543', ngc: 'NGC 6543', const: 'Dra', type: 'PN', mag: 8.1, size: '0.4', name: 'Macskaszem-köd', desc: 'Planetáris köd' },
-    { id: 'NGC 7000', ngc: 'NGC 7000', const: 'Cyg', type: 'NB', mag: 4.0, size: '120x100', name: 'Észak-Amerika köd', desc: 'Emissziós köd' },
-    { id: 'NGC 6960', ngc: 'NGC 6960', const: 'Cyg', type: 'SNR', mag: 7.0, size: '70x6', name: 'Fátyol-köd (Nyugat)', desc: 'Szupernóva-maradvány' },
-    { id: 'NGC 6992', ngc: 'NGC 6992', const: 'Cyg', type: 'SNR', mag: 7.0, size: '60x8', name: 'Fátyol-köd (Kelet)', desc: 'Szupernóva-maradvány' },
-    { id: 'NGC 2244', ngc: 'NGC 2244', const: 'Mon', type: 'OC', mag: 4.8, size: '24', name: 'Rozetta-halmaz', desc: 'Nyílthalmaz' },
-    { id: 'NGC 2264', ngc: 'NGC 2264', const: 'Mon', type: 'OC', mag: 3.9, size: '20', name: 'Karácsonyfa-halmaz', desc: 'Nyílthalmaz' },
-    { id: 'NGC 5139', ngc: 'NGC 5139', const: 'Cen', type: 'GC', mag: 3.7, size: '36', name: 'Omega Centauri', desc: 'Gömbhalmaz' },
-    { id: 'NGC 104', ngc: 'NGC 104', const: 'Tuc', type: 'GC', mag: 4.0, size: '31', name: '47 Tucanae', desc: 'Gömbhalmaz' },
-    { id: 'NGC 3372', ngc: 'NGC 3372', const: 'Car', type: 'NB', mag: 1.0, size: '120', name: 'Eta Carinae köd', desc: 'Emissziós köd' },
-    { id: 'NGC 4755', ngc: 'NGC 4755', const: 'Cru', type: 'OC', mag: 4.2, size: '10', name: 'Ékszerdoboz', desc: 'Nyílthalmaz' },
-    { id: 'NGC 3532', ngc: 'NGC 3532', const: 'Car', type: 'OC', mag: 3.0, size: '50', name: 'Kívánságkút-halmaz', desc: 'Nyílthalmaz' },
-    { id: 'NGC 2516', ngc: 'NGC 2516', const: 'Car', type: 'OC', mag: 3.8, size: '30', name: 'Déli Fiastyúk', desc: 'Nyílthalmaz' },
-    { id: 'IC 2602', ngc: 'IC 2602', const: 'Car', type: 'OC', mag: 1.9, size: '50', name: 'Déli Fiastyúk (Theta Car)', desc: 'Nyílthalmaz' },
-    { id: 'NGC 6231', ngc: 'NGC 6231', const: 'Sco', type: 'OC', mag: 2.6, size: '15', name: 'Déli Ékszerdoboz', desc: 'Nyílthalmaz' },
-    { id: 'NGC 7293', ngc: 'NGC 7293', const: 'Aqr', type: 'PN', mag: 7.3, size: '16', name: 'Csiga-köd', desc: 'Planetáris köd' },
-    { id: 'NGC 281', ngc: 'NGC 281', const: 'Cas', type: 'NB', mag: 7.0, size: '35x30', name: 'Pacman-köd', desc: 'Emissziós köd' },
-    { id: 'NGC 891', ngc: 'NGC 891', const: 'And', type: 'GAL', mag: 9.9, size: '13x3', name: 'Külső-határvidék galaxis', desc: 'Spirálgalaxis' },
-    { id: 'NGC 4631', ngc: 'NGC 4631', const: 'CVn', type: 'GAL', mag: 9.2, size: '15x3', name: 'Bálna-galaxis', desc: 'Spirálgalaxis' },
-    { id: 'NGC 4565', ngc: 'NGC 4565', const: 'Com', type: 'GAL', mag: 9.6, size: '16x3', name: 'Tű-galaxis', desc: 'Spirálgalaxis' },
-    { id: 'NGC 6888', ngc: 'NGC 6888', const: 'Cyg', type: 'NB', mag: 10.0, size: '18x13', name: 'Sarló-köd', desc: 'Emissziós köd' },
-    { id: 'NGC 7662', ngc: 'NGC 7662', const: 'And', type: 'PN', mag: 8.3, size: '0.5', name: 'Kék Hógolyó', desc: 'Planetáris köd' },
-    { id: 'NGC 3242', ngc: 'NGC 3242', const: 'Hya', type: 'PN', mag: 7.7, size: '0.7', name: 'Jupiter szelleme', desc: 'Planetáris köd' }
-];
-
-export const catalogs = [...messier, ...melotte, ...ngc];
+export const catalogs = [...messier, ...melotte];
 
 export const constellations = {
     'And': 'Androméda (Andromeda, And)', 'Ant': 'Légszivattyú (Antlia, Ant)', 'Aps': 'Paradicsommadár (Apus, Aps)', 'Aql': 'Sas (Aquila, Aql)', 'Aqr': 'Vízöntő (Aquarius, Aqr)', 'Ara': 'Oltár (Ara, Ara)',
