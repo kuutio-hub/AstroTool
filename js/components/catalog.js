@@ -8,7 +8,7 @@ export function createCatalog(isNightMode) {
 
     // State
     let searchTerm = '';
-    let selectedCatalog = 'messier';
+    let selectedCatalog = ''; // No default catalog
     let selectedConst = 'ALL';
     let selectedType = 'ALL';
     let expandedItem = null;
@@ -29,6 +29,7 @@ export function createCatalog(isNightMode) {
         filtersDiv.innerHTML = `
             <div class="flex gap-2">
                 <select id="cat-filter" class="astro-input text-xs flex-1">
+                    <option value="" ${!selectedCatalog ? 'selected' : ''}>-- Válassz katalógust --</option>
                     <option value="messier" ${selectedCatalog === 'messier' ? 'selected' : ''}>Messier Katalógus</option>
                     <option value="caldwell" ${selectedCatalog === 'caldwell' ? 'selected' : ''}>Caldwell Katalógus</option>
                     <option value="melotte" ${selectedCatalog === 'melotte' ? 'selected' : ''}>Melotte Katalógus</option>
@@ -70,6 +71,13 @@ export function createCatalog(isNightMode) {
 
         async function fetchAndRender() {
             if (isLoading) return;
+            
+            // If no filter selected, don't load anything
+            if (!selectedCatalog && searchTerm.length < 2 && selectedConst === 'ALL') {
+                listDiv.innerHTML = `<div class="text-center opacity-50 text-xs py-8">Válassz egy katalógust vagy keress rá egy objektumra a kezdéshez.</div>`;
+                return;
+            }
+
             isLoading = true;
             listDiv.innerHTML = `<div class="text-center opacity-50 text-xs py-8 animate-pulse">Adatok lekérése...</div>`;
 
@@ -80,13 +88,22 @@ export function createCatalog(isNightMode) {
                     results = await catalogService.search(searchTerm);
                 } else if (selectedConst !== 'ALL') {
                     results = await catalogService.searchByConstellation(selectedConst);
-                } else {
+                } else if (selectedCatalog) {
                     results = await catalogService.getByCatalog(selectedCatalog);
                 }
 
                 // Client-side type filtering
                 if (selectedType !== 'ALL') {
-                    results = results.filter(item => item.type === selectedType || item.subtype === selectedType);
+                    const typeLabel = objectTypes[selectedType].toLowerCase();
+                    results = results.filter(item => {
+                        const itemType = (item.type || '').toLowerCase();
+                        const itemSubtype = (item.subtype || '').toLowerCase();
+                        const searchType = selectedType.toLowerCase();
+                        
+                        return itemType.includes(typeLabel) || 
+                               itemSubtype === searchType || 
+                               itemSubtype.includes(typeLabel);
+                    });
                 }
 
                 currentResults = results;
@@ -116,12 +133,15 @@ export function createCatalog(isNightMode) {
                 const itemEl = document.createElement('div');
                 itemEl.className = `astro-card transition-all`;
                 
+                const commonName = item.common_name || item.name || item.id;
+                const otherIds = item.other_ids ? ` • ${item.other_ids}` : '';
+                
                 itemEl.innerHTML = `
                     <div class="flex justify-between items-center cursor-pointer p-4">
                         <div class="flex items-center gap-3">
                             <div class="font-mono font-bold text-lg ${textColor}">${item.id}</div>
                             <div>
-                                <div class="font-bold text-xs uppercase tracking-wider">${item.name || item.id}</div>
+                                <div class="font-bold text-xs uppercase tracking-wider">${commonName}${otherIds}</div>
                                 <div class="text-[10px] opacity-60">${item.type} • ${constellations[item.constellation] || item.constellation}</div>
                             </div>
                         </div>
@@ -138,6 +158,7 @@ export function createCatalog(isNightMode) {
                                 <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
                                 <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size || '-'}</span></div>
                                 <div class="flex justify-between"><span class="astro-label mb-0">Távolság:</span> <span class="font-mono">${item.distance_ly ? formatNum(item.distance_ly) + ' ly' : '-'}</span></div>
+                                ${item.description ? `<div class="mt-2 text-[11px] leading-relaxed opacity-90">${item.description}</div>` : ''}
                                 <div class="mt-2 italic opacity-80">${item.notes || ''}</div>
                                 <div class="mt-3 flex gap-2">
                                     <button class="copy-coords-btn flex-1 py-2 rounded bg-white/5 hover:bg-white/10 transition-colors text-[10px] uppercase tracking-widest font-bold" data-ra="${item.ra}" data-dec="${item.dec}">

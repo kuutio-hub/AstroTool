@@ -185,5 +185,6 @@ export const objectTypes = {
     'OC': 'Nyílthalmaz',
     'GC': 'Gömbhalmaz',
     'SNR': 'Szupernóva-maradvány',
-    'DS': 'Kettőscsillag'
+    'DS': 'Kettőscsillag',
+    'STAR': 'Csillag'
 };

@@ -92,9 +92,8 @@ export function createAnalemma(location, isNightMode) {
             // If local time mode, we need to adjust for TZ and DST
             let finalDate = calcDate;
             if (useLocalTime) {
-                // This is a bit tricky, but we want to see how the analemma shifts with local time
-                // We'll just use the local time equivalent of that UTC moment
-                const offset = new Date().getTimezoneOffset() * 60000;
+                // Get the timezone offset for THIS specific date to account for DST
+                const offset = calcDate.getTimezoneOffset() * 60000;
                 finalDate = new Date(calcDate.getTime() - offset);
             }
 
