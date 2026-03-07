@@ -1,4 +1,4 @@
-export const InfoIcon = (classes = "w-4 h-4") => `<svg class="${classes}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+export const InfoIcon = (classes = "w-5 h-5") => `<svg class="${classes}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
 
 export function showInfoModal(title, content, isNightMode) {
     const existing = document.getElementById('info-modal');
@@ -38,7 +38,7 @@ export function showInfoModal(title, content, isNightMode) {
 }
 
 export function createInfoBtn(title, content) {
-    return `<button type="button" class="inline-block ml-1 p-1 -m-1 opacity-50 hover:opacity-100 transition-opacity focus:outline-none" onclick="window.showInfo('${title}', '${content.replace(/'/g, "\\'")}')">${InfoIcon("w-4 h-4")}</button>`;
+    return `<button type="button" class="inline-block ml-1 p-1 -m-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none" onclick="window.showInfo('${title}', '${content.replace(/'/g, "\\'")}')">${InfoIcon("w-5 h-5")}</button>`;
 }
 
 export const storage = {

@@ -3,8 +3,6 @@ import { formatTime, formatDate, formatNum, TimeService } from './utils.js';
 import { createAnalemma } from './components/analemma.js';
 import { renderMoonPhaseIcon } from './components/moonphase.js';
 
-import { createCatalogSearch } from './components/catalogSearch.js';
-
 export function createDashboard(location, sunData, moonData, isNightMode) {
     const container = document.createElement('div');
     container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6";
@@ -141,8 +139,9 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     // Moon transit (meridian)
     const moonTransit = moonTimes.main ? formatTime(moonTimes.main) : (moonTimes.transit ? formatTime(moonTimes.transit) : '-');
 
-    const moonDistKm = moonData.distance * 6371;
-    const moonSizeDeg = Math.atan(3474 / moonDistKm) * (180 / Math.PI);
+    const moonPos = window.SunCalc ? window.SunCalc.getMoonPosition(TimeService.now(), location.latitude, location.longitude) : { distance: 384400 };
+    const moonDistKm = moonPos.distance; // SunCalc.getMoonPosition returns distance in km
+    const moonSizeDeg = (3474 / moonDistKm) * (180 / Math.PI); // Simplified angular size
     
     // Elongation
     const elongation = moonData.phase * 360;
@@ -159,34 +158,58 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         const results = [];
         let searchDate = new Date(now.getTime());
         
-        for (let k = 0; k < count; k++) {
-            let foundInLoop = false;
-            for (let i = 0; i < 40; i++) {
-                const d = new Date(searchDate.getTime() + i * 86400000);
-                const p = sc.getMoonIllumination(d).phase;
-                
+        // Find the very next phase first
+        let firstPhase = null;
+        let minDiff = Infinity;
+        
+        for (let i = 0; i < 30; i++) {
+            const d = new Date(now.getTime() + i * 86400000);
+            for (let h = 0; h < 24; h++) {
+                const dh = new Date(d.getTime() + h * 3600000);
+                if (dh <= now) continue;
+                const ph = sc.getMoonIllumination(dh).phase;
                 for (let j = 0; j < 4; j++) {
-                    const diff = Math.abs(p - targets[j]);
-                    if (diff < 0.03) {
-                        for (let h = 0; h < 24; h++) {
-                            const dh = new Date(d.getTime() + h * 3600000);
-                            if (dh <= now) continue;
-                            const ph = sc.getMoonIllumination(dh).phase;
-                            if (Math.abs(ph - targets[j]) < 0.005) {
-                                if (!results.some(r => Math.abs(r.date - dh) < 3600000)) {
-                                    results.push({ name: targetNames[j], date: dh });
-                                    searchDate = new Date(dh.getTime() + 86400000);
-                                    foundInLoop = true;
-                                    break;
-                                }
-                            }
-                        }
+                    const diff = Math.abs(ph - targets[j]);
+                    if (diff < 0.005) {
+                        firstPhase = { name: targetNames[j], date: dh, targetIdx: j };
+                        break;
                     }
-                    if (foundInLoop) break;
                 }
-                if (foundInLoop) break;
+                if (firstPhase) break;
+            }
+            if (firstPhase) break;
+        }
+
+        if (!firstPhase) return [];
+
+        results.push(firstPhase);
+        
+        // Now find the next 3 in sequence
+        let currentIdx = firstPhase.targetIdx;
+        let lastDate = firstPhase.date;
+
+        for (let k = 1; k < count; k++) {
+            currentIdx = (currentIdx + 1) % 4;
+            const targetP = targets[currentIdx];
+            
+            // Search starting from last found date
+            let found = false;
+            for (let i = 1; i < 15; i++) { // Next phase is roughly 7 days away
+                const d = new Date(lastDate.getTime() + i * 86400000);
+                for (let h = 0; h < 24; h++) {
+                    const dh = new Date(d.getTime() + h * 3600000);
+                    const ph = sc.getMoonIllumination(dh).phase;
+                    if (Math.abs(ph - targetP) < 0.005) {
+                        results.push({ name: targetNames[currentIdx], date: dh });
+                        lastDate = dh;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
             }
         }
+        
         return results;
     };
 
@@ -233,7 +256,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                         <div class="font-mono font-bold text-xs ${valueColor}">${illumPercent}%</div>
                     </div>
                     <div>
-                        <div class="astro-label">Távolság</div>
+                        <div class="astro-label">Távolság ${createInfoBtn('Hold Távolság', 'A Hold aktuális távolsága a Föld középpontjától. Perigeum (közelpont): ~356,400 km. Apogeum (távolpont): ~406,700 km.')}</div>
                         <div class="font-mono font-bold text-xs ${valueColor}">${formatNum(moonDistKm)} km</div>
                     </div>
                 </div>
@@ -268,7 +291,6 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const wrapper = document.createElement('div');
     wrapper.appendChild(container);
     wrapper.appendChild(analemmaContainer);
-    wrapper.appendChild(createCatalogSearch(isNightMode));
 
     return wrapper;
 }

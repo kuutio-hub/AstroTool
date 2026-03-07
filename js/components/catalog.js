@@ -111,7 +111,7 @@ export function createCatalog(isNightMode) {
                 const paginationDiv = document.createElement('div');
                 paginationDiv.className = "flex justify-center items-center gap-4 pt-4 text-xs font-bold";
                 
-                const btnClass = `px-4 py-2 rounded-lg transition-all uppercase tracking-widest text-[10px] ${isNightMode ? 'bg-red-900/40 text-red-500 hover:bg-red-800/60' : 'bg-slate-700 text-white hover:bg-slate-600'}`;
+                const btnClass = `px-4 py-2 rounded-lg transition-all uppercase tracking-widest text-[10px] ${isNightMode ? 'bg-red-900/40 text-red-500 hover:bg-red-800/60' : 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50'}`;
                 
                 paginationDiv.innerHTML = `
                     <button id="prev-btn" class="${btnClass} ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : ''}" ${currentPage === 1 ? 'disabled' : ''}>&lt; Előző</button>

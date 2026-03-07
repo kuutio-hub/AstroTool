@@ -1,102 +1,174 @@
+import { SunIcon } from '../icons.js';
+import { formatDate, formatTime, TimeService } from '../utils.js';
+
 export function createAnalemma(location, isNightMode) {
     const container = document.createElement('div');
     container.className = "w-full overflow-hidden flex flex-col items-center py-4 relative";
 
     // Analemma settings
-    let timeOffsetHours = 0;
+    let useLocalTime = false;
+    
+    // Calculate initial offset for local solar noon in UTC
+    const getSolarNoonOffset = () => {
+        const now = TimeService.now();
+        const sc = window.SunCalc;
+        if (!sc) return 0;
+        const times = sc.getTimes(now, location.latitude, location.longitude);
+        const noon = times.solarNoon;
+        // Offset from 12:00 UTC base
+        return (noon.getUTCHours() + noon.getUTCMinutes() / 60 + noon.getUTCSeconds() / 3600) - 12;
+    };
+
+    let timeOffsetHours = getSolarNoonOffset();
 
     const render = () => {
         container.innerHTML = '';
         
+        const headerColor = isNightMode ? "text-red-500" : "text-blue-300";
+        const textColor = isNightMode ? "#ff4d4d" : "#ffffff";
+        const pathColor = isNightMode ? "#ff4d4d" : "#fbbf24";
+        const gridColor = isNightMode ? "rgba(255, 77, 77, 0.15)" : "rgba(255, 255, 255, 0.15)";
+
         // Controls
         const controls = document.createElement('div');
-        controls.className = "flex gap-2 items-center mb-4 z-10";
+        controls.className = "flex flex-wrap gap-4 items-center justify-center mb-6 z-10 w-full px-4";
+        
+        const displayHours = 12 + timeOffsetHours;
+        const h = Math.floor(displayHours);
+        const m = Math.round((displayHours - h) * 60);
+        const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+
         controls.innerHTML = `
-            <span class="text-xs font-bold uppercase ${isNightMode ? 'text-red-500' : 'text-white'}">Időeltolás (UTC):</span>
-            <button id="offset-minus" class="px-2 py-1 bg-black/20 rounded hover:bg-black/40">-30m</button>
-            <span class="font-mono text-sm font-bold w-16 text-center">${timeOffsetHours > 0 ? '+' : ''}${timeOffsetHours.toFixed(1)}h</span>
-            <button id="offset-plus" class="px-2 py-1 bg-black/20 rounded hover:bg-black/40">+30m</button>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase ${headerColor}">Idő (UTC):</span>
+                <div class="flex items-center bg-black/20 rounded-lg p-1 border border-white/5">
+                    <button id="offset-down" class="p-1 hover:bg-white/10 rounded transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <span class="font-mono text-sm font-bold w-16 text-center ${isNightMode ? 'text-red-400' : 'text-white'}">${timeStr}</span>
+                    <button id="offset-up" class="p-1 hover:bg-white/10 rounded transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase ${headerColor}">Mód:</span>
+                <button id="mode-toggle" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border border-white/10 ${useLocalTime ? (isNightMode ? 'bg-red-900/40 text-red-500' : 'bg-blue-600 text-white') : 'bg-black/20 text-white/50'}">
+                    ${useLocalTime ? 'Helyi Idő' : 'UTC'}
+                </button>
+            </div>
         `;
         
-        controls.querySelector('#offset-minus').onclick = () => { timeOffsetHours -= 0.5; render(); };
-        controls.querySelector('#offset-plus').onclick = () => { timeOffsetHours += 0.5; render(); };
+        controls.querySelector('#offset-down').onclick = () => { timeOffsetHours -= 0.5; render(); };
+        controls.querySelector('#offset-up').onclick = () => { timeOffsetHours += 0.5; render(); };
+        controls.querySelector('#mode-toggle').onclick = () => { useLocalTime = !useLocalTime; render(); };
         
         container.appendChild(controls);
 
         const svgNS = "http://www.w3.org/2000/svg";
-        const viewBox = { w: 400, h: 400 };
+        const viewBox = { w: 500, h: 400 };
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", `0 0 ${viewBox.w} ${viewBox.h}`);
-        svg.setAttribute("class", "w-full max-w-md h-auto");
+        svg.setAttribute("class", "w-full max-w-2xl h-auto overflow-visible");
 
         const year = new Date().getFullYear();
         const points = [];
-        const months = [];
+        const monthMarkers = [];
+        
+        // Significant points (approximate dates)
+        const events = [
+            { name: "Tavaszi Napéjegyenlőség", month: 2, day: 20 },
+            { name: "Nyári Napforduló", month: 5, day: 21 },
+            { name: "Őszi Napéjegyenlőség", month: 8, day: 22 },
+            { name: "Téli Napforduló", month: 11, day: 21 }
+        ];
 
-        // Generate points for each day at 12:00 UTC + offset
+        // Generate points for each day
         for (let d = 0; d < 365; d++) {
-            // 12:00 UTC is base. We add offset in hours.
-            const date = new Date(Date.UTC(year, 0, d, 12 + Math.floor(timeOffsetHours), (timeOffsetHours % 1) * 60, 0));
-            const sunCalc = window.SunCalc || { getPosition: () => ({ azimuth: 0, altitude: 0 }) };
-            const pos = sunCalc.getPosition(date, location.latitude, location.longitude);
+            const date = new Date(Date.UTC(year, 0, d + 1, 12, 0, 0));
+            // Apply offset
+            const calcDate = new Date(date.getTime() + timeOffsetHours * 3600000);
             
-            // Convert azimuth to degrees (-180 to 180 from South)
+            // If local time mode, we need to adjust for TZ and DST
+            let finalDate = calcDate;
+            if (useLocalTime) {
+                // This is a bit tricky, but we want to see how the analemma shifts with local time
+                // We'll just use the local time equivalent of that UTC moment
+                const offset = new Date().getTimezoneOffset() * 60000;
+                finalDate = new Date(calcDate.getTime() - offset);
+            }
+
+            const sunCalc = window.SunCalc;
+            const pos = sunCalc.getPosition(finalDate, location.latitude, location.longitude);
+            
             let az = pos.azimuth * 180 / Math.PI;
-            // Convert altitude to degrees
             let alt = pos.altitude * 180 / Math.PI;
 
-            points.push({ az, alt, date });
+            const p = { az, alt, date: finalDate, originalDate: date };
+            points.push(p);
 
-            // Save first day of month for labels
-            if (date.getDate() === 1) {
-                months.push({ az, alt, label: date.toLocaleString('hu-HU', { month: 'short' }) });
+            if (date.getUTCDate() === 1) {
+                monthMarkers.push(p);
             }
         }
 
-        // Find bounds
+        // Bounds
         let minAz = Math.min(...points.map(p => p.az));
         let maxAz = Math.max(...points.map(p => p.az));
         let minAlt = Math.min(...points.map(p => p.alt));
         let maxAlt = Math.max(...points.map(p => p.alt));
 
-        // Add padding
-        const padAz = (maxAz - minAz) * 0.2 || 10;
-        const padAlt = (maxAlt - minAlt) * 0.1 || 10;
-        
+        const padAz = (maxAz - minAz) * 0.2 || 15;
+        const padAlt = (maxAlt - minAlt) * 0.15 || 15;
         minAz -= padAz; maxAz += padAz;
         minAlt -= padAlt; maxAlt += padAlt;
 
-        // Map function
         const mapX = (az) => ((az - minAz) / (maxAz - minAz)) * viewBox.w;
         const mapY = (alt) => viewBox.h - (((alt - minAlt) / (maxAlt - minAlt)) * viewBox.h);
 
-        // Colors
-        const gridColor = isNightMode ? "rgba(255, 77, 77, 0.2)" : "rgba(255, 255, 255, 0.2)";
-        const textColor = isNightMode ? "#ff4d4d" : "#ffffff";
-        const pathColor = isNightMode ? "#ff4d4d" : "#fbbf24"; // Red or Amber
-
-        // Draw Grid (Altitude lines)
+        // Draw Curved Grid Lines
+        // Altitude arcs
         for (let a = Math.floor(minAlt / 10) * 10; a <= maxAlt; a += 10) {
-            if (a < 0) continue;
-            const y = mapY(a);
-            const line = document.createElementNS(svgNS, "line");
-            line.setAttribute("x1", 0);
-            line.setAttribute("y1", y);
-            line.setAttribute("x2", viewBox.w);
-            line.setAttribute("y2", y);
-            line.setAttribute("stroke", gridColor);
-            line.setAttribute("stroke-width", "1");
-            line.setAttribute("stroke-dasharray", "4,4");
-            svg.appendChild(line);
-
+            if (a < -10) continue;
+            const path = document.createElementNS(svgNS, "path");
+            let d = "";
+            for (let az = minAz; az <= maxAz; az += 2) {
+                const x = mapX(az);
+                const y = mapY(a);
+                d += (az === minAz ? "M" : "L") + ` ${x} ${y}`;
+            }
+            path.setAttribute("d", d);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", gridColor);
+            path.setAttribute("stroke-width", "0.5");
+            path.setAttribute("stroke-dasharray", "2,4");
+            svg.appendChild(path);
+            
             const text = document.createElementNS(svgNS, "text");
             text.setAttribute("x", 5);
-            text.setAttribute("y", y - 5);
+            text.setAttribute("y", mapY(a) - 2);
             text.setAttribute("fill", textColor);
-            text.setAttribute("font-size", "12");
-            text.setAttribute("opacity", "0.5");
+            text.setAttribute("font-size", "8");
+            text.setAttribute("opacity", "0.3");
             text.textContent = `${a}°`;
             svg.appendChild(text);
+        }
+
+        // Azimuth arcs (vertical-ish)
+        for (let az = Math.floor(minAz / 10) * 10; az <= maxAz; az += 10) {
+            const path = document.createElementNS(svgNS, "path");
+            let d = "";
+            for (let a = minAlt; a <= maxAlt; a += 2) {
+                const x = mapX(az);
+                const y = mapY(a);
+                d += (a === minAlt ? "M" : "L") + ` ${x} ${y}`;
+            }
+            path.setAttribute("d", d);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", gridColor);
+            path.setAttribute("stroke-width", "0.5");
+            path.setAttribute("stroke-dasharray", "2,4");
+            svg.appendChild(path);
         }
 
         // Draw Analemma Path
@@ -108,57 +180,118 @@ export function createAnalemma(location, isNightMode) {
             if (i === 0) dStr += `M ${x} ${y} `;
             else dStr += `L ${x} ${y} `;
         });
-        dStr += "Z"; // Close loop
+        dStr += "Z";
         path.setAttribute("d", dStr);
         path.setAttribute("fill", "none");
         path.setAttribute("stroke", pathColor);
-        path.setAttribute("stroke-width", "2");
+        path.setAttribute("stroke-width", "1.5");
+        path.setAttribute("opacity", "0.8");
         svg.appendChild(path);
 
-        // Draw Month Labels
-        months.forEach(m => {
+        // Month Markers (Small lines)
+        monthMarkers.forEach(m => {
             const x = mapX(m.az);
             const y = mapY(m.alt);
             
-            const circle = document.createElementNS(svgNS, "circle");
-            circle.setAttribute("cx", x);
-            circle.setAttribute("cy", y);
-            circle.setAttribute("r", "3");
-            circle.setAttribute("fill", textColor);
-            svg.appendChild(circle);
+            const line = document.createElementNS(svgNS, "line");
+            line.setAttribute("x1", x - 4);
+            line.setAttribute("y1", y);
+            line.setAttribute("x2", x + 4);
+            line.setAttribute("y2", y);
+            line.setAttribute("stroke", textColor);
+            line.setAttribute("stroke-width", "1");
+            svg.appendChild(line);
 
             const text = document.createElementNS(svgNS, "text");
             text.setAttribute("x", x);
-            text.setAttribute("y", y - 8);
+            text.setAttribute("y", y - 6);
             text.setAttribute("fill", textColor);
-            text.setAttribute("font-size", "14"); // Larger font as requested
-            text.setAttribute("font-weight", "bold");
+            text.setAttribute("font-size", "10");
             text.setAttribute("text-anchor", "middle");
-            text.textContent = m.label;
+            text.setAttribute("font-weight", "bold");
+            text.textContent = m.originalDate.toLocaleString('hu-HU', { month: 'short' });
             svg.appendChild(text);
         });
 
-        // Draw Current Sun Position
-        const now = new Date();
-        const sunCalc = window.SunCalc || { getPosition: () => ({ azimuth: 0, altitude: 0 }) };
-        const currentPos = sunCalc.getPosition(now, location.latitude, location.longitude);
-        const currAz = currentPos.azimuth * 180 / Math.PI;
-        const currAlt = currentPos.altitude * 180 / Math.PI;
-        
-        if (currAlt >= minAlt && currAlt <= maxAlt) {
-            const cx = mapX(currAz);
-            const cy = mapY(currAlt);
+        // Significant Points (Faint suns)
+        const now = TimeService.now();
+        let nextEvent = null;
+        let minDays = Infinity;
+
+        events.forEach(ev => {
+            const evDate = new Date(Date.UTC(year, ev.month, ev.day, 12, 0, 0));
+            const calcDate = new Date(evDate.getTime() + timeOffsetHours * 3600000);
             
-            const sunDot = document.createElementNS(svgNS, "circle");
-            sunDot.setAttribute("cx", cx);
-            sunDot.setAttribute("cy", cy);
-            sunDot.setAttribute("r", "6");
-            sunDot.setAttribute("fill", pathColor);
-            sunDot.setAttribute("filter", "drop-shadow(0 0 4px currentColor)");
-            svg.appendChild(sunDot);
+            let finalDate = calcDate;
+            if (useLocalTime) {
+                const offset = new Date().getTimezoneOffset() * 60000;
+                finalDate = new Date(calcDate.getTime() - offset);
+            }
+
+            const pos = window.SunCalc.getPosition(finalDate, location.latitude, location.longitude);
+            const x = mapX(pos.azimuth * 180 / Math.PI);
+            const y = mapY(pos.altitude * 180 / Math.PI);
+
+            const sun = document.createElementNS(svgNS, "circle");
+            sun.setAttribute("cx", x);
+            sun.setAttribute("cy", y);
+            sun.setAttribute("r", "4");
+            sun.setAttribute("fill", pathColor);
+            sun.setAttribute("opacity", "0.2");
+            svg.appendChild(sun);
+
+            // Calculate days to next
+            let daysTo = (evDate.getTime() - now.getTime()) / 86400000;
+            if (daysTo < 0) {
+                const nextYearDate = new Date(Date.UTC(year + 1, ev.month, ev.day, 12, 0, 0));
+                daysTo = (nextYearDate.getTime() - now.getTime()) / 86400000;
+            }
+
+            if (daysTo < minDays) {
+                minDays = daysTo;
+                nextEvent = { ...ev, days: Math.ceil(daysTo), date: evDate };
+            }
+        });
+
+        // Current Day Marker (Glowing Sun)
+        const todayIdx = Math.floor((now.getTime() - new Date(Date.UTC(year, 0, 1)).getTime()) / 86400000);
+        const todayPoint = points[todayIdx % 365];
+        if (todayPoint) {
+            const tx = mapX(todayPoint.az);
+            const ty = mapY(todayPoint.alt);
+
+            // Glow
+            const glow = document.createElementNS(svgNS, "circle");
+            glow.setAttribute("cx", tx);
+            glow.setAttribute("cy", ty);
+            glow.setAttribute("r", "8");
+            glow.setAttribute("fill", pathColor);
+            glow.setAttribute("opacity", "0.4");
+            const animate = document.createElementNS(svgNS, "animate");
+            animate.setAttribute("attributeName", "r");
+            animate.setAttribute("values", "6;10;6");
+            animate.setAttribute("dur", "2s");
+            animate.setAttribute("repeatCount", "indefinite");
+            glow.appendChild(animate);
+            svg.appendChild(glow);
+
+            const sun = document.createElementNS(svgNS, "circle");
+            sun.setAttribute("cx", tx);
+            sun.setAttribute("cy", ty);
+            sun.setAttribute("r", "4");
+            sun.setAttribute("fill", pathColor);
+            svg.appendChild(sun);
         }
 
         container.appendChild(svg);
+
+        // Info footer
+        if (nextEvent) {
+            const footer = document.createElement('div');
+            footer.className = `mt-4 text-[10px] uppercase tracking-widest font-bold ${headerColor} text-center`;
+            footer.innerHTML = `Következő: ${nextEvent.name} • ${nextEvent.days} nap múlva`;
+            container.appendChild(footer);
+        }
     };
 
     render();

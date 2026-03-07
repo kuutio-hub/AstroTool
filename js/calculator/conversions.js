@@ -94,14 +94,14 @@ export function createConversionsCalc(isNightMode) {
         });
     };
 
-    const inputClass = "astro-input p-1 text-xs";
-    const labelClass = "astro-label text-[9px]";
+    const inputClass = "astro-input p-1 text-xs w-full";
+    const labelClass = "astro-label text-[9px] block truncate";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Astrometria / Konverziók</h3>
         <div class="space-y-4 mb-4 flex-grow">
             <div>
-                <label class="${labelClass}">Óraszög (RA) -> Fok ${createInfoBtn('Óraszög', 'Az égi koordinátákat gyakran órában, percben és másodpercben adják meg (1 óra = 15 fok).')}</label>
+                <label class="${labelClass}">Óraszög (RA) -> Fok ${createInfoBtn('Óraszög', 'Az égi koordinátákat gyakran órában, percben és másodpercben adják meg (1 óra = 15 fok). Képlet: deg = (H + M/60 + S/3600) * 15')}</label>
                 <div class="grid grid-cols-3 gap-2">
                     <input type="number" id="conv-H" value="${data.H}" class="${inputClass}" placeholder="h">
                     <input type="number" id="conv-M" value="${data.M}" class="${inputClass}" placeholder="m">

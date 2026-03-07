@@ -82,16 +82,16 @@ function render() {
             </div>
             <div class="grid grid-cols-3 gap-2">
                 <div>
-                    <label class="astro-label text-[9px]">Fókusz (F) mm ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben.')}</label>
-                    <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs">
+                    <label class="astro-label text-[9px] block truncate">Fókusztávolság (mm) ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben (F).')}</label>
+                    <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs w-full">
                 </div>
                 <div>
-                    <label class="astro-label text-[9px]">Apertúra (A) mm ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben.')}</label>
-                    <input type="number" id="g-A" value="${gData.A}" class="astro-input p-1 text-xs">
+                    <label class="astro-label text-[9px] block truncate">Apertúra (mm) ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben (A).')}</label>
+                    <input type="number" id="g-A" value="${gData.A}" class="astro-input p-1 text-xs w-full">
                 </div>
                 <div>
-                    <label class="astro-label text-[9px]">Barlow (B) x ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó vagy fókuszcsökkentő szorzója.')}</label>
-                    <input type="number" id="g-B" value="${gData.B}" class="astro-input p-1 text-xs" step="0.1">
+                    <label class="astro-label text-[9px] block truncate">Barlow / Reducer (x) ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó vagy fókuszcsökkentő szorzója (B).')}</label>
+                    <input type="number" id="g-B" value="${gData.B}" class="astro-input p-1 text-xs w-full" step="0.1">
                 </div>
             </div>
         `;
@@ -245,7 +245,8 @@ async function init() {
                     (err) => {
                         console.warn('Geolocation failed', err);
                         render(); // Fallback to default
-                    }
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
                 );
             } else {
                 render();

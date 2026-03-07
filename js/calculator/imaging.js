@@ -11,7 +11,7 @@ export function createImagingCalc(isNightMode) {
         h: storage.get('h', 14.9), // Sensor height
         p: storage.get('p', 4.3),   // Pixel size
         seeing: storage.get('seeing', 2.0), // Seeing limit in arcsec
-        seeingMode: storage.get('seeingMode', 'arcsec'), // 'arcsec' or 'scale'
+        seeingMode: storage.get('seeingMode', 'scale'), // Default to scale
         bin: storage.get('bin', 1) // Binning
     };
 
@@ -62,8 +62,8 @@ export function createImagingCalc(isNightMode) {
         }
     };
 
-    const inputClass = "astro-input p-1 text-xs";
-    const labelClass = "astro-label text-[10px]";
+    const inputClass = "astro-input p-1 text-xs w-full";
+    const labelClass = "astro-label text-[10px] block truncate";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Fotós Kalkulátor</h3>
@@ -84,21 +84,21 @@ export function createImagingCalc(isNightMode) {
                 <div class="p-3 space-y-3 bg-black/10">
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="${labelClass}">Szenzor W (mm) ${createInfoBtn('Szenzor Szélesség', 'A kamera szenzorának fizikai szélessége milliméterben.')}</label>
+                            <label class="${labelClass}">Szenzor szélesség (mm) ${createInfoBtn('Szenzor Szélesség', 'A kamera szenzorának fizikai szélessége milliméterben (w).')}</label>
                             <input type="number" id="img-w" value="${data.w}" class="${inputClass}" step="0.1">
                         </div>
                         <div>
-                            <label class="${labelClass}">Szenzor H (mm) ${createInfoBtn('Szenzor Magasság', 'A kamera szenzorának fizikai magassága milliméterben.')}</label>
+                            <label class="${labelClass}">Szenzor magasság (mm) ${createInfoBtn('Szenzor Magasság', 'A kamera szenzorának fizikai magassága milliméterben (h).')}</label>
                             <input type="number" id="img-h" value="${data.h}" class="${inputClass}" step="0.1">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="${labelClass}">Pixel (µm) ${createInfoBtn('Pixel Méret', 'A kamera egyetlen pixelének mérete mikrométerben.')}</label>
+                            <label class="${labelClass}">Pixelméret (µm) ${createInfoBtn('Pixel Méret', 'A kamera egyetlen pixelének mérete mikrométerben (p).')}</label>
                             <input type="number" id="img-p" value="${data.p}" class="${inputClass}" step="0.1">
                         </div>
                         <div>
-                            <label class="${labelClass}">Binning ${createInfoBtn('Binning', 'Több pixel összevonása egy nagyobb pixellé.')}</label>
+                            <label class="${labelClass}">Binning ${createInfoBtn('Binning', 'Több pixel összevonása egy nagyobb pixellé (bin).')} </label>
                             <input type="number" id="img-bin" value="${data.bin}" class="${inputClass}" min="1" step="1">
                         </div>
                     </div>
@@ -107,15 +107,15 @@ export function createImagingCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Effektív Fókusz ${createInfoBtn('Effektív Fókusz', 'A távcső és a Barlow/Reducer együttes fókusztávolsága.')}</div>
+                <div class="${labelClass}">Effektív Fókusz ${createInfoBtn('Effektív Fókusz', 'A távcső és a Barlow/Reducer együttes fókusztávolsága. Képlet: F_eff = F * B')}</div>
                 <div id="img-effF" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Felbontás (Arcsec/px) ${createInfoBtn('Képpont Felbontás', 'Egy pixel hány ívmásodpercnyi területet fed le az égen. Ideális esetben a Seeing értékének harmada (Nyquist).')}</div>
+                <div class="${labelClass}">Felbontás ${createInfoBtn('Képpont Felbontás', 'Egy pixel hány ívmásodpercnyi területet fed le az égen. Képlet: R = (p * bin / F_eff) * 206.3. Ideális esetben a Seeing értékének harmada (Nyquist).')}</div>
                 <div id="img-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Látómező (Fok) ${createInfoBtn('Látómező (Fok)', 'A kamera által rögzített terület mérete az égen fokban.')}</div>
+                <div class="${labelClass}">Látómező (Fok) ${createInfoBtn('Látómező (Fok)', 'A kamera által rögzített terület mérete az égen fokban. Képlet: FoV = (S / F_eff) * 57.3')}</div>
                 <div id="img-fov" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
@@ -123,7 +123,7 @@ export function createImagingCalc(isNightMode) {
                 <div id="img-fov-arcmin" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Szenzor Átló ${createInfoBtn('Szenzor Átló', 'A szenzor átlója milliméterben. Fontos a megfelelő korrektor vagy flattener kiválasztásához.')}</div>
+                <div class="${labelClass}">Szenzor Átló ${createInfoBtn('Szenzor Átló', 'A szenzor átlója milliméterben. Képlet: d = sqrt(w^2 + h^2)')}</div>
                 <div id="img-diag" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">

@@ -35,8 +35,8 @@ export function createTelescopeCalc(isNightMode) {
         card.querySelector('#light-res').textContent = Math.round(lightGathering) + 'x';
     };
 
-    const inputClass = "astro-input p-1 text-xs";
-    const labelClass = "astro-label text-[10px]";
+    const inputClass = "astro-input p-1 text-xs w-full";
+    const labelClass = "astro-label text-[10px] block truncate";
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Teleszkóp Kalkulátor</h3>
@@ -53,11 +53,11 @@ export function createTelescopeCalc(isNightMode) {
                 </summary>
                 <div class="p-3 space-y-3 bg-black/10">
                     <div>
-                        <label class="${labelClass}">Központi kitakarás % ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest. Csökkenti a kontrasztot.')}</label>
+                        <label class="${labelClass}">Központi kitakarás (%) ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest (obs). Csökkenti a kontrasztot.')}</label>
                         <input type="number" id="tel-obs" value="${data.obs}" class="${inputClass}" min="0" max="100">
                     </div>
                     <div>
-                        <label class="${labelClass}">Transzmisszió % ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége. Általában 85-95%.')}</label>
+                        <label class="${labelClass}">Transzmisszió (%) ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége (trans). Általában 85-95%.')}</label>
                         <input type="number" id="tel-trans" value="${data.trans}" class="${inputClass}" min="1" max="100">
                     </div>
                 </div>
@@ -65,23 +65,23 @@ export function createTelescopeCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Fényerő ${createInfoBtn('Fényerő (F-szám)', 'A fókusztávolság és az apertúra hányadosa. Kisebb szám = "gyorsabb" távcső, ami rövidebb expozíciós időt igényel fotózásnál.')}</div>
+                <div class="${labelClass}">Fényerő ${createInfoBtn('Fényerő (F-szám)', 'A fókusztávolság és az apertúra hányadosa. Képlet: f/ratio = F / A. Kisebb szám = "gyorsabb" távcső.')}</div>
                 <div id="fratio-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Határmagnitúdó ${createInfoBtn('Határmagnitúdó', 'A leghalványabb csillag, amit még éppen meg lehet pillantani a távcsővel. Függ a távcső átmérőjétől, a transzmissziótól és az égbolt sötétségétől (Bortle).')}</div>
+                <div class="${labelClass}">Határmagnitúdó ${createInfoBtn('Határmagnitúdó', 'A leghalványabb csillag, amit még éppen meg lehet pillantani. Képlet alapja: NELM + 5 * log10(A_eff / 7).')}</div>
                 <div id="mag-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Dawes Határ ${createInfoBtn('Dawes Határ', 'A távcső elméleti felbontóképessége ívmásodpercben. Két egyforma fényességű csillag minimális távolsága, amit még különállónak látunk.')}</div>
+                <div class="${labelClass}">Dawes Határ ${createInfoBtn('Dawes Határ', 'A távcső elméleti felbontóképessége ívmásodpercben. Képlet: R = 116 / A.')}</div>
                 <div id="dawes-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Rayleigh Határ ${createInfoBtn('Rayleigh Határ', 'Egy másik, szigorúbb elméleti felbontási határ. Általában ezt használják a kontrasztos részletek felbontásának meghatározására.')}</div>
+                <div class="${labelClass}">Rayleigh Határ ${createInfoBtn('Rayleigh Határ', 'Szigorúbb elméleti felbontási határ. Képlet: R = 138 / A.')}</div>
                 <div id="rayleigh-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">
-                <div class="${labelClass}">Fénygyűjtő Képesség ${createInfoBtn('Fénygyűjtő Képesség', 'Megmutatja, hogy a távcső hányszor több fényt gyűjt össze, mint egy átlagos emberi szem (7mm-es pupillával számolva).')}</div>
+                <div class="${labelClass}">Fénygyűjtő Képesség ${createInfoBtn('Fénygyűjtő Képesség', 'Megmutatja, hogy a távcső hányszor több fényt gyűjt össze, mint az emberi szem. Képlet: LGP = (A_eff / 7)^2 * trans')}</div>
                 <div id="light-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
         </div>
