@@ -66,6 +66,7 @@ export function formatDate(date) {
 }
 
 export function formatNum(num) {
+    if (num === undefined || num === null || isNaN(num)) return '-';
     if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
     if (num >= 1e3) return (num / 1e3).toFixed(2) + 'k';
     return num.toFixed(2);
@@ -75,16 +76,24 @@ export const TimeService = {
     offset: 0,
     async sync() {
         try {
-            const res = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const res = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await res.json();
-            const serverTime = new Date(data.utc_datetime).getTime();
-            const localTime = Date.now();
-            this.offset = serverTime - localTime;
+            if (data && data.utc_datetime) {
+                const serverTime = new Date(data.utc_datetime).getTime();
+                const localTime = Date.now();
+                if (!isNaN(serverTime)) {
+                    this.offset = serverTime - localTime;
+                }
+            }
         } catch (e) {
             console.warn('Time sync failed', e);
         }
     },
     now() {
-        return new Date(Date.now() + this.offset);
+        const t = Date.now() + (isNaN(this.offset) ? 0 : this.offset);
+        return new Date(t);
     }
 };

@@ -1,5 +1,5 @@
 import { SunIcon, MoonIcon, GlobeIcon } from './icons.js';
-import { formatTime, formatDate, formatNum, TimeService } from './utils.js';
+import { formatTime, formatDate, formatNum, TimeService, createInfoBtn } from './utils.js';
 import { createAnalemma } from './components/analemma.js';
 import { renderMoonPhaseIcon } from './components/moonphase.js';
 
@@ -126,11 +126,11 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         "Újhold", "Növekvő sarló", "Első negyed", "Növekvő hold",
         "Telihold", "Fogyó hold", "Utolsó negyed", "Fogyó sarló"
     ];
-    const phaseIndex = Math.floor((moonData.phase + 0.0625) * 8) % 8;
-    const phaseName = phaseNames[phaseIndex];
+    const phaseIndex = Math.floor(((moonData.phase || 0) + 0.0625) * 8) % 8;
+    const phaseName = phaseNames[phaseIndex] || "Ismeretlen";
     
-    const isWaxing = moonData.phase < 0.5;
-    const illumPercent = (moonData.fraction * 100).toFixed(1);
+    const isWaxing = (moonData.phase || 0) < 0.5;
+    const illumPercent = ((moonData.fraction || 0) * 100).toFixed(1);
     
     const moonTimes = window.SunCalc ? window.SunCalc.getMoonTimes(TimeService.now(), location.latitude, location.longitude) : { rise: null, set: null };
     const moonRise = moonTimes.rise ? formatTime(moonTimes.rise) : '-';

@@ -219,8 +219,8 @@ function showWiki() {
 async function init() {
     await TimeService.sync();
     
-    // Try to get location if not set
-    if (!storage.get('location')) {
+    // Try to get location if not set in localStorage
+    if (localStorage.getItem('astro_location') === null) {
         showInfoModal('Helymeghatározás', `
             <div class="space-y-3">
                 <p>Az AstroTool-nak szüksége van a földrajzi helyzetedre a pontos Nap és Hold adatok kiszámításához.</p>

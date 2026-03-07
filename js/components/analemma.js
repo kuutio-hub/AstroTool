@@ -99,6 +99,7 @@ export function createAnalemma(location, isNightMode) {
             }
 
             const sunCalc = window.SunCalc;
+            if (!sunCalc) return;
             const pos = sunCalc.getPosition(finalDate, location.latitude, location.longitude);
             
             let az = pos.azimuth * 180 / Math.PI;
