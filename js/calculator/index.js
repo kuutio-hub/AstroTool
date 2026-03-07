@@ -4,6 +4,7 @@ import { createImagingCalc } from './imaging.js';
 import { createLunarCalc } from './lunar.js';
 import { createExposureCalc } from './exposure.js';
 import { createConversionsCalc } from './conversions.js';
+import { createPositionCalc } from './position.js';
 
 export function createCalculator(isNightMode) {
     const container = document.createElement('div');
@@ -15,6 +16,7 @@ export function createCalculator(isNightMode) {
     container.appendChild(createLunarCalc(isNightMode));
     container.appendChild(createExposureCalc(isNightMode));
     container.appendChild(createConversionsCalc(isNightMode));
+    container.appendChild(createPositionCalc(isNightMode));
 
     return container;
 }

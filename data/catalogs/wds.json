@@ -1,22 +1,8 @@
 [
-    {
-        "id": "WDS 02318+8915",
-        "catalog": "WDS",
-        "type": "Double Star",
-        "subtype": "DS",
-        "ra": "02h 31m 49.0s",
-        "dec": "+89° 15' 50\"",
-        "ra_deg": 37.954,
-        "dec_deg": 89.264,
-        "magnitude": 1.9,
-        "surface_brightness": null,
-        "size": "18.3\"",
-        "distance_ly": 433,
-        "constellation": "UMi",
-        "notes": "Polaris (Sarkcsillag)",
-        "mag_primary": 1.9,
-        "mag_secondary": 9.0,
-        "separation_arcsec": 18.3,
-        "position_angle": 235
-    }
+  {"id":"WDS 19307+2758","name":"Albireo","catalog":"WDS","type":"Kettőscsillag","constellation":"Cyg","ra":"19h 30.7m","dec":"+27° 58'","magnitude":3.1,"notes":"Béta Cygni"},
+  {"id":"WDS 13239+5456","name":"Mizar","catalog":"WDS","type":"Kettőscsillag","constellation":"UMa","ra":"13h 23.9m","dec":"+54° 56'","magnitude":2.2,"notes":"Zéta Ursae Majoris"},
+  {"id":"WDS 05145-0812","name":"Rigel","catalog":"WDS","type":"Kettőscsillag","constellation":"Ori","ra":"05h 14.5m","dec":"-08° 12'","magnitude":0.1,"notes":"Béta Orionis"},
+  {"id":"WDS 07346+3153","name":"Castor","catalog":"WDS","type":"Kettőscsillag","constellation":"Gem","ra":"07h 34.6m","dec":"+31° 53'","magnitude":1.6,"notes":"Alpha Geminorum"},
+  {"id":"WDS 12417-0127","name":"Porrima","catalog":"WDS","type":"Kettőscsillag","constellation":"Vir","ra":"12h 41.7m","dec":"-01° 27'","magnitude":2.7,"notes":"Gamma Virginis"},
+  {"id":"WDS 10200+1950","name":"Algieba","catalog":"WDS","type":"Kettőscsillag","constellation":"Leo","ra":"10h 20.0m","dec":"+19° 50'","magnitude":2.0,"notes":"Gamma Leonis"}
 ]

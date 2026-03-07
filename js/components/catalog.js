@@ -8,6 +8,7 @@ export function createCatalog(isNightMode) {
 
     // State
     let searchTerm = '';
+    let selectedCatalog = 'messier';
     let selectedConst = 'ALL';
     let selectedType = 'ALL';
     let expandedItem = null;
@@ -26,7 +27,18 @@ export function createCatalog(isNightMode) {
         const filtersDiv = document.createElement('div');
         filtersDiv.className = "space-y-2 mb-4 animate-fade-in";
         filtersDiv.innerHTML = `
-            <input type="text" id="cat-search" placeholder="Keresés (pl. M42, Orion)..." class="astro-input" value="${searchTerm}">
+            <div class="flex gap-2">
+                <select id="cat-filter" class="astro-input text-xs flex-1">
+                    <option value="messier" ${selectedCatalog === 'messier' ? 'selected' : ''}>Messier Katalógus</option>
+                    <option value="caldwell" ${selectedCatalog === 'caldwell' ? 'selected' : ''}>Caldwell Katalógus</option>
+                    <option value="melotte" ${selectedCatalog === 'melotte' ? 'selected' : ''}>Melotte Katalógus</option>
+                    <option value="ngc" ${selectedCatalog === 'ngc' ? 'selected' : ''}>NGC Katalógus (Kiemelt)</option>
+                    <option value="ic" ${selectedCatalog === 'ic' ? 'selected' : ''}>IC Katalógus (Kiemelt)</option>
+                    <option value="hr" ${selectedCatalog === 'hr' ? 'selected' : ''}>Fényes csillagok (HR)</option>
+                    <option value="wds" ${selectedCatalog === 'wds' ? 'selected' : ''}>Kettőscsillagok (WDS)</option>
+                </select>
+                <input type="text" id="cat-search" placeholder="Keresés..." class="astro-input flex-[2]" value="${searchTerm}">
+            </div>
             <div class="flex gap-2">
                 <select id="const-filter" class="astro-input text-xs">
                     <option value="ALL">Minden csillagkép</option>
@@ -44,6 +56,7 @@ export function createCatalog(isNightMode) {
             fetchAndRender();
         };
 
+        filtersDiv.querySelector('#cat-filter').onchange = (e) => { selectedCatalog = e.target.value; triggerSearch(); };
         filtersDiv.querySelector('#cat-search').oninput = (e) => { searchTerm = e.target.value; triggerSearch(); };
         filtersDiv.querySelector('#const-filter').onchange = (e) => { selectedConst = e.target.value; triggerSearch(); };
         filtersDiv.querySelector('#type-filter').onchange = (e) => { selectedType = e.target.value; triggerSearch(); };
@@ -68,8 +81,7 @@ export function createCatalog(isNightMode) {
                 } else if (selectedConst !== 'ALL') {
                     results = await catalogService.searchByConstellation(selectedConst);
                 } else {
-                    // Default to Messier if no filters
-                    results = await catalogService.getByCatalog('messier');
+                    results = await catalogService.getByCatalog(selectedCatalog);
                 }
 
                 // Client-side type filtering
@@ -105,7 +117,7 @@ export function createCatalog(isNightMode) {
                 itemEl.className = `astro-card transition-all`;
                 
                 itemEl.innerHTML = `
-                    <div class="flex justify-between items-center cursor-pointer">
+                    <div class="flex justify-between items-center cursor-pointer p-4">
                         <div class="flex items-center gap-3">
                             <div class="font-mono font-bold text-lg ${textColor}">${item.id}</div>
                             <div>
@@ -118,12 +130,24 @@ export function createCatalog(isNightMode) {
                         </div>
                     </div>
                     ${isExpanded ? `
-                        <div class="mt-3 pt-3 border-t border-current/10 text-xs space-y-1 animate-fade-in">
-                            <div class="flex justify-between"><span class="astro-label mb-0">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
-                            <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.magnitude} mag</span></div>
-                            <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size}</span></div>
-                            <div class="flex justify-between"><span class="astro-label mb-0">Távolság:</span> <span class="font-mono">${item.distance_ly ? formatNum(item.distance_ly) + ' ly' : '-'}</span></div>
-                            <div class="mt-2 italic opacity-80">${item.notes || ''}</div>
+                        <div class="px-4 pb-4 animate-fade-in">
+                            <div class="pt-3 border-t border-current/10 text-xs space-y-1">
+                                <div class="flex justify-between"><span class="astro-label mb-0">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
+                                <div class="flex justify-between"><span class="astro-label mb-0">RA:</span> <span class="font-mono">${item.ra || '-'}</span></div>
+                                <div class="flex justify-between"><span class="astro-label mb-0">Dec:</span> <span class="font-mono">${item.dec || '-'}</span></div>
+                                <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
+                                <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size || '-'}</span></div>
+                                <div class="flex justify-between"><span class="astro-label mb-0">Távolság:</span> <span class="font-mono">${item.distance_ly ? formatNum(item.distance_ly) + ' ly' : '-'}</span></div>
+                                <div class="mt-2 italic opacity-80">${item.notes || ''}</div>
+                                <div class="mt-3 flex gap-2">
+                                    <button class="copy-coords-btn flex-1 py-2 rounded bg-white/5 hover:bg-white/10 transition-colors text-[10px] uppercase tracking-widest font-bold" data-ra="${item.ra}" data-dec="${item.dec}">
+                                        Koordináták másolása
+                                    </button>
+                                    <button class="calc-pos-btn flex-1 py-2 rounded bg-blue-600/20 hover:bg-blue-600/40 transition-colors text-[10px] uppercase tracking-widest font-bold ${isNightMode ? 'bg-red-900/30 hover:bg-red-900/50 text-red-500' : 'text-blue-400'}" data-ra="${item.ra}" data-dec="${item.dec}">
+                                        Pozíció számítása
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     ` : ''}
                 `;
@@ -132,6 +156,26 @@ export function createCatalog(isNightMode) {
                     expandedItem = isExpanded ? null : item.id;
                     renderList();
                 };
+
+                if (isExpanded) {
+                    itemEl.querySelector('.copy-coords-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        const ra = e.target.dataset.ra;
+                        const dec = e.target.dataset.dec;
+                        navigator.clipboard.writeText(`${ra}, ${dec}`);
+                        const originalText = e.target.innerText;
+                        e.target.innerText = 'MÁSOLVA!';
+                        setTimeout(() => e.target.innerText = originalText, 2000);
+                    };
+
+                    itemEl.querySelector('.calc-pos-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        const ra = e.target.dataset.ra;
+                        const dec = e.target.dataset.dec;
+                        window.dispatchEvent(new CustomEvent('astro-set-position', { detail: { ra, dec } }));
+                        if (window.switchTab) window.switchTab('calculator');
+                    };
+                }
 
                 listDiv.appendChild(itemEl);
             });

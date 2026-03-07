@@ -12,6 +12,12 @@ let userLocation = storage.get('location', { latitude: 47.4979, longitude: 19.04
 
 window.showInfo = (title, content) => showInfoModal(title, content, isNightMode);
 
+window.switchTab = (tabId) => {
+    activeTab = tabId;
+    storage.set('activeTab', activeTab);
+    render();
+};
+
 function render() {
     app.innerHTML = '';
     

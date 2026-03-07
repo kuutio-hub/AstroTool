@@ -1,18 +1,22 @@
 [
-    {
-        "id": "IC434",
-        "catalog": "IC",
-        "type": "Emission Nebula",
-        "subtype": "EN",
-        "ra": "05h 40m 59.0s",
-        "dec": "-02° 27' 30\"",
-        "ra_deg": 85.246,
-        "dec_deg": -2.458,
-        "magnitude": 7.3,
-        "surface_brightness": 15.0,
-        "size": "60' x 10'",
-        "distance_ly": 1500,
-        "constellation": "Ori",
-        "notes": "Lófej-köd háttérköde"
-    }
+  {"id":"IC 10","catalog":"IC","type":"Galaxis","constellation":"Cas","ra":"00h 20.4m","dec":"+59° 18'","magnitude":10.3,"size":"6'x5'"},
+  {"id":"IC 1613","catalog":"IC","type":"Galaxis","constellation":"Cet","ra":"01h 04.8m","dec":"-03° 51'","magnitude":9.2,"size":"16'x15'"},
+  {"id":"IC 342","catalog":"IC","type":"Galaxis","constellation":"Cam","ra":"03h 46.8m","dec":"+68° 06'","magnitude":9.1,"size":"15'x13'"},
+  {"id":"IC 405","catalog":"IC","type":"Diffúz köd","constellation":"Aur","ra":"05h 16.2m","dec":"+34° 16'","magnitude":6.0,"size":"37'x19'","notes":"Lángoló csillag köd"},
+  {"id":"IC 410","catalog":"IC","type":"Diffúz köd","constellation":"Aur","ra":"05h 22.6m","dec":"+33° 31'","magnitude":7.5,"size":"40'"},
+  {"id":"IC 434","catalog":"IC","type":"Diffúz köd","constellation":"Ori","ra":"05h 41.0m","dec":"-02° 27'","magnitude":7.3,"size":"60'x10'","notes":"Lófej-köd háttere"},
+  {"id":"IC 443","catalog":"IC","type":"Szupernóva-maradvány","constellation":"Gem","ra":"06h 16.9m","dec":"+22° 47'","magnitude":null,"size":"50'","notes":"Medúza-köd"},
+  {"id":"IC 1318","catalog":"IC","type":"Diffúz köd","constellation":"Cyg","ra":"20h 22.2m","dec":"+40° 15'","magnitude":null,"size":"40'","notes":"Sadr-régió"},
+  {"id":"IC 1396","catalog":"IC","type":"Diffúz köd","constellation":"Cep","ra":"21h 39.1m","dec":"+57° 30'","magnitude":3.5,"size":"170'","notes":"Elefántormány-köd"},
+  {"id":"IC 1805","catalog":"IC","type":"Diffúz köd","constellation":"Cas","ra":"02h 32.7m","dec":"+61° 27'","magnitude":6.5,"size":"60'","notes":"Szív-köd"},
+  {"id":"IC 1848","catalog":"IC","type":"Diffúz köd","constellation":"Cas","ra":"02h 51.2m","dec":"+60° 26'","magnitude":6.5,"size":"60'","notes":"Lélek-köd"},
+  {"id":"IC 2118","catalog":"IC","type":"Diffúz köd","constellation":"Eri","ra":"05h 06.9m","dec":"-07° 13'","magnitude":null,"size":"180'x60'","notes":"Boszorkányfej-köd"},
+  {"id":"IC 2177","catalog":"IC","type":"Diffúz köd","constellation":"Mon","ra":"07h 04.8m","dec":"-10° 27'","magnitude":null,"size":"120'","notes":"Sirály-köd"},
+  {"id":"IC 2391","catalog":"IC","type":"Nyílthalmaz","constellation":"Vel","ra":"08h 40.2m","dec":"-53° 04'","magnitude":2.5,"size":"50'","notes":"Omicron Velorum halmaz"},
+  {"id":"IC 2602","catalog":"IC","type":"Nyílthalmaz","constellation":"Car","ra":"10h 43.2m","dec":"-64° 24'","magnitude":1.9,"size":"50'","notes":"Déli Fiastyúk"},
+  {"id":"IC 4604","catalog":"IC","type":"Diffúz köd","constellation":"Oph","ra":"16h 25.6m","dec":"-23° 26'","magnitude":null,"size":"60'","notes":"Rho Ophiuchi köd"},
+  {"id":"IC 4665","catalog":"IC","type":"Nyílthalmaz","constellation":"Oph","ra":"17h 46.3m","dec":"+05° 43'","magnitude":4.2,"size":"41'"},
+  {"id":"IC 4703","catalog":"IC","type":"Diffúz köd","constellation":"Ser","ra":"18h 18.8m","dec":"-13° 47'","magnitude":null,"size":"7'","notes":"Sas-köd (M16 része)"},
+  {"id":"IC 5070","catalog":"IC","type":"Diffúz köd","constellation":"Cyg","ra":"20h 50.8m","dec":"+44° 21'","magnitude":8.0,"size":"60'x50'","notes":"Pelikán-köd"},
+  {"id":"IC 5146","catalog":"IC","type":"Diffúz köd","constellation":"Cyg","ra":"21h 53.5m","dec":"+47° 16'","magnitude":7.2,"size":"12'","notes":"Gubó-köd"}
 ]
