@@ -70,6 +70,7 @@ export function createCatalog(isNightMode) {
                 <select id="sort-filter" class="astro-input text-xs flex-1">
                     <option value="default" ${sortBy === 'default' ? 'selected' : ''}>Alapértelmezett sorrend</option>
                     <option value="altitude" ${sortBy === 'altitude' ? 'selected' : ''}>Láthatóság szerint (Zenittől lefelé)</option>
+                    <option value="distance" ${sortBy === 'distance' ? 'selected' : ''}>Távolság szerint (Növekvő)</option>
                 </select>
             </div>
         `;
@@ -143,6 +144,12 @@ export function createCatalog(isNightMode) {
                         const altA = a.pos ? a.pos.alt : -90;
                         const altB = b.pos ? b.pos.alt : -90;
                         return altB - altA; // Descending (Zenith to Horizon)
+                    });
+                } else if (sortBy === 'distance') {
+                    results.sort((a, b) => {
+                        const distA = a.distance_ly || 999999999;
+                        const distB = b.distance_ly || 999999999;
+                        return distA - distB; // Ascending
                     });
                 }
 
@@ -228,15 +235,6 @@ export function createCatalog(isNightMode) {
 
                                 ${item.description ? `<div class="mt-3 p-2 rounded bg-white/5 text-[11px] leading-relaxed opacity-90 border-l-2 ${isNightMode ? 'border-red-500' : 'border-blue-500'}">${item.description}</div>` : ''}
                                 ${item.notes ? `<div class="mt-2 text-[10px] italic opacity-80">${item.notes}</div>` : ''}
-                                
-                                <div class="mt-3 flex gap-2">
-                                    <button class="copy-coords-btn flex-1 py-2 rounded bg-white/5 hover:bg-white/10 transition-colors text-[10px] uppercase tracking-widest font-bold" data-ra="${item.ra}" data-dec="${item.dec}">
-                                        Koordináták másolása
-                                    </button>
-                                    <button class="calc-pos-btn flex-1 py-2 rounded bg-blue-600/20 hover:bg-blue-600/40 transition-colors text-[10px] uppercase tracking-widest font-bold ${isNightMode ? 'bg-red-900/30 hover:bg-red-900/50 text-red-500' : 'text-blue-400'}" data-ra="${item.ra}" data-dec="${item.dec}">
-                                        Pozíció számítása
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     ` : ''}
@@ -263,7 +261,7 @@ export function createCatalog(isNightMode) {
                         const unit = distSelect.value;
                         distanceUnits[item.id] = unit;
                         let val = item.distance_ly;
-                        let suffix = ' ly';
+                        let suffix = ' fényév';
                         
                         if (unit === 'pc') {
                             val = val / 3.26156;
@@ -273,9 +271,14 @@ export function createCatalog(isNightMode) {
                             else { suffix = ' pc'; }
                         } else if (unit === 'km') {
                             val = val * 9.461e12;
-                            suffix = ' km';
-                            distValEl.textContent = val.toExponential(2) + suffix;
+                            // Scientific notation: 7.57 x 10^15
+                            const exp = Math.floor(Math.log10(val));
+                            const mantissa = (val / Math.pow(10, exp)).toFixed(2).replace('.', ',');
+                            distValEl.innerHTML = `${mantissa} &times; 10<sup>${exp}</sup> km`;
                             return;
+                        } else {
+                            // Light years
+                            suffix = ' fényév';
                         }
                         
                         distValEl.textContent = val.toLocaleString('hu-HU', { maximumFractionDigits: 2 }) + suffix;
@@ -283,24 +286,6 @@ export function createCatalog(isNightMode) {
                     
                     distSelect.onchange = updateDistance;
                     updateDistance();
-
-                    itemEl.querySelector('.copy-coords-btn').onclick = (e) => {
-                        e.stopPropagation();
-                        const ra = e.target.dataset.ra;
-                        const dec = e.target.dataset.dec;
-                        navigator.clipboard.writeText(`${ra}, ${dec}`);
-                        const originalText = e.target.innerText;
-                        e.target.innerText = 'MÁSOLVA!';
-                        setTimeout(() => e.target.innerText = originalText, 2000);
-                    };
-
-                    itemEl.querySelector('.calc-pos-btn').onclick = (e) => {
-                        e.stopPropagation();
-                        const ra = e.target.dataset.ra;
-                        const dec = e.target.dataset.dec;
-                        window.dispatchEvent(new CustomEvent('astro-set-position', { detail: { ra, dec } }));
-                        if (window.switchTab) window.switchTab('calculator');
-                    };
                 }
 
                 listDiv.appendChild(itemEl);

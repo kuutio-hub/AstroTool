@@ -36,6 +36,8 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         const now = TimeService.now();
         const local = formatTime(now);
         const utc = now.toISOString().split('T')[1].split('.')[0];
+        const tzOffset = -now.getTimezoneOffset() / 60;
+        const tzStr = `GMT${tzOffset >= 0 ? '+' : ''}${tzOffset}`;
         
         timeCard.innerHTML = `
             <div>
@@ -58,7 +60,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
             <div class="border-t border-white/10 pt-3">
                 <div class="flex justify-between items-end">
                     <div>
-                        <div class="astro-label">Helyi Idő</div>
+                        <div class="astro-label">Helyi Idő <span class="opacity-50 text-[10px] ml-1">(${tzStr})</span></div>
                         <div class="font-mono text-2xl font-bold ${valueColor}">${local}</div>
                     </div>
                     <div class="text-right">
@@ -152,52 +154,58 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         const sc = window.SunCalc;
         if (!sc) return [];
         
-        const targets = [0, 0.25, 0.5, 0.75];
-        const targetNames = ["Újhold", "Első Negyed", "Telihold", "Utolsó Negyed"];
-        
         const results = [];
-        let searchDate = new Date(now.getTime());
+        let searchTime = now.getTime();
+        const hour = 3600000;
         
-        // Find the next 4 phases in sequence
-        for (let k = 0; k < count; k++) {
-            let found = false;
-            // Search day by day for up to 45 days (to cover a full cycle + buffer)
-            for (let i = 0; i < 45; i++) {
-                const d = new Date(searchDate.getTime() + i * 86400000);
-                for (let h = 0; h < 24; h++) {
-                    const dh = new Date(d.getTime() + h * 3600000);
-                    if (dh <= now && k === 0) continue;
-                    
-                    const ph = sc.getMoonIllumination(dh).phase;
-                    for (let j = 0; j < 4; j++) {
-                        // Check if this phase is already in results to avoid duplicates
-                        const isAlreadyFound = results.some(r => r.name === targetNames[j]);
-                        if (isAlreadyFound) continue;
-
-                        if (Math.abs(ph - targets[j]) < 0.005) {
-                            results.push({ name: targetNames[j], date: dh, targetIdx: j });
-                            searchDate = dh;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) break;
-                }
-                if (found) break;
+        // Target phases: 0 (New), 0.25 (First Q), 0.5 (Full), 0.75 (Last Q)
+        // We look for transitions across these values
+        
+        const phaseNames = ["Újhold", "Első Negyed", "Telihold", "Utolsó Negyed"];
+        
+        // Helper to get phase at time t
+        const getPhase = (t) => sc.getMoonIllumination(new Date(t)).phase;
+        
+        let lastPhase = getPhase(searchTime);
+        
+        // Search forward for 60 days (approx 2 lunar cycles)
+        // Step by 1 hour to catch transitions
+        for (let i = 0; i < 60 * 24; i++) {
+            searchTime += hour;
+            const currentPhase = getPhase(searchTime);
+            
+            // Check for wrap around 0 (New Moon)
+            // Phase goes 0.99 -> 0.01
+            if (lastPhase > 0.9 && currentPhase < 0.1) {
+                results.push({ name: "Újhold", date: new Date(searchTime), type: 'new' });
             }
+            // Check for other transitions
+            else if (lastPhase < 0.25 && currentPhase >= 0.25) {
+                results.push({ name: "Első Negyed", date: new Date(searchTime), type: 'first' });
+            }
+            else if (lastPhase < 0.5 && currentPhase >= 0.5) {
+                results.push({ name: "Telihold", date: new Date(searchTime), type: 'full' });
+            }
+            else if (lastPhase < 0.75 && currentPhase >= 0.75) {
+                results.push({ name: "Utolsó Negyed", date: new Date(searchTime), type: 'last' });
+            }
+            
+            if (results.length >= count) break;
+            lastPhase = currentPhase;
         }
         
-        // Sort by date to be sure
-        return results.sort((a, b) => a.date - b.date);
+        return results;
     };
 
     const nextPhases = getNextPhases(4);
-    const nextPhase = nextPhases[0];
-    const nextPhaseStr = nextPhase ? `${nextPhase.name}: ${formatDate(nextPhase.date)}` : '';
+    const nextNewMoon = nextPhases.find(p => p.type === 'new');
+    const nextFullMoon = nextPhases.find(p => p.type === 'full');
+    
+    const nextPhaseStr = nextPhases[0] ? `${nextPhases[0].name}: ${formatDate(nextPhases[0].date)}` : '';
     
     const morePhasesContent = nextPhases.map(p => `
         <div class="flex justify-between border-b border-white/5 py-2">
-            <span class="font-bold">${p.name}</span>
+            <span class="font-bold ${p.type === 'new' ? 'text-blue-300' : (p.type === 'full' ? 'text-yellow-300' : '')}">${p.name}</span>
             <span class="font-mono text-xs">${formatDate(p.date)} ${formatTime(p.date)}</span>
         </div>
     `).join('');
@@ -239,14 +247,18 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                     </div>
                 </div>
             </div>
-            <div class="border-t border-white/5 pt-2 mt-2">
+            <div class="border-t border-white/5 pt-2 mt-2 space-y-1">
                 <div class="flex justify-between items-center">
-                    <span class="astro-label mb-0">Következő esemény</span>
-                    <button onclick="window.showMorePhases()" class="font-mono font-bold text-[10px] ${valueColor} hover:underline decoration-dotted underline-offset-2">${nextPhaseStr} ▾</button>
+                    <span class="astro-label mb-0">Következő Újhold</span>
+                    <span class="font-mono font-bold text-[10px] ${valueColor}">${nextNewMoon ? formatDate(nextNewMoon.date) : '-'}</span>
                 </div>
-                <div class="flex justify-between items-center mt-1">
-                    <span class="astro-label mb-0">Elongáció / Méret</span>
-                    <span class="font-mono font-bold text-[10px] ${valueColor}">${elongation.toFixed(1)}° / ${moonSizeDeg.toFixed(2)}°</span>
+                <div class="flex justify-between items-center">
+                    <span class="astro-label mb-0">Következő Telihold</span>
+                    <span class="font-mono font-bold text-[10px] ${valueColor}">${nextFullMoon ? formatDate(nextFullMoon.date) : '-'}</span>
+                </div>
+                <div class="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
+                    <span class="astro-label mb-0">Következő fázis</span>
+                    <button onclick="window.showMorePhases()" class="font-mono font-bold text-[10px] ${valueColor} hover:underline decoration-dotted underline-offset-2">${nextPhaseStr} ▾</button>
                 </div>
             </div>
         </div>

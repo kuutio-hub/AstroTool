@@ -198,8 +198,16 @@ function render() {
     // Footer
     const footer = document.createElement('footer');
     footer.className = "mt-12 py-6 border-t border-white/10 text-center opacity-40 text-[10px] uppercase tracking-widest";
-    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • Minden jog fenntartva`;
+    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • v0.0.1.0-béta • Minden jog fenntartva`;
     app.appendChild(footer);
+
+    // Dynamic Background
+    if (!document.getElementById('dynamic-bg')) {
+        import('./components/background.js').then(module => {
+            const bg = module.createBackground();
+            document.body.prepend(bg);
+        });
+    }
 }
 
 function showWiki() {

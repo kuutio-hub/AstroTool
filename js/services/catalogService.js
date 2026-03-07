@@ -24,15 +24,29 @@ export const catalogService = {
         const lowerQuery = query.toLowerCase();
         const catalogs = ['messier', 'ngc', 'ic', 'melotte', 'caldwell', 'wds', 'hr'];
         let results = [];
+        const seenNames = new Set();
 
         for (const cat of catalogs) {
             const data = await this.loadCatalog(cat);
-            const matches = data.filter(obj => 
-                (obj.name && obj.name.toLowerCase().includes(lowerQuery)) ||
-                (obj.id && obj.id.toLowerCase().includes(lowerQuery))
-            );
-            results = results.concat(matches);
-            if (results.length > 100) break; // Limit results
+            const matches = data.filter(obj => {
+                const nameMatch = obj.name && obj.name.toLowerCase().includes(lowerQuery);
+                const idMatch = obj.id && obj.id.toLowerCase().includes(lowerQuery);
+                const commonMatch = obj.common_name && obj.common_name.toLowerCase().includes(lowerQuery);
+                return nameMatch || idMatch || commonMatch;
+            });
+
+            for (const item of matches) {
+                // Deduplication by common_name if available
+                const key = item.common_name ? item.common_name.toLowerCase() : item.id.toLowerCase();
+                if (!seenNames.has(key)) {
+                    results.push(item);
+                    seenNames.add(key);
+                    // Also add ID to seen to prevent duplicates if searched by ID later
+                    if (item.id) seenNames.add(item.id.toLowerCase());
+                }
+            }
+            
+            if (results.length > 100) break;
         }
 
         return results.slice(0, 100);

@@ -38,7 +38,9 @@ export function showInfoModal(title, content, isNightMode) {
 }
 
 export function createInfoBtn(title, content) {
-    return `<button type="button" class="inline-block ml-1 p-1 -m-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none" onclick="window.showInfo('${title}', '${content.replace(/'/g, "\\'")}')">${InfoIcon("w-5 h-5")}</button>`;
+    // Escape single quotes and backslashes for JS string
+    const escapedContent = content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return `<button type="button" class="inline-block ml-1 p-1 -m-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none" onclick="window.showInfo('${title}', '${escapedContent}')">${InfoIcon("w-5 h-5")}</button>`;
 }
 
 export const storage = {
@@ -63,6 +65,14 @@ export function formatTime(date) {
 
 export function formatDate(date) {
     return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+export function formatDuration(seconds) {
+    if (seconds === undefined || seconds === null || isNaN(seconds)) return '-';
+    if (seconds < 60) return seconds.toFixed(2) + ' s';
+    if (seconds < 3600) return (seconds / 60).toFixed(1) + ' perc';
+    if (seconds < 86400) return (seconds / 3600).toFixed(1) + ' óra';
+    return (seconds / 86400).toFixed(1) + ' nap';
 }
 
 export function formatNum(num) {

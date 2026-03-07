@@ -67,7 +67,7 @@ export function createImagingCalc(isNightMode) {
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Fotós Kalkulátor</h3>
-        <div class="space-y-3 mb-4 flex-grow">
+        <div class="space-y-3 mb-4 flex-grow custom-scrollbar overflow-y-auto pr-1">
             <div>
                 <div class="flex justify-between items-center mb-1">
                     <label class="${labelClass} mb-0"><span id="seeing-label-text">Seeing</span> ${createInfoBtn('Seeing', 'A légkör nyugodtságát jelzi. Átváltható ívmásodperc (arcsec) és 1-10-es skála között. 10: tökéletes, 1: nagyon rossz.')}</label>
@@ -107,27 +107,27 @@ export function createImagingCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Effektív Fókusz ${createInfoBtn('Effektív Fókusz', 'A távcső és a Barlow/Reducer együttes fókusztávolsága. Képlet: F_eff = F × B')}</div>
+                <div class="${labelClass}">Effektív Fókusz ${createInfoBtn('Effektív Fókusz', '<div class="text-center text-lg font-mono mb-4">F<sub>eff</sub> = F &times; B</div><div class="text-xs text-left space-y-1"><div><strong>F<sub>eff</sub>:</strong> Eredő fókusz (mm)</div><div><strong>F:</strong> Távcső fókusz</div><div><strong>B:</strong> Barlow/Reducer</div></div>')}</div>
                 <div id="img-effF" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Felbontás ${createInfoBtn('Képpont Felbontás', 'Egy pixel hány ívmásodpercnyi területet fed le az égen. Képlet: R = (p × bin ÷ F_eff) × 206.3.')}</div>
+                <div class="${labelClass}">Felbontás ${createInfoBtn('Felbontás', '<div class="text-center text-lg font-mono mb-4">R = (<div class="inline-block align-middle text-center"><div class="border-b border-current">p &times; bin</div><div>F<sub>eff</sub></div></div>) &times; 206.3</div><div class="text-xs text-left space-y-1"><div><strong>R:</strong> Felbontás (ívmásodperc/pixel)</div><div><strong>p:</strong> Pixelméret (µm)</div><div><strong>bin:</strong> Binning</div></div>')}</div>
                 <div id="img-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Látómező (Fok) ${createInfoBtn('Látómező (Fok)', 'A kamera által rögzített terület mérete az égen fokban. Képlet: FoV = (S ÷ F_eff) × 57.3')}</div>
+                <div class="${labelClass}">Látómező (Fok) ${createInfoBtn('Látómező (Fok)', '<div class="text-center text-lg font-mono mb-4">FoV = (<div class="inline-block align-middle text-center"><div class="border-b border-current">S</div><div>F<sub>eff</sub></div></div>) &times; 57.3</div><div class="text-xs text-left space-y-1"><div><strong>FoV:</strong> Látómező (fok)</div><div><strong>S:</strong> Szenzor oldal (w vagy h)</div></div>')}</div>
                 <div id="img-fov" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Látómező (Ívperc) ${createInfoBtn('Látómező (Ívperc)', 'A kamera által rögzített terület mérete az égen ívpercben (1° = 60′).')}</div>
+                <div class="${labelClass}">Látómező (Ívperc) ${createInfoBtn('Látómező (Ívperc)', '<div class="text-center text-lg font-mono mb-4">FoV\' = FoV &times; 60</div><div class="text-xs text-left space-y-1"><div><strong>FoV\':</strong> Látómező (ívperc)</div></div>')}</div>
                 <div id="img-fov-arcmin" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Szenzor Átló ${createInfoBtn('Szenzor Átló', 'A szenzor átlója milliméterben. Képlet: d = √(w² + h²)')}</div>
+                <div class="${labelClass}">Szenzor Átló ${createInfoBtn('Szenzor Átló', '<div class="text-center text-lg font-mono mb-4">d = &radic;<span style="text-decoration:overline">w<sup>2</sup> + h<sup>2</sup></span></div><div class="text-xs text-left space-y-1"><div><strong>d:</strong> Átló (mm)</div><div><strong>w, h:</strong> Szélesség, Magasság</div></div>')}</div>
                 <div id="img-diag" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">
-                <div class="${labelClass}">Nyquist Mintavételezés ${createInfoBtn('Nyquist Mintavételezés', 'Megmutatja, hogy a kamera felbontása (pixelméret) és a távcső fókusza mennyire illeszkedik az aktuális légköri nyugodtsághoz (Seeing).')}</div>
+                <div class="${labelClass}">Nyquist Mintavételezés ${createInfoBtn('Nyquist Mintavételezés', '<div class="text-center text-lg font-mono mb-4">Optimális R &approx; <div class="inline-block align-middle text-center"><div class="border-b border-current">Seeing</div><div>3</div></div></div><div class="text-xs text-left space-y-1"><div><strong>R:</strong> Felbontás</div><div><strong>Seeing:</strong> Légkör nyugodtsága</div></div>')}</div>
                 <div id="img-sampling" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
         </div>

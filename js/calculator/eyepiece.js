@@ -33,7 +33,7 @@ export function createEyepieceCalc(isNightMode) {
 
     card.innerHTML = `
         <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Okulár Kalkulátor</h3>
-        <div class="space-y-3 mb-4 flex-grow">
+        <div class="space-y-3 mb-4 flex-grow custom-scrollbar overflow-y-auto pr-1">
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="${labelClass}">Fókusztávolság (mm) ${createInfoBtn('Okulár Fókusztávolsága', 'Az okulár fókusztávolsága milliméterben (e). Meghatározza a nagyítást. Kisebb szám = nagyobb nagyítás.')}</label>
@@ -64,23 +64,23 @@ export function createEyepieceCalc(isNightMode) {
         </div>
         <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
             <div>
-                <div class="${labelClass}">Nagyítás ${createInfoBtn('Nagyítás', 'Hányszorosára nagyítja a távcső a képet. Képlet: M = (F ÷ e) × B (F: távcső fókusz, e: okulár fókusz, B: Barlow).')}</div>
+                <div class="${labelClass}">Nagyítás ${createInfoBtn('Nagyítás', '<div class="text-center text-lg font-mono mb-4">M = (<div class="inline-block align-middle text-center"><div class="border-b border-current">F</div><div>e</div></div>) &times; B</div><div class="text-xs text-left space-y-1"><div><strong>M:</strong> Nagyítás (x)</div><div><strong>F:</strong> Távcső fókusz</div><div><strong>e:</strong> Okulár fókusz</div><div><strong>B:</strong> Barlow/Reducer</div></div>')}</div>
                 <div id="mag-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Kilépő Pupilla ${createInfoBtn('Kilépő Pupilla', 'A távcsőből kilépő fénynyaláb átmérője. Képlet: EP = A ÷ M (A: apertúra, M: nagyítás).')}</div>
+                <div class="${labelClass}">Kilépő Pupilla ${createInfoBtn('Kilépő Pupilla', '<div class="text-center text-lg font-mono mb-4">EP = <div class="inline-block align-middle text-center"><div class="border-b border-current">A</div><div>M</div></div></div><div class="text-xs text-left space-y-1"><div><strong>EP:</strong> Kilépő pupilla (mm)</div><div><strong>A:</strong> Apertúra</div><div><strong>M:</strong> Nagyítás</div></div>')}</div>
                 <div id="ep-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Valós Látómező ${createInfoBtn('Valós Látómező (TFOV)', 'Az égboltnak az a része fokban, amit ténylegesen látsz a távcsőben. Képlet: TFoV = AFoV ÷ M.')}</div>
+                <div class="${labelClass}">Valós Látómező ${createInfoBtn('Valós Látómező', '<div class="text-center text-lg font-mono mb-4">TFoV = <div class="inline-block align-middle text-center"><div class="border-b border-current">AFoV</div><div>M</div></div></div><div class="text-xs text-left space-y-1"><div><strong>TFoV:</strong> Valós látómező (°)</div><div><strong>AFoV:</strong> Látszólagos látómező</div><div><strong>M:</strong> Nagyítás</div></div>')}</div>
                 <div id="fov-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div>
-                <div class="${labelClass}">Max Látómező ${createInfoBtn('Maximális Látómező', 'A távcső és az okulár mezőrekesze által fizikailag megengedett legnagyobb látómező. Képlet: FoV_max = (b ÷ F) × 57.3')}</div>
+                <div class="${labelClass}">Max Látómező ${createInfoBtn('Max Látómező', '<div class="text-center text-lg font-mono mb-4">FoV<sub>max</sub> = (<div class="inline-block align-middle text-center"><div class="border-b border-current">b</div><div>F</div></div>) &times; 57.3</div><div class="text-xs text-left space-y-1"><div><strong>FoV<sub>max</sub>:</strong> Max látómező (°)</div><div><strong>b:</strong> Mezőrekesz (mm)</div><div><strong>F:</strong> Távcső fókusz</div></div>')}</div>
                 <div id="maxfov-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
             <div class="col-span-2">
-                <div class="${labelClass}">Drift Idő (Átvonulás) ${createInfoBtn('Drift Idő', 'Mennyi idő alatt vonul át egy égitest a látómezőn kikapcsolt óragép esetén. Képlet: T = (TFoV × 4) ÷ cos(Dec)')}</div>
+                <div class="${labelClass}">Drift Idő (Átvonulás) ${createInfoBtn('Drift Idő', '<div class="text-center text-lg font-mono mb-4">T = <div class="inline-block align-middle text-center"><div class="border-b border-current">TFoV &times; 4</div><div>cos(Dec)</div></div></div><div class="text-xs text-left space-y-1"><div><strong>T:</strong> Átvonulási idő (perc)</div><div><strong>TFoV:</strong> Valós látómező</div><div><strong>Dec:</strong> Deklináció</div></div>')}</div>
                 <div id="drift-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
             </div>
         </div>
