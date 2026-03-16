@@ -6,32 +6,34 @@ export function showInfoModal(title, content, isNightMode) {
 
     const modal = document.createElement('div');
     modal.id = 'info-modal';
-    modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4";
+    modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in";
     
-    const bgClass = isNightMode ? "bg-black border border-red-600" : "bg-slate-900 border border-white/10";
-    const textClass = isNightMode ? "text-red-600" : "text-white";
-    const btnClass = isNightMode ? "bg-red-600/20 hover:bg-red-600/40 text-red-600 border border-red-600" : "bg-blue-600 hover:bg-blue-700 text-white";
+    const textClass = isNightMode ? "text-red-500" : "text-white";
+    const btnClass = isNightMode ? "bg-red-900/40 hover:bg-red-900/60 text-red-500 border border-red-500/50" : "bg-blue-600/80 hover:bg-blue-600 text-white border border-blue-500/50";
 
     modal.innerHTML = `
-        <div class="${bgClass} rounded-2xl p-6 max-w-md w-full shadow-2xl transform transition-all backdrop-blur-xl">
+        <div class="astro-modal-content p-6 max-w-md w-full transform transition-all">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold uppercase tracking-wider ${textClass}">${title}</h3>
-                <button id="close-modal" class="opacity-50 hover:opacity-100 ${textClass}">
+                <button id="close-modal" class="opacity-50 hover:opacity-100 transition-opacity ${textClass}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="text-sm opacity-80 space-y-3 ${textClass}">
+            <div class="text-sm opacity-90 space-y-3 ${textClass} leading-relaxed">
                 ${content}
             </div>
             <div class="mt-6 flex justify-end">
-                <button id="close-modal-btn" class="px-4 py-2 rounded font-bold text-xs uppercase tracking-wider transition-all ${btnClass}">Rendben</button>
+                <button id="close-modal-btn" class="px-5 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all ${btnClass}">Rendben</button>
             </div>
         </div>
     `;
 
     document.body.appendChild(modal);
 
-    const close = () => modal.remove();
+    const close = () => {
+        modal.style.opacity = '0';
+        setTimeout(() => modal.remove(), 200);
+    };
     modal.querySelector('#close-modal').onclick = close;
     modal.querySelector('#close-modal-btn').onclick = close;
     modal.onclick = (e) => { if (e.target === modal) close(); };

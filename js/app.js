@@ -3,7 +3,16 @@ import { storage, TimeService, showInfoModal, createInfoBtn } from './utils.js';
 import { createDashboard } from './dashboard.js';
 import { createCalculator } from './calculator/index.js';
 import { createCatalog } from './components/catalog.js';
+import { createEvents } from './components/events.js';
+import { createPlanetarium } from './components/planetarium.js';
 import { createDropdown } from './components/dropdown.js';
+
+// Global input selection on click
+document.addEventListener('click', (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox' && e.target.type !== 'radio') {
+        e.target.select();
+    }
+});
 
 const app = document.getElementById('app');
 let isNightMode = storage.get('nightMode', false);
@@ -159,7 +168,9 @@ function render() {
     const tabs = [
         { id: 'dashboard', label: 'Műszerfal' },
         { id: 'calculator', label: 'Kalkulátorok' },
-        { id: 'catalog', label: 'Katalógus' }
+        { id: 'catalog', label: 'Katalógus' },
+        { id: 'planetarium', label: 'Planetárium' },
+        { id: 'events', label: 'Események' }
     ];
 
     tabs.forEach(tab => {
@@ -176,6 +187,14 @@ function render() {
     });
     app.appendChild(nav);
 
+    window.showVisibility = (ra, dec) => {
+        storage.set('vis-ra', ra);
+        storage.set('vis-dec', dec);
+        activeTab = 'planetarium';
+        storage.set('activeTab', activeTab);
+        render();
+    };
+
     // Content
     const content = document.createElement('main');
     
@@ -191,6 +210,10 @@ function render() {
         content.appendChild(createCalculator(isNightMode));
     } else if (activeTab === 'catalog') {
         content.appendChild(createCatalog(isNightMode));
+    } else if (activeTab === 'planetarium') {
+        content.appendChild(createPlanetarium(isNightMode));
+    } else if (activeTab === 'events') {
+        content.appendChild(createEvents(isNightMode));
     }
 
     app.appendChild(content);
@@ -198,7 +221,7 @@ function render() {
     // Footer
     const footer = document.createElement('footer');
     footer.className = "mt-12 py-6 border-t border-white/10 text-center opacity-40 text-[10px] uppercase tracking-widest";
-    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • v0.0.1.0-béta • Minden jog fenntartva`;
+    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • v0.0.0.3-beta • Minden jog fenntartva`;
     app.appendChild(footer);
 
     // Dynamic Background

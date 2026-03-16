@@ -69,3 +69,40 @@ export function renderMoonPhaseIcon(illumination, isWaxing, isNightMode = false)
     </svg>
     `;
 }
+
+export function renderSmallMoonPhaseIcon(illumination, isWaxing, isNightMode = false) {
+    const ill = Math.max(0, Math.min(1, illumination));
+    const r = 45;
+    const cx = 50;
+    const topY = 5;
+    const botY = 95;
+    const rx = +(r * Math.abs(1 - 2 * ill)).toFixed(3);
+    
+    let darkPath = "";
+    const baseSweep = isWaxing ? 0 : 1;
+    let termSweep;
+    if (isWaxing) {
+        termSweep = ill < 0.5 ? 0 : 1;
+    } else {
+        termSweep = ill < 0.5 ? 1 : 0;
+    }
+
+    if (ill < 0.001) {
+        darkPath = `M ${cx},${topY} A ${r},${r} 0 1,0 ${cx},${botY} A ${r},${r} 0 1,0 ${cx},${topY} Z`;
+    } else if (ill > 0.999) {
+        darkPath = "";
+    } else {
+        darkPath = `M ${cx},${topY} A ${r},${r} 0 0,${baseSweep} ${cx},${botY} A ${rx},${r} 0 0,${termSweep} ${cx},${topY} Z`;
+    }
+    
+    const lightColor = isNightMode ? '#ff0000' : '#e2e8f0';
+    const darkColor = isNightMode ? '#000000' : '#0f172a';
+    
+    return `
+    <svg viewBox="0 0 100 100" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" fill="${lightColor}" />
+        <path d="${darkPath}" fill="${darkColor}" />
+        <circle cx="50" cy="50" r="45" fill="none" stroke="${lightColor}" stroke-width="0.5" opacity="0.3" />
+    </svg>
+    `;
+}

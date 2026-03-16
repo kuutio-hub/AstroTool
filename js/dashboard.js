@@ -1,7 +1,7 @@
 import { SunIcon, MoonIcon, GlobeIcon } from './icons.js';
 import { formatTime, formatDate, formatNum, TimeService, createInfoBtn } from './utils.js';
 import { createAnalemma } from './components/analemma.js';
-import { renderMoonPhaseIcon } from './components/moonphase.js';
+import { renderMoonPhaseIcon, renderSmallMoonPhaseIcon } from './components/moonphase.js';
 
 export function createDashboard(location, sunData, moonData, isNightMode) {
     const container = document.createElement('div');
@@ -83,6 +83,12 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const solarNoon = formatTime(sunData.solarNoon);
     const nadir = formatTime(sunData.nadir);
     
+    // Golden & Blue Hour
+    const goldenHourMorning = sunData.goldenHourEnd ? `${formatTime(sunData.sunrise)} - ${formatTime(sunData.goldenHourEnd)}` : '-';
+    const goldenHourEvening = sunData.goldenHour ? `${formatTime(sunData.goldenHour)} - ${formatTime(sunData.sunset)}` : '-';
+    const blueHourMorning = sunData.dawn ? `${formatTime(sunData.dawn)} - ${formatTime(sunData.sunrise)}` : '-';
+    const blueHourEvening = sunData.sunset ? `${formatTime(sunData.sunset)} - ${formatTime(sunData.dusk)}` : '-';
+    
     // Sun distance and size
     const sunDistKm = 149597870.7; // Approx 1 AU
     const sunSizeDeg = 0.533; // Approx
@@ -106,6 +112,14 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
                     <span class="astro-label mb-0">Delelés / Nadir</span>
                     <span class="font-mono font-bold ${valueColor}">${solarNoon} / ${nadir}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="astro-label mb-0 text-yellow-500">Aranyóra (Reggel / Este)</span>
+                    <span class="font-mono font-bold text-[10px] ${valueColor}">${goldenHourMorning} | ${goldenHourEvening}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="astro-label mb-0 text-blue-400">Kékóra (Reggel / Este)</span>
+                    <span class="font-mono font-bold text-[10px] ${valueColor}">${blueHourMorning} | ${blueHourEvening}</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
                     <span class="astro-label mb-0">Távolság / Látszó méret</span>
@@ -148,6 +162,25 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     // Elongation
     const elongation = moonData.phase * 360;
 
+    // 30-day forecast
+    const forecast30 = [];
+    if (window.SunCalc) {
+        const nowTime = TimeService.now().getTime();
+        for (let i = 1; i <= 30; i++) {
+            const d = new Date(nowTime + i * 86400000);
+            const ill = window.SunCalc.getMoonIllumination(d);
+            const mt = window.SunCalc.getMoonTimes(d, location.latitude, location.longitude);
+            forecast30.push({
+                date: d,
+                fraction: ill.fraction,
+                phase: ill.phase,
+                isWaxing: ill.phase < 0.5,
+                rise: mt.rise ? formatTime(mt.rise).substring(0, 5) : '-',
+                set: mt.set ? formatTime(mt.set).substring(0, 5) : '-'
+            });
+        }
+    }
+
     // Find next major phases
     const getNextPhases = (count = 4) => {
         const now = TimeService.now();
@@ -158,28 +191,17 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         let searchTime = now.getTime();
         const hour = 3600000;
         
-        // Target phases: 0 (New), 0.25 (First Q), 0.5 (Full), 0.75 (Last Q)
-        // We look for transitions across these values
-        
-        const phaseNames = ["Újhold", "Első Negyed", "Telihold", "Utolsó Negyed"];
-        
-        // Helper to get phase at time t
         const getPhase = (t) => sc.getMoonIllumination(new Date(t)).phase;
         
         let lastPhase = getPhase(searchTime);
         
-        // Search forward for 60 days (approx 2 lunar cycles)
-        // Step by 1 hour to catch transitions
         for (let i = 0; i < 60 * 24; i++) {
             searchTime += hour;
             const currentPhase = getPhase(searchTime);
             
-            // Check for wrap around 0 (New Moon)
-            // Phase goes 0.99 -> 0.01
             if (lastPhase > 0.9 && currentPhase < 0.1) {
                 results.push({ name: "Újhold", date: new Date(searchTime), type: 'new' });
             }
-            // Check for other transitions
             else if (lastPhase < 0.25 && currentPhase >= 0.25) {
                 results.push({ name: "Első Negyed", date: new Date(searchTime), type: 'first' });
             }
@@ -202,16 +224,31 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const nextFullMoon = nextPhases.find(p => p.type === 'full');
     
     const nextPhaseStr = nextPhases[0] ? `${nextPhases[0].name}: ${formatDate(nextPhases[0].date)}` : '';
-    
-    const morePhasesContent = nextPhases.map(p => `
-        <div class="flex justify-between border-b border-white/5 py-2">
-            <span class="font-bold ${p.type === 'new' ? 'text-blue-300' : (p.type === 'full' ? 'text-yellow-300' : '')}">${p.name}</span>
-            <span class="font-mono text-xs">${formatDate(p.date)} ${formatTime(p.date)}</span>
+
+    const forecastHtml = forecast30.map(f => `
+        <div class="flex flex-col items-center min-w-[60px] p-2 bg-white/5 rounded">
+            <div class="text-[9px] opacity-70 mb-1">${f.date.getDate()}.</div>
+            ${renderSmallMoonPhaseIcon(f.fraction, f.isWaxing, isNightMode)}
+            <div class="text-[8px] mt-1 text-blue-300">↑${f.rise}</div>
+            <div class="text-[8px] text-red-400">↓${f.set}</div>
         </div>
     `).join('');
 
     window.showMorePhases = () => {
-        window.showInfo('Következő Holdfázisok', `<div class="space-y-1">${morePhasesContent}</div>`);
+        window.showInfo('30 Napos Holdfázis Előrejelzés', `
+            <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                ${forecastHtml}
+            </div>
+            <div class="mt-4 space-y-1 border-t border-white/10 pt-2">
+                <div class="font-bold text-xs uppercase mb-2">Következő Fő Fázisok:</div>
+                ${nextPhases.map(p => `
+                    <div class="flex justify-between border-b border-white/5 py-1">
+                        <span class="font-bold ${p.type === 'new' ? 'text-blue-300' : (p.type === 'full' ? 'text-yellow-300' : '')}">${p.name}</span>
+                        <span class="font-mono text-xs">${formatDate(p.date)} ${formatTime(p.date)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `);
     };
 
     moonCard.innerHTML = `
@@ -257,8 +294,8 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                     <span class="font-mono font-bold text-[10px] ${valueColor}">${nextFullMoon ? formatDate(nextFullMoon.date) : '-'}</span>
                 </div>
                 <div class="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
-                    <span class="astro-label mb-0">Következő fázis</span>
-                    <button onclick="window.showMorePhases()" class="font-mono font-bold text-[10px] ${valueColor} hover:underline decoration-dotted underline-offset-2">${nextPhaseStr} ▾</button>
+                    <span class="astro-label mb-0">30 Napos Előrejelzés</span>
+                    <button onclick="window.showMorePhases()" class="font-mono font-bold text-[10px] ${valueColor} hover:underline decoration-dotted underline-offset-2">Mutasd ▾</button>
                 </div>
             </div>
         </div>

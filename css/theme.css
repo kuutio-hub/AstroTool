@@ -1,6 +1,6 @@
 /* Custom styles for AstroTool 2.0 */
 :root {
-    --dim-level: 0;
+    --dim-level: 0.5; /* Dark overlay for better readability */
 }
 
 #dim-overlay {
@@ -8,7 +8,7 @@
     inset: 0;
     background-color: rgba(0, 0, 0, var(--dim-level));
     pointer-events: none;
-    z-index: 9999;
+    z-index: -1; /* Behind content, over background */
     transition: background-color 0.3s ease;
 }
 
@@ -17,9 +17,18 @@ body.day-mode {
     color: #ffffff;
 }
 
+body.day-mode .glow-text {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
 body.night-mode {
     background-color: #000000 !important;
+    background-image: none !important;
     color: #ff0000 !important;
+}
+
+body.night-mode #dim-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 body.night-mode .glow-text {
@@ -32,8 +41,8 @@ body.night-mode .glow-box {
 
 /* Inputs and selects */
 .astro-input {
-    background-color: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     color: #ffffff;
     padding: 0.5rem;
     border-radius: 0.5rem;
@@ -43,42 +52,69 @@ body.night-mode .glow-box {
     font-family: monospace;
     font-weight: bold;
     appearance: none;
+    -moz-appearance: textfield; /* Remove spinner Firefox */
+}
+
+/* Remove spinner Chrome/Safari/Edge */
+.astro-input::-webkit-outer-spin-button,
+.astro-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .astro-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    border-color: #ef4444; /* Red border on focus (Apple style) */
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    background-color: rgba(0, 0, 0, 0.6);
 }
 
 body.night-mode .astro-input,
 body.night-mode select,
 body.night-mode input {
     background-color: #000000 !important;
-    border-color: #ff0000 !important;
+    border-color: rgba(255, 0, 0, 0.5) !important;
     color: #ff0000 !important;
     box-shadow: none !important;
 }
 
 body.night-mode .astro-input:focus {
     border-color: #ff0000 !important;
-    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2) !important;
+    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.3) !important;
 }
 
 .astro-card {
-    background-color: rgba(15, 23, 42, 0.6);
+    background-color: rgba(15, 23, 42, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
     padding: 1rem;
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     transition: all 0.3s ease;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 body.night-mode .astro-card {
-    background-color: rgba(0, 0, 0, 0.85) !important;
-    border-color: rgba(255, 0, 0, 0.3) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 0, 0, 0.4) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    box-shadow: 0 4px 30px rgba(255, 0, 0, 0.05) !important;
+}
+
+/* Info Popups (Apple style) */
+.astro-modal-content {
+    background-color: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+body.night-mode .astro-modal-content {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    border: 1px solid rgba(255, 0, 0, 0.5) !important;
+    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.2) !important;
 }
 
 .astro-label {

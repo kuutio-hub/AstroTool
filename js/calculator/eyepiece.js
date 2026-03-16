@@ -26,6 +26,22 @@ export function createEyepieceCalc(isNightMode) {
         card.querySelector('#fov-res').textContent = fov.toFixed(2) + '°';
         card.querySelector('#maxfov-res').textContent = maxFov.toFixed(2) + '°';
         card.querySelector('#drift-res').textContent = driftTime.toFixed(1) + ' min';
+
+        let epWarning = '';
+        let epColor = isNightMode ? 'text-red-400' : 'text-white';
+        if (ep > 7) {
+            epWarning = 'Túl nagy kilépő pupilla – fényveszteség.';
+            epColor = 'text-yellow-500';
+        } else if (ep < 0.5) {
+            epWarning = 'Túl kicsi kilépő pupilla – diffrakció dominál.';
+            epColor = 'text-yellow-500';
+        } else {
+            epWarning = 'Optimális tartomány.';
+            epColor = 'text-green-500';
+        }
+        card.querySelector('#ep-res').className = `font-mono font-bold text-lg ${epColor}`;
+        card.querySelector('#ep-warning').textContent = epWarning;
+        card.querySelector('#ep-warning').className = `text-[9px] mt-1 ${epColor} opacity-80`;
     };
 
     const inputClass = "astro-input p-1 text-xs w-full";
@@ -70,6 +86,7 @@ export function createEyepieceCalc(isNightMode) {
             <div>
                 <div class="${labelClass}">Kilépő Pupilla ${createInfoBtn('Kilépő Pupilla', '<div class="text-center text-lg font-mono mb-4">EP = <div class="inline-block align-middle text-center"><div class="border-b border-current">A</div><div>M</div></div></div><div class="text-xs text-left space-y-1"><div><strong>EP:</strong> Kilépő pupilla (mm)</div><div><strong>A:</strong> Apertúra</div><div><strong>M:</strong> Nagyítás</div></div>')}</div>
                 <div id="ep-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
+                <div id="ep-warning" class="text-[9px] mt-1"></div>
             </div>
             <div>
                 <div class="${labelClass}">Valós Látómező ${createInfoBtn('Valós Látómező', '<div class="text-center text-lg font-mono mb-4">TFoV = <div class="inline-block align-middle text-center"><div class="border-b border-current">AFoV</div><div>M</div></div></div><div class="text-xs text-left space-y-1"><div><strong>TFoV:</strong> Valós látómező (°)</div><div><strong>AFoV:</strong> Látszólagos látómező</div><div><strong>M:</strong> Nagyítás</div></div>')}</div>

@@ -3,6 +3,30 @@ import { constellations, objectTypes } from '../catalogs.js';
 import { CatalogIcon, InfoIcon, ChevronDownIcon, ChevronUpIcon } from '../icons.js';
 import { storage, TimeService, calculateAltAz, formatNum } from '../utils.js';
 
+window.updateCatalogDistance = (id, distanceLy, unit) => {
+    const distValEl = document.getElementById(`modal-dist-val-${id}`);
+    if (!distValEl) return;
+    
+    let val = distanceLy;
+    let suffix = ' fényév';
+    
+    if (unit === 'pc') {
+        val = val / 3.26156;
+        if (val >= 1e9) { val = val / 1e9; suffix = ' Gpc'; }
+        else if (val >= 1e6) { val = val / 1e6; suffix = ' Mpc'; }
+        else if (val >= 1e3) { val = val / 1e3; suffix = ' kpc'; }
+        else { suffix = ' pc'; }
+    } else if (unit === 'km') {
+        val = val * 9.461e12;
+        const exp = Math.floor(Math.log10(val));
+        const mantissa = (val / Math.pow(10, exp)).toFixed(2).replace('.', ',');
+        distValEl.innerHTML = `${mantissa} &times; 10<sup>${exp}</sup> km`;
+        return;
+    }
+    
+    distValEl.textContent = val.toLocaleString('hu-HU', { maximumFractionDigits: 2 }) + suffix;
+};
+
 const TypeIcons = {
     'GAL': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4c4.418 0 8 3.582 8 8s-3.582 8-8 8-8-3.582-8-8 3.582-8 8-8zm0 0c1.5 0 2.5 2 2.5 4 0 1.5-1 3-2.5 3s-2.5-1.5-2.5-3c0-2 1-4 2.5-4zm0 16c-1.5 0-2.5-2-2.5-4 0-1.5 1-3 2.5-3s2.5 1.5 2.5 3c0 2-1 4-2.5 4z"></path></svg>`,
     'PN': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" stroke-width="1.5" stroke-dasharray="3 3"></circle><circle cx="12" cy="12" r="2" fill="currentColor"></circle></svg>`,
@@ -176,9 +200,8 @@ export function createCatalog(isNightMode) {
             const displayList = currentResults.slice(startIndex, startIndex + itemsPerPage);
 
             displayList.forEach(item => {
-                const isExpanded = expandedItem === item.id;
                 const itemEl = document.createElement('div');
-                itemEl.className = `astro-card transition-all`;
+                itemEl.className = `astro-card transition-all cursor-pointer hover:bg-white/5`;
                 
                 const commonName = item.common_name || item.name || item.id;
                 const otherIds = item.other_ids ? ` • ${item.other_ids}` : '';
@@ -196,7 +219,7 @@ export function createCatalog(isNightMode) {
                 }
 
                 itemEl.innerHTML = `
-                    <div class="flex justify-between items-center cursor-pointer p-4">
+                    <div class="flex justify-between items-center p-2">
                         <div class="flex items-center gap-3">
                             <div class="font-mono font-bold text-lg ${textColor}">${item.id}</div>
                             <div>
@@ -207,86 +230,61 @@ export function createCatalog(isNightMode) {
                             </div>
                         </div>
                         <div class="${isNightMode ? 'text-red-800' : 'text-slate-400'}">
-                            ${isExpanded ? ChevronUpIcon("w-4 h-4") : ChevronDownIcon("w-4 h-4")}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </div>
                     </div>
-                    ${isExpanded ? `
-                        <div class="px-4 pb-4 animate-fade-in">
-                            <div class="pt-3 border-t border-white/10 text-xs space-y-2">
-                                <div class="flex justify-between"><span class="astro-label mb-0">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
-                                <div class="flex justify-between"><span class="astro-label mb-0">RA:</span> <span class="font-mono">${item.ra || '-'}</span></div>
-                                <div class="flex justify-between"><span class="astro-label mb-0">Dec:</span> <span class="font-mono">${item.dec || '-'}</span></div>
-                                <div class="flex justify-between"><span class="astro-label mb-0">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
-                                <div class="flex justify-between"><span class="astro-label mb-0">Méret:</span> <span class="font-mono">${item.size || '-'}</span></div>
-                                
-                                <div class="flex justify-between items-center">
-                                    <span class="astro-label mb-0">Távolság:</span> 
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-mono" id="dist-val-${item.id}">-</span>
-                                        <select id="dist-unit-${item.id}" class="astro-input p-0 text-[10px] w-auto bg-transparent border-none">
-                                            <option value="ly">Fényév</option>
-                                            <option value="pc">Parsec</option>
-                                            <option value="km">Kilométer</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-between"><span class="astro-label mb-0">Jelenlegi Helyzet:</span> <span class="font-mono">${item.pos ? `Alt: ${item.pos.alt.toFixed(1)}° | Az: ${item.pos.az.toFixed(1)}°` : '-'}${visibilityHtml}</span></div>
-
-                                ${item.description ? `<div class="mt-3 p-2 rounded bg-white/5 text-[11px] leading-relaxed opacity-90 border-l-2 ${isNightMode ? 'border-red-500' : 'border-blue-500'}">${item.description}</div>` : ''}
-                                ${item.notes ? `<div class="mt-2 text-[10px] italic opacity-80">${item.notes}</div>` : ''}
-                            </div>
-                        </div>
-                    ` : ''}
                 `;
 
-                itemEl.querySelector('.cursor-pointer').onclick = () => {
-                    expandedItem = isExpanded ? null : item.id;
-                    renderList();
-                };
+                itemEl.onclick = () => {
+                    const detailsHtml = `
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
+                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Típus:</span> <span>${typeName}</span></div>
+                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Csillagkép:</span> <span>${constellations[item.constellation] || item.constellation}</span></div>
+                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">RA:</span> <span class="font-mono">${item.ra || '-'}</span></div>
+                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Dec:</span> <span class="font-mono">${item.dec || '-'}</span></div>
+                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
+                            <div class="flex justify-between border-b border-white/10 pb-1">
+                                <span class="opacity-70 uppercase text-[10px] font-bold">Méret:</span> 
+                                <span class="font-mono">${item.size || '-'}</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/10 pb-1">
+                                <span class="opacity-70 uppercase text-[10px] font-bold">Távolság:</span> 
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono" id="modal-dist-val-${item.id}">${item.distance_ly ? item.distance_ly.toLocaleString('hu-HU') + ' fényév' : '-'}</span>
+                                    ${item.distance_ly ? `
+                                    <select id="modal-dist-unit-${item.id}" class="astro-input p-0 text-[10px] w-auto bg-transparent border-none" onchange="window.updateCatalogDistance('${item.id}', ${item.distance_ly}, this.value)">
+                                        <option value="ly">Fényév</option>
+                                        <option value="pc">Parsec</option>
+                                        <option value="km">Kilométer</option>
+                                    </select>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="flex justify-between border-b border-white/10 pb-1">
+                                <span class="opacity-70 uppercase text-[10px] font-bold">Jelenlegi Helyzet:</span> 
+                                <span class="font-mono">${item.pos ? `Alt: ${item.pos.alt.toFixed(1)}° | Az: ${item.pos.az.toFixed(1)}°` : '-'}${visibilityHtml}</span>
+                            </div>
+                            
+                            ${item.description ? `<div class="mt-4 p-3 rounded-lg bg-black/20 text-xs leading-relaxed border-l-2 ${isNightMode ? 'border-red-500' : 'border-blue-500'}">${item.description}</div>` : ''}
+                            ${item.notes ? `<div class="mt-2 text-[10px] italic opacity-60">${item.notes}</div>` : ''}
 
-                if (isExpanded) {
-                    // Distance Conversion Logic
-                    const distSelect = itemEl.querySelector(`#dist-unit-${item.id}`);
-                    const distValEl = itemEl.querySelector(`#dist-val-${item.id}`);
+                            <div class="pt-4 mt-4 border-t border-white/10">
+                                <button id="btn-vis-${item.id}" class="w-full py-3 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold uppercase tracking-wider transition-colors border border-white/20">
+                                    Láthatósági Grafikon Mutatása
+                                </button>
+                            </div>
+                        </div>
+                    `;
                     
-                    if (!distanceUnits[item.id]) distanceUnits[item.id] = 'ly';
-                    distSelect.value = distanceUnits[item.id];
+                    // We need to use a custom modal or the existing showInfoModal
+                    // Since showInfoModal doesn't easily let us attach event listeners to buttons inside it AFTER it's created (unless we use setTimeout or global functions),
+                    // Let's use the global window.showVisibility function.
                     
-                    const updateDistance = () => {
-                        if (!item.distance_ly) {
-                            distValEl.textContent = '-';
-                            return;
-                        }
-                        const unit = distSelect.value;
-                        distanceUnits[item.id] = unit;
-                        let val = item.distance_ly;
-                        let suffix = ' fényév';
-                        
-                        if (unit === 'pc') {
-                            val = val / 3.26156;
-                            if (val >= 1e9) { val = val / 1e9; suffix = ' Gpc'; }
-                            else if (val >= 1e6) { val = val / 1e6; suffix = ' Mpc'; }
-                            else if (val >= 1e3) { val = val / 1e3; suffix = ' kpc'; }
-                            else { suffix = ' pc'; }
-                        } else if (unit === 'km') {
-                            val = val * 9.461e12;
-                            // Scientific notation: 7.57 x 10^15
-                            const exp = Math.floor(Math.log10(val));
-                            const mantissa = (val / Math.pow(10, exp)).toFixed(2).replace('.', ',');
-                            distValEl.innerHTML = `${mantissa} &times; 10<sup>${exp}</sup> km`;
-                            return;
-                        } else {
-                            // Light years
-                            suffix = ' fényév';
-                        }
-                        
-                        distValEl.textContent = val.toLocaleString('hu-HU', { maximumFractionDigits: 2 }) + suffix;
-                    };
+                    const finalHtml = detailsHtml.replace(`id="btn-vis-${item.id}"`, `onclick="document.getElementById('info-modal').remove(); window.showVisibility('${item.ra}', '${item.dec}')"`);
                     
-                    distSelect.onchange = updateDistance;
-                    updateDistance();
-                }
+                    window.showInfo(item.id + (commonName !== item.id ? ` - ${commonName}` : ''), finalHtml);
+                };
 
                 listDiv.appendChild(itemEl);
             });
