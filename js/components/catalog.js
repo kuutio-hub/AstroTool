@@ -1,7 +1,6 @@
 import { catalogService } from '../services/catalogService.js';
 import { constellations, objectTypes } from '../catalogs.js';
-import { CatalogIcon, InfoIcon, ChevronDownIcon, ChevronUpIcon } from '../icons.js';
-import { storage, TimeService, calculateAltAz, formatNum } from '../utils.js';
+import { storage, TimeService, calculateAltAz } from '../utils.js';
 
 window.updateCatalogDistance = (id, distanceLy, unit) => {
     const distValEl = document.getElementById(`modal-dist-val-${id}`);
@@ -48,20 +47,16 @@ export function createCatalog(isNightMode) {
     let selectedConst = 'ALL';
     let selectedType = 'ALL';
     let sortBy = 'default'; // 'default' or 'altitude'
-    let expandedItem = null;
     let currentPage = 1;
     const itemsPerPage = 25;
     let currentResults = [];
     let isLoading = false;
-    
-    // Distance unit state for expanded items
-    const distanceUnits = {}; // { itemId: 'ly' | 'pc' | 'km' }
 
     // Render Function
     async function render() {
         container.innerHTML = '';
         
-        const textColor = isNightMode ? 'text-red-500' : 'text-white';
+        const textColor = isNightMode ? 'text-red-500' : 'text-slate-900';
 
         // Filters
         const filtersDiv = document.createElement('div');
@@ -179,7 +174,8 @@ export function createCatalog(isNightMode) {
 
                 currentResults = results;
                 renderList();
-            } catch (error) {
+            } catch (err) {
+                console.error("Catalog load error:", err);
                 listDiv.innerHTML = `<div class="text-center text-red-500 text-xs py-8">Hiba történt az adatok betöltésekor.</div>`;
             } finally {
                 isLoading = false;
@@ -201,7 +197,7 @@ export function createCatalog(isNightMode) {
 
             displayList.forEach(item => {
                 const itemEl = document.createElement('div');
-                itemEl.className = `astro-card transition-all cursor-pointer hover:bg-white/5`;
+                itemEl.className = `astro-card transition-all cursor-pointer ${isNightMode ? 'hover:bg-red-900/10' : 'hover:bg-slate-50'}`;
                 
                 const commonName = item.common_name || item.name || item.id;
                 const otherIds = item.other_ids ? ` • ${item.other_ids}` : '';
@@ -238,17 +234,17 @@ export function createCatalog(isNightMode) {
                 itemEl.onclick = () => {
                     const detailsHtml = `
                         <div class="space-y-3 text-sm">
-                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
-                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Típus:</span> <span>${typeName}</span></div>
-                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Csillagkép:</span> <span>${constellations[item.constellation] || item.constellation}</span></div>
-                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">RA:</span> <span class="font-mono">${item.ra || '-'}</span></div>
-                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Dec:</span> <span class="font-mono">${item.dec || '-'}</span></div>
-                            <div class="flex justify-between border-b border-white/10 pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
-                            <div class="flex justify-between border-b border-white/10 pb-1">
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Katalógus:</span> <span class="font-mono">${item.catalog}</span></div>
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Típus:</span> <span>${typeName}</span></div>
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Csillagkép:</span> <span>${constellations[item.constellation] || item.constellation}</span></div>
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">RA:</span> <span class="font-mono">${item.ra || '-'}</span></div>
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Dec:</span> <span class="font-mono">${item.dec || '-'}</span></div>
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1"><span class="opacity-70 uppercase text-[10px] font-bold">Fényesség:</span> <span class="font-mono">${item.magnitude ? item.magnitude + ' mag' : '-'}</span></div>
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1">
                                 <span class="opacity-70 uppercase text-[10px] font-bold">Méret:</span> 
                                 <span class="font-mono">${item.size || '-'}</span>
                             </div>
-                            <div class="flex justify-between items-center border-b border-white/10 pb-1">
+                            <div class="flex justify-between items-center border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1">
                                 <span class="opacity-70 uppercase text-[10px] font-bold">Távolság:</span> 
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono" id="modal-dist-val-${item.id}">${item.distance_ly ? item.distance_ly.toLocaleString('hu-HU') + ' fényév' : '-'}</span>
@@ -261,16 +257,16 @@ export function createCatalog(isNightMode) {
                                     ` : ''}
                                 </div>
                             </div>
-                            <div class="flex justify-between border-b border-white/10 pb-1">
+                            <div class="flex justify-between border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-1">
                                 <span class="opacity-70 uppercase text-[10px] font-bold">Jelenlegi Helyzet:</span> 
                                 <span class="font-mono">${item.pos ? `Alt: ${item.pos.alt.toFixed(1)}° | Az: ${item.pos.az.toFixed(1)}°` : '-'}${visibilityHtml}</span>
                             </div>
                             
-                            ${item.description ? `<div class="mt-4 p-3 rounded-lg bg-black/20 text-xs leading-relaxed border-l-2 ${isNightMode ? 'border-red-500' : 'border-blue-500'}">${item.description}</div>` : ''}
+                            ${item.description ? `<div class="mt-4 p-3 rounded-lg ${isNightMode ? 'bg-black/40' : 'bg-slate-50'} text-xs leading-relaxed border-l-2 ${isNightMode ? 'border-red-500' : 'border-blue-500'}">${item.description}</div>` : ''}
                             ${item.notes ? `<div class="mt-2 text-[10px] italic opacity-60">${item.notes}</div>` : ''}
 
-                            <div class="pt-4 mt-4 border-t border-white/10">
-                                <button id="btn-vis-${item.id}" class="w-full py-3 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold uppercase tracking-wider transition-colors border border-white/20">
+                            <div class="pt-4 mt-4 border-t ${isNightMode ? 'border-red-900/30' : 'border-slate-100'}">
+                                <button id="btn-vis-${item.id}" class="w-full py-3 rounded-lg ${isNightMode ? 'bg-red-900/20 hover:bg-red-900/40 border-red-900/30' : 'bg-slate-100 hover:bg-slate-200 border-slate-200'} text-xs font-bold uppercase tracking-wider transition-colors border">
                                     Láthatósági Grafikon Mutatása
                                 </button>
                             </div>

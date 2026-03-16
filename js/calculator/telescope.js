@@ -1,106 +1,136 @@
-import { storage, createInfoBtn } from '../utils.js';
+import { safeFixed } from '../utils.js';
 
-export function createTelescopeCalc(isNightMode) {
-    const card = document.createElement('div');
-    card.className = "astro-card h-full flex flex-col";
+export function renderTelescopeCalculators(globalParams, isNightMode) {
+    const container = document.createElement('div');
+    container.className = 'space-y-2';
     
-    let data = {
-        F: storage.get('F', 1000),
-        A: storage.get('A', 200),
-        bortle: storage.get('bortle', 4),
-        obs: storage.get('obs', 0), // Obstruction %
-        trans: storage.get('trans', 90) // Transmission %
-    };
+    const resultBoxClass = isNightMode ? 'bg-red-900/10 border-red-900/30' : 'bg-slate-50 border-slate-200';
+    const mutedTextClass = isNightMode ? 'text-slate-400' : 'text-slate-600';
 
-    const update = () => {
-        const fRatio = data.F / data.A;
-        const dawes = 116 / data.A;
-        const rayleigh = 138 / data.A;
-        
-        // Effective aperture considering obstruction
-        const effA = Math.sqrt(Math.pow(data.A, 2) - Math.pow(data.A * (data.obs / 100), 2));
-        
-        // Light gathering power compared to 7mm eye pupil, with transmission
-        const lightGathering = Math.pow(effA / 7, 2) * (data.trans / 100);
-        
-        // Limiting magnitude based on Bortle
-        // NELM approx: B1=7.8, B2=7.3, B3=6.8, B4=6.3, B5=5.8, B6=5.3, B7=4.8, B8=4.3, B9=3.8
-        const nelm = 8.3 - (data.bortle * 0.5);
-        const limitingMag = nelm + 5 * Math.log10(effA / 7) + 2.5 * Math.log10(data.trans / 100);
-
-        card.querySelector('#fratio-res').textContent = 'f/' + fRatio.toFixed(1);
-        card.querySelector('#dawes-res').textContent = dawes.toFixed(2) + '"';
-        card.querySelector('#rayleigh-res').textContent = rayleigh.toFixed(2) + '"';
-        card.querySelector('#mag-res').textContent = limitingMag.toFixed(1) + ' mag';
-        card.querySelector('#light-res').textContent = Math.round(lightGathering) + 'x';
-    };
-
-    const inputClass = "astro-input p-1 text-xs w-full";
-    const labelClass = "astro-label text-[10px] block truncate";
-
-    card.innerHTML = `
-        <h3 class="font-bold uppercase text-xs mb-4 ${isNightMode ? 'text-red-500' : 'text-blue-300'}">Teleszkóp Kalkulátor</h3>
-        <div class="space-y-3 mb-4 flex-grow custom-scrollbar overflow-y-auto pr-1">
-            <div>
-                <label class="${labelClass}">Bortle Skála (1-9) ${createInfoBtn('Bortle Skála', 'Az égbolt fényszennyezettségét mérő skála. 1: tökéletesen sötét, 9: belváros. Meghatározza a határmagnitúdót.')}</label>
-                <input type="number" id="tel-bortle" value="${data.bortle}" class="${inputClass}" min="1" max="9" step="1">
-            </div>
+    // Focal Length <-> Focal Ratio
+    container.appendChild(createAccordion('Fókusztávolság ↔ Fókuszarány', 'LensIcon', `
+        <div class="astro-radio-group mb-4">
+            <input type="radio" id="calc-f" name="tel-calc" value="f" class="astro-radio-input hidden" checked>
+            <label for="calc-f" class="astro-radio-label">Fókuszarány (f/)</label>
             
-            <details class="mb-4 border border-white/10 rounded overflow-hidden group">
-                <summary class="bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-black/40 transition-colors flex justify-between items-center ${isNightMode ? 'text-red-400' : 'text-blue-300'}">
-                    <span>Paraméterek</span>
-                    <svg class="w-3 h-3 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </summary>
-                <div class="p-3 space-y-3 bg-black/10">
-                    <div>
-                        <label class="${labelClass}">Központi kitakarás (%) ${createInfoBtn('Központi kitakarás', 'Tükrös távcsöveknél a segédtükör által kitakart terület százalékos aránya az átmérőhöz képest (obs). Csökkenti a kontrasztot.')}</label>
-                        <input type="number" id="tel-obs" value="${data.obs}" class="${inputClass}" min="0" max="100">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">Transzmisszió (%) ${createInfoBtn('Transzmisszió', 'A lencsék és tükrök fényáteresztő/visszaverő képessége (trans). Általában 85-95%.')}</label>
-                        <input type="number" id="tel-trans" value="${data.trans}" class="${inputClass}" min="1" max="100">
-                    </div>
+            <input type="radio" id="calc-F" name="tel-calc" value="F" class="astro-radio-input hidden">
+            <label for="calc-F" class="astro-radio-label">Fókusztáv (F)</label>
+        </div>
+        
+        <div id="tel-input-container" class="mb-4">
+            <label class="astro-label" id="tel-input-label">Fókusztávolság (mm)</label>
+            <input type="number" inputmode="decimal" id="tel-input" class="astro-input" value="${globalParams.F}">
+        </div>
+        
+        <div class="p-4 ${resultBoxClass} rounded-xl border">
+            <div class="text-[10px] ${mutedTextClass} uppercase font-extrabold mb-1" id="tel-result-label">Eredmény: Fókuszarány</div>
+            <div class="text-2xl font-mono" id="tel-result">--</div>
+        </div>
+    `));
+
+    // Resolution Limits
+    container.appendChild(createAccordion('Felbontási határok', 'EyeIcon', `
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="p-4 ${resultBoxClass} rounded-xl border">
+                <div class="text-[10px] ${mutedTextClass} uppercase font-extrabold mb-1">Dawes-határ</div>
+                <div class="text-xl font-mono" id="res-dawes">--</div>
+            </div>
+            <div class="p-4 ${resultBoxClass} rounded-xl border">
+                <div class="text-[10px] ${mutedTextClass} uppercase font-extrabold mb-1">Rayleigh-határ</div>
+                <div class="text-xl font-mono" id="res-rayleigh">--</div>
+            </div>
+        </div>
+    `));
+
+    // Limiting Magnitude
+    container.appendChild(createAccordion('Határmagnitúdó', 'StarIcon', `
+        <div class="p-4 ${resultBoxClass} rounded-xl border">
+            <div class="text-[10px] ${mutedTextClass} uppercase font-extrabold mb-1">Elméleti határmagnitúdó</div>
+            <div class="text-2xl font-mono" id="lim-mag">--</div>
+        </div>
+    `));
+
+    // Moon Area
+    container.appendChild(createAccordion('Hold terület (FOV %)', 'MoonIcon', `
+        <div class="p-4 ${resultBoxClass} rounded-xl border">
+            <div class="text-[10px] ${mutedTextClass} uppercase font-extrabold mb-1">Hold területe a látómezőben</div>
+            <div class="text-2xl font-mono" id="moon-area">--</div>
+            <div class="text-[10px] ${mutedTextClass} mt-1">Képlet: (Hold_Terület / Látómező_Terület) * 100%</div>
+        </div>
+    `));
+
+    // Logic
+    setTimeout(() => {
+        const A = globalParams.A;
+
+        // Focal Logic
+        const telRadios = container.querySelectorAll('input[name="tel-calc"]');
+        const telInputLabel = container.querySelector('#tel-input-label');
+        const telInput = container.querySelector('#tel-input');
+        const telResultLabel = container.querySelector('#tel-result-label');
+        const telResult = container.querySelector('#tel-result');
+
+        const updateTel = () => {
+            const mode = container.querySelector('input[name="tel-calc"]:checked').value;
+            const val = parseFloat(telInput.value);
+            
+            if (mode === 'f') {
+                telInputLabel.textContent = 'Fókusztávolság (mm)';
+                telResultLabel.textContent = 'Eredmény: Fókuszarány';
+                telResult.textContent = (val > 0 && A > 0) ? 'f/' + safeFixed(val / A, 1) : '--';
+            } else {
+                telInputLabel.textContent = 'Fókuszarány (f/)';
+                telResultLabel.textContent = 'Eredmény: Fókusztávolság';
+                telResult.textContent = (val > 0 && A > 0) ? safeFixed(A * val, 0, ' mm') : '--';
+            }
+        };
+
+        telRadios.forEach(r => r.addEventListener('change', updateTel));
+        telInput.addEventListener('input', updateTel);
+        updateTel();
+
+        // Resolution Logic
+        const resDawes = container.querySelector('#res-dawes');
+        const resRayleigh = container.querySelector('#res-rayleigh');
+        if (A > 0) {
+            resDawes.textContent = safeFixed(116 / A, 2, '"');
+            resRayleigh.textContent = safeFixed(138 / A, 2, '"');
+        }
+
+        // Limiting Magnitude Logic
+        const limMag = container.querySelector('#lim-mag');
+        if (A > 0) {
+            limMag.textContent = safeFixed(2 + 5 * Math.log10(A), 1, ' mag');
+        }
+
+        // Moon Area Logic
+        const moonArea = container.querySelector('#moon-area');
+        // Moon angular diameter ~ 0.5 deg
+        const moonRadius = 0.25;
+        const moonAreaSqDeg = Math.PI * Math.pow(moonRadius, 2);
+        moonArea.textContent = safeFixed(moonAreaSqDeg, 4, ' sq deg');
+
+    }, 0);
+
+    return container;
+}
+
+function createAccordion(title, iconName, contentHtml) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'astro-accordion-wrapper';
+    wrapper.innerHTML = `
+        <details class="astro-card group p-0 overflow-hidden mb-2">
+            <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-bold uppercase tracking-wider text-sm">
+                <div class="flex items-center gap-3">
+                    <span class="icon-placeholder" data-icon="${iconName}"></span>
+                    <span>${title}</span>
                 </div>
-            </details>
-        </div>
-        <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-3 border-t border-white/10 mt-auto">
-            <div>
-                <div class="${labelClass}">Fényerő ${createInfoBtn('Fényerő', '<div class="text-center text-lg font-mono mb-4">f/ = <div class="inline-block align-middle text-center"><div class="border-b border-current">F</div><div>A</div></div></div><div class="text-xs text-left space-y-1"><div><strong>F:</strong> Fókusztávolság</div><div><strong>A:</strong> Apertúra (átmérő)</div></div>')}</div>
-                <div id="fratio-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
+                <span class="transform group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-4 pt-0 border-t border-divider mt-2">
+                ${contentHtml}
             </div>
-            <div>
-                <div class="${labelClass}">Határmagnitúdó ${createInfoBtn('Határmagnitúdó', '<div class="text-center text-lg font-mono mb-4">m<sub>lim</sub> = NELM + 5&middot;log(<div class="inline-block align-middle text-center"><div class="border-b border-current">A<sub>eff</sub></div><div>7</div></div>)</div><div class="text-xs text-left space-y-1"><div><strong>NELM:</strong> Szabad szemes határ</div><div><strong>A<sub>eff</sub>:</strong> Effektív átmérő</div><div><strong>7:</strong> Pupilla méret (mm)</div></div>')}</div>
-                <div id="mag-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
-            </div>
-            <div>
-                <div class="${labelClass}">Dawes Határ ${createInfoBtn('Dawes Határ', '<div class="text-center text-lg font-mono mb-4">R = <div class="inline-block align-middle text-center"><div class="border-b border-current">116</div><div>A</div></div></div><div class="text-xs text-left space-y-1"><div><strong>R:</strong> Felbontás (ívmásodperc)</div><div><strong>A:</strong> Apertúra (mm)</div></div>')}</div>
-                <div id="dawes-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
-            </div>
-            <div>
-                <div class="${labelClass}">Rayleigh Határ ${createInfoBtn('Rayleigh Határ', '<div class="text-center text-lg font-mono mb-4">R = <div class="inline-block align-middle text-center"><div class="border-b border-current">138</div><div>A</div></div></div><div class="text-xs text-left space-y-1"><div><strong>R:</strong> Felbontás (ívmásodperc)</div><div><strong>A:</strong> Apertúra (mm)</div></div>')}</div>
-                <div id="rayleigh-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
-            </div>
-            <div class="col-span-2">
-                <div class="${labelClass}">Fénygyűjtő Képesség ${createInfoBtn('Fénygyűjtő Képesség', '<div class="text-center text-lg font-mono mb-4">LGP = (<div class="inline-block align-middle text-center"><div class="border-b border-current">A<sub>eff</sub></div><div>7</div></div>)<sup>2</sup> &times; trans</div><div class="text-xs text-left space-y-1"><div><strong>LGP:</strong> Fénygyűjtés (szemhez képest)</div><div><strong>A<sub>eff</sub>:</strong> Effektív átmérő</div><div><strong>trans:</strong> Transzmisszió</div></div>')}</div>
-                <div id="light-res" class="font-mono font-bold text-lg ${isNightMode ? 'text-red-400' : 'text-white'}"></div>
-            </div>
-        </div>
+        </details>
     `;
-
-    card.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const key = e.target.id.split('-')[1];
-            data[key] = parseFloat(e.target.value) || 0;
-            storage.set(key, data[key]);
-            update();
-        });
-    });
-
-    window.addEventListener('astro-settings-changed', (e) => {
-        data = { ...data, ...e.detail };
-        update();
-    });
-
-    update();
-    return card;
+    return wrapper;
 }

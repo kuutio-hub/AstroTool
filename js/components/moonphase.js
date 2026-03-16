@@ -20,7 +20,7 @@ export function renderMoonPhaseIcon(illumination, isWaxing, isNightMode = false)
     // When ill = 0 or 1, rx = r (full circle)
     const rx = +(r * Math.abs(1 - 2 * ill)).toFixed(3);
     
-    let darkPath = "";
+    let darkPath;
     
     // The base dark half-circle
     // For waxing, the dark half is on the left (A r r 0 0 0 cx botY)
@@ -78,7 +78,7 @@ export function renderSmallMoonPhaseIcon(illumination, isWaxing, isNightMode = f
     const botY = 95;
     const rx = +(r * Math.abs(1 - 2 * ill)).toFixed(3);
     
-    let darkPath = "";
+    let darkPath;
     const baseSweep = isWaxing ? 0 : 1;
     let termSweep;
     if (isWaxing) {

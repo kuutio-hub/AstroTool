@@ -1,11 +1,11 @@
-import { storage, TimeService, formatDate } from '../utils.js';
+import { TimeService, formatDate } from '../utils.js';
 
 export function createEvents(isNightMode) {
     const container = document.createElement('div');
     container.className = "space-y-4";
 
-    const textColor = isNightMode ? 'text-red-500' : 'text-white';
-    const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white/10 border-white/20';
+    const textColor = isNightMode ? 'text-red-500' : 'text-slate-900';
+    const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white border-slate-200';
 
     // Mock events data for now
     const events = [
@@ -46,14 +46,14 @@ export function createEvents(isNightMode) {
                 </div>
                 <div class="space-y-3">
                     ${upcomingEvents.length > 0 ? upcomingEvents.map(event => `
-                        <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <div class="flex justify-between items-center border-b ${isNightMode ? 'border-red-900/30' : 'border-slate-100'} pb-2">
                             <div>
                                 <div class="font-bold ${textColor}">${event.name}</div>
                                 <div class="text-xs opacity-70">${event.type}</div>
                             </div>
                             <div class="font-mono text-sm">${formatDate(new Date(event.date))}</div>
                         </div>
-                    `).join('') : '<div class="text-center opacity-50 text-sm py-4">Nincs közelgő esemény ebben a kategóriában.</div>'}
+                    `).join('') : `<div class="text-center opacity-50 text-sm py-4 ${textColor}">Nincs közelgő esemény ebben a kategóriában.</div>`}
                 </div>
             </div>
         `;

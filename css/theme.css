@@ -1,222 +1,240 @@
-/* Custom styles for AstroTool 2.0 */
+/* Custom styles for AstroTool 3.0 */
 :root {
-    --dim-level: 0.5; /* Dark overlay for better readability */
+    --bg-day: #f8fafc;
+    --panel-day: #ffffff;
+    --text-day: #0f172a;
+    --text-muted-day: #475569;
+    --border-day: rgba(0, 0, 0, 0.1);
+    --input-bg-day: #f1f5f9;
+    --accent-day: #2563eb;
+
+    --bg-night: #000000;
+    --panel-night: rgba(20, 0, 0, 0.6);
+    --text-night: #ff4444;
+    --text-muted-night: #991b1b;
+    --border-night: rgba(220, 38, 38, 0.3);
+    --input-bg-night: rgba(40, 0, 0, 0.4);
+    --accent-night: #ef4444;
 }
 
-#dim-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, var(--dim-level));
-    pointer-events: none;
-    z-index: -1; /* Behind content, over background */
-    transition: background-color 0.3s ease;
+body {
+    background-color: var(--bg-day);
+    color: var(--text-day);
+    transition: background-color 0.3s, color 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
 }
 
 body.day-mode {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-    color: #ffffff;
-}
-
-body.day-mode .glow-text {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    background-color: var(--bg-day) !important;
+    color: var(--text-day) !important;
 }
 
 body.night-mode {
-    background-color: #000000 !important;
-    background-image: none !important;
-    color: #ff0000 !important;
+    background-color: var(--bg-night) !important;
+    color: var(--text-night) !important;
 }
 
-body.night-mode #dim-overlay {
-    background-color: rgba(0, 0, 0, 0.8);
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 6rem 2rem; /* Further increased padding */
 }
 
-body.night-mode .glow-text {
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.4) !important;
+@media (max-width: 640px) {
+    #app {
+        padding: 2rem 1.25rem 6rem 1.25rem;
+    }
 }
 
-body.night-mode .glow-box {
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.1) !important;
+/* Sticky Header */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: rgba(248, 250, 252, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-day);
+    padding: 1rem 1.5rem;
 }
 
-/* Inputs and selects */
-.astro-input {
-    background-color: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    width: 100%;
-    outline: none;
-    transition: all 0.2s;
-    font-family: monospace;
-    font-weight: bold;
-    appearance: none;
-    -moz-appearance: textfield; /* Remove spinner Firefox */
+body.night-mode .sticky-header {
+    background-color: rgba(0, 0, 0, 1) !important;
+    border-bottom: 1px solid var(--border-night) !important;
 }
 
-/* Remove spinner Chrome/Safari/Edge */
-.astro-input::-webkit-outer-spin-button,
-.astro-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.astro-input:focus {
-    border-color: #ef4444; /* Red border on focus (Apple style) */
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-    background-color: rgba(0, 0, 0, 0.6);
-}
-
-body.night-mode .astro-input,
-body.night-mode select,
-body.night-mode input {
-    background-color: #000000 !important;
-    border-color: rgba(255, 0, 0, 0.5) !important;
-    color: #ff0000 !important;
-    box-shadow: none !important;
-}
-
-body.night-mode .astro-input:focus {
-    border-color: #ff0000 !important;
-    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.3) !important;
-}
-
+/* Cards & Panels */
 .astro-card {
-    background-color: rgba(15, 23, 42, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 1rem;
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    background-color: var(--panel-day);
+    border: 1px solid var(--border-day);
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    padding: 1.75rem; /* Increased internal padding */
+    margin-bottom: 1.5rem;
 }
 
 body.night-mode .astro-card {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    border-color: rgba(255, 0, 0, 0.4) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    box-shadow: 0 4px 30px rgba(255, 0, 0, 0.05) !important;
+    background-color: var(--panel-night) !important;
+    border-color: var(--border-night) !important;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.1) !important;
+    color: var(--text-night) !important;
 }
 
-/* Info Popups (Apple style) */
-.astro-modal-content {
-    background-color: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 1.5rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+/* Inputs */
+.astro-input {
+    background-color: var(--input-bg-day);
+    border: 1px solid var(--border-day);
+    color: var(--text-day);
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.875rem;
+    width: 100%;
+    outline: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    transition: all 0.2s;
 }
 
-body.night-mode .astro-modal-content {
-    background-color: rgba(0, 0, 0, 0.85) !important;
-    border: 1px solid rgba(255, 0, 0, 0.5) !important;
-    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.2) !important;
+.astro-input:focus {
+    border-color: var(--accent-day);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
+body.night-mode .astro-input:focus {
+    border-color: var(--accent-night) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3) !important;
+}
+
+body.night-mode .astro-input {
+    background-color: var(--input-bg-night) !important;
+    border-color: var(--border-night) !important;
+    color: var(--text-night) !important;
+}
+
+/* Labels */
 .astro-label {
     display: block;
-    font-size: 0.65rem;
-    font-weight: bold;
+    font-size: 0.8rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.25rem;
-    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.075em;
+    margin-bottom: 0.6rem;
+    color: var(--text-muted-day);
 }
 
-body.night-mode .astro-label,
-body.night-mode .opacity-70,
-body.night-mode .opacity-60,
-body.night-mode .opacity-50,
-body.night-mode .opacity-40,
-body.night-mode .opacity-30,
-body.night-mode .opacity-20,
-body.night-mode .opacity-10,
-body.night-mode .text-white\/50,
-body.night-mode .text-white\/70,
-body.night-mode .text-white\/80,
-body.night-mode .text-white\/10,
-body.night-mode .text-white\/20,
-body.night-mode .text-white\/30,
-body.night-mode .text-white\/40,
-body.night-mode .text-white\/60,
-body.night-mode .text-white\/90 {
-    color: #ff0000 !important;
-    opacity: 0.9 !important;
+body.night-mode .astro-label {
+    color: var(--text-muted-night) !important;
 }
 
-/* Global Night Mode Overrides for Tailwind classes */
-body.night-mode .text-white,
-body.night-mode [class*="text-slate-"],
-body.night-mode [class*="text-gray-"],
-body.night-mode [class*="text-zinc-"],
-body.night-mode [class*="text-neutral-"],
-body.night-mode [class*="text-blue-"],
-body.night-mode [class*="text-red-"],
-body.night-mode [class*="text-green-"],
-body.night-mode [class*="text-yellow-"] {
-    color: #ff0000 !important;
+/* Radio Buttons (Custom) */
+.astro-radio-group {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--input-bg-day);
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-day);
 }
 
-/* Ensure opacity doesn't make red look greyish */
-body.night-mode .opacity-50,
-body.night-mode .opacity-60,
-body.night-mode .opacity-70,
-body.night-mode .opacity-80,
-body.night-mode .opacity-90 {
-    opacity: 1 !important;
+body.night-mode .astro-radio-group {
+    background: var(--input-bg-night) !important;
+    border-color: var(--border-night) !important;
 }
 
-body.night-mode .bg-blue-600,
-body.night-mode .bg-red-900,
-body.night-mode [class*="bg-red-"],
-body.night-mode [class*="bg-blue-"],
-body.night-mode [class*="bg-white/"],
-body.night-mode [class*="bg-black/"] {
-    background-color: rgba(255, 0, 0, 0.1) !important;
-    border: 1px solid rgba(255, 0, 0, 0.4) !important;
+.astro-radio-label {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-muted-day);
 }
 
-body.night-mode .border-white\/10,
-body.night-mode .border-white\/5,
-body.night-mode .border-current\/10,
-body.night-mode [class*="border-white/"],
-body.night-mode [class*="border-red-"],
-body.night-mode [class*="border-blue-"],
-body.night-mode .border-b-2 {
-    border-color: rgba(255, 0, 0, 0.5) !important;
+body.night-mode .astro-radio-label {
+    color: var(--text-muted-night) !important;
 }
 
+.astro-radio-input:checked + .astro-radio-label {
+    background: var(--panel-day);
+    color: var(--accent-day);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+body.night-mode .astro-radio-input:checked + .astro-radio-label {
+    background: var(--panel-night) !important;
+    color: var(--text-night) !important;
+    border: 1px solid var(--border-night);
+    box-shadow: 0 0 10px rgba(255,0,0,0.2) !important;
+}
+
+/* Icons */
+svg {
+    stroke: var(--text-day);
+}
 body.night-mode svg {
-    stroke: #ff0000 !important;
+    stroke: #ffcccc !important;
+}
+body.night-mode svg[fill="currentColor"] {
+    fill: #ffcccc !important;
 }
 
-body.night-mode svg text {
-    fill: #ff0000 !important;
-    opacity: 0.8 !important;
+/* Buttons */
+.astro-btn {
+    background-color: var(--input-bg-day);
+    border: 1px solid var(--border-day);
+    color: var(--text-day);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
 }
 
-body.night-mode svg[fill="currentColor"],
-body.night-mode svg path[fill="currentColor"] {
-    fill: #ff0000 !important;
+.astro-btn:active {
+    transform: scale(0.98);
 }
 
-body.night-mode ::placeholder {
-    color: rgba(255, 0, 0, 0.6) !important;
+body.night-mode .astro-btn {
+    background-color: var(--input-bg-night) !important;
+    border-color: var(--border-night) !important;
+    color: var(--text-night) !important;
 }
 
-body.night-mode .shadow-sm,
-body.night-mode .shadow-md,
-body.night-mode .shadow-lg,
-body.night-mode .shadow-xl,
-body.night-mode .shadow-2xl {
-    box-shadow: 0 4px 20px rgba(255, 0, 0, 0.15) !important;
+/* Accordion Summary */
+details > summary {
+    list-style: none;
+}
+details > summary::-webkit-details-marker {
+    display: none;
 }
 
-/* Hide scrollbar for tabs */
+/* Category Filter */
+.category-btn {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted-day);
+}
+.category-btn.active {
+    color: var(--accent-day);
+    border-bottom-color: var(--accent-day);
+}
+body.night-mode .category-btn {
+    color: var(--text-muted-night) !important;
+}
+body.night-mode .category-btn.active {
+    color: var(--text-night) !important;
+    border-bottom-color: var(--accent-night) !important;
+}
+
+/* Hide scrollbar */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -225,25 +243,31 @@ body.night-mode .shadow-2xl {
     scrollbar-width: none;
 }
 
-/* Dropdown specific */
-.astro-dropdown-menu {
-    background-color: #1e293b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+/* Modals */
+.astro-modal-content {
+    background-color: var(--panel-day);
+    border: 1px solid var(--border-day);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-body.night-mode .astro-dropdown-menu {
-    background-color: rgba(0, 0, 0, 0.95) !important;
-    border-color: #ff0000 !important;
-    box-shadow: 0 10px 25px -5px rgba(255, 0, 0, 0.3) !important;
+body.night-mode .astro-modal-content {
+    background-color: var(--panel-night) !important;
+    border-color: var(--border-night) !important;
+    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.3) !important;
 }
+
+/* Utilities */
+.text-muted { color: var(--text-muted-day); }
+body.night-mode .text-muted { color: var(--text-muted-night) !important; }
+
+.border-divider { border-color: var(--border-day); }
+body.night-mode .border-divider { border-color: var(--border-night) !important; }
 
 @keyframes fade-in {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
 .animate-fade-in {
     animation: fade-in 0.2s ease-out forwards;
 }

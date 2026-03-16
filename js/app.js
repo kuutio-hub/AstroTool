@@ -1,11 +1,9 @@
-import { SunIcon, MoonIcon, GlobeIcon, InfoIcon } from './icons.js';
+import { InfoIcon, MapPinIcon } from './icons.js';
 import { storage, TimeService, showInfoModal, createInfoBtn } from './utils.js';
 import { createDashboard } from './dashboard.js';
 import { createCalculator } from './calculator/index.js';
 import { createCatalog } from './components/catalog.js';
-import { createEvents } from './components/events.js';
 import { createPlanetarium } from './components/planetarium.js';
-import { createDropdown } from './components/dropdown.js';
 
 // Global input selection on click
 document.addEventListener('click', (e) => {
@@ -18,6 +16,16 @@ const app = document.getElementById('app');
 let isNightMode = storage.get('nightMode', false);
 let activeTab = storage.get('activeTab', 'dashboard');
 let userLocation = storage.get('location', { latitude: 47.4979, longitude: 19.0402 }); // Default Budapest
+
+window.updateLocation = (lat, lon) => {
+    const parsedLat = parseFloat(lat);
+    const parsedLon = parseFloat(lon);
+    if (!isNaN(parsedLat) && !isNaN(parsedLon)) {
+        userLocation = { latitude: parsedLat, longitude: parsedLon };
+        storage.set('location', userLocation);
+        render();
+    }
+};
 let dimLevel = storage.get('dimLevel', 0); // 0 to 0.9
 
 window.showInfo = (title, content) => showInfoModal(title, content, isNightMode);
@@ -59,7 +67,7 @@ function render() {
     header.className = "flex justify-between items-center mb-6";
     
     const title = document.createElement('h1');
-    title.className = `text-2xl font-black tracking-tighter uppercase ${isNightMode ? 'text-red-500 glow-text' : 'text-white'}`;
+    title.className = `text-2xl font-black tracking-tighter uppercase ${isNightMode ? 'text-red-500 glow-text' : 'text-slate-900'}`;
     title.textContent = "AstroTool";
     
     const controls = document.createElement('div');
@@ -92,14 +100,14 @@ function render() {
 
     // Wiki Button
     const wikiBtn = document.createElement('button');
-    wikiBtn.className = `p-2 rounded astro-card hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500 glow-box' : 'text-white'}`;
+    wikiBtn.className = `p-2 rounded astro-card hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-slate-700'}`;
     wikiBtn.innerHTML = InfoIcon("w-5 h-5");
     wikiBtn.title = "Információ & Wiki";
     wikiBtn.onclick = () => showWiki();
 
     // Theme Toggle
     const themeBtn = document.createElement('button');
-    themeBtn.className = `px-4 py-2 rounded astro-card font-bold text-xs uppercase tracking-wider hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500 glow-box' : 'text-white'}`;
+    themeBtn.className = `px-4 py-2 rounded astro-card font-bold text-xs uppercase tracking-wider hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-slate-700'}`;
     themeBtn.textContent = isNightMode ? 'Nappali Mód' : 'Éjszakai Mód';
     themeBtn.onclick = () => {
         isNightMode = !isNightMode;
@@ -107,6 +115,28 @@ function render() {
         render();
     };
 
+    // Location Button
+    const locBtn = document.createElement('button');
+    locBtn.className = `p-2 rounded astro-card hover:bg-opacity-80 transition-all ${isNightMode ? 'text-red-500' : 'text-slate-700'}`;
+    locBtn.innerHTML = MapPinIcon("w-5 h-5");
+    locBtn.title = "Helymeghatározás";
+    locBtn.onclick = () => {
+        showInfoModal('Helymeghatározás', `
+            <div class="space-y-4">
+                <div>
+                    <label class="astro-label">Szélesség (Latitude)</label>
+                    <input type="number" inputmode="decimal" id="loc-lat" value="${userLocation.latitude}" class="astro-input w-full" step="0.0001">
+                </div>
+                <div>
+                    <label class="astro-label">Hosszúság (Longitude)</label>
+                    <input type="number" inputmode="decimal" id="loc-lon" value="${userLocation.longitude}" class="astro-input w-full" step="0.0001">
+                </div>
+                <button onclick="window.updateLocation(document.getElementById('loc-lat').value, document.getElementById('loc-lon').value); const m = document.getElementById('info-modal'); if(m) m.remove();" class="w-full py-2 ${isNightMode ? 'bg-red-900 text-red-500' : 'bg-blue-600 text-white'} rounded font-bold uppercase tracking-wider">Mentés</button>
+            </div>
+        `, isNightMode);
+    };
+
+    controls.appendChild(locBtn);
     controls.appendChild(wikiBtn);
     controls.appendChild(themeBtn);
     
@@ -117,7 +147,7 @@ function render() {
     // Global Settings Bar (Only on Calculator tab)
     if (activeTab === 'calculator') {
         const globalSettings = document.createElement('div');
-        globalSettings.className = `astro-card mb-4 p-3 animate-fade-in`;
+        globalSettings.className = `astro-card mb-4 p-4 animate-fade-in`;
         
         let gData = {
             F: storage.get('F', 1000),
@@ -132,21 +162,21 @@ function render() {
         };
 
         globalSettings.innerHTML = `
-            <div class="flex items-center gap-2 mb-2 ${isNightMode ? 'text-red-500' : 'text-blue-300'} font-bold uppercase tracking-wider text-[10px]">
+            <div class="flex items-center gap-2 mb-3 ${isNightMode ? 'text-red-500' : 'text-blue-600'} font-bold uppercase tracking-wider text-[10px]">
                 Globális Paraméterek
             </div>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="astro-label text-[9px] block truncate">Apertúra (mm) ${createInfoBtn('Távcső Apertúrája', 'A távcső objektívjének vagy főtükrének átmérője milliméterben (A).')}</label>
-                    <input type="number" id="g-A" value="${gData.A}" class="astro-input p-1 text-xs w-full">
+                    <input type="number" inputmode="decimal" id="g-A" value="${gData.A}" class="astro-input p-2 text-xs w-full">
                 </div>
                 <div>
                     <label class="astro-label text-[9px] block truncate">Fókusztávolság (mm) ${createInfoBtn('Távcső Fókusztávolsága', 'A távcső objektívjének vagy főtükrének fókusztávolsága milliméterben (F).')}</label>
-                    <input type="number" id="g-F" value="${gData.F}" class="astro-input p-1 text-xs w-full">
+                    <input type="number" inputmode="decimal" id="g-F" value="${gData.F}" class="astro-input p-2 text-xs w-full">
                 </div>
                 <div>
                     <label class="astro-label text-[9px] block truncate">Barlow / Reducer (x) ${createInfoBtn('Barlow vagy Reducer', 'A fókusznyújtó vagy fókuszcsökkentő szorzója (B).')}</label>
-                    <input type="number" id="g-B" value="${gData.B}" class="astro-input p-1 text-xs w-full" step="0.1">
+                    <input type="number" inputmode="decimal" id="g-B" value="${gData.B}" class="astro-input p-2 text-xs w-full" step="0.1">
                 </div>
             </div>
         `;
@@ -163,20 +193,26 @@ function render() {
 
     // Navigation
     const nav = document.createElement('nav');
-    nav.className = "flex gap-2 mb-6 overflow-x-auto no-scrollbar border-b border-white/10 pb-2";
+    nav.className = `flex gap-2 mb-6 mx-4 overflow-x-auto no-scrollbar border-b ${isNightMode ? 'border-red-900/20' : 'border-slate-200'} pb-2`;
     
     const tabs = [
         { id: 'dashboard', label: 'Műszerfal' },
         { id: 'calculator', label: 'Kalkulátorok' },
         { id: 'catalog', label: 'Katalógus' },
-        { id: 'planetarium', label: 'Planetárium' },
-        { id: 'events', label: 'Események' }
+        { id: 'planetarium', label: 'Planetárium' }
     ];
 
     tabs.forEach(tab => {
         const btn = document.createElement('button');
         const isActive = activeTab === tab.id;
-        btn.className = `px-4 py-2 rounded-t-lg font-bold text-sm uppercase tracking-wider transition-all ${isActive ? (isNightMode ? 'bg-red-900/30 text-red-500 border-b-2 border-red-500' : 'bg-blue-900/30 text-white border-b-2 border-blue-400') : 'text-white/50 hover:text-white/80'}`;
+        const activeClass = isNightMode 
+            ? 'bg-red-900/30 text-red-500 border-b-2 border-red-500' 
+            : 'bg-blue-600 text-white border-b-2 border-blue-800 shadow-sm';
+        const inactiveClass = isNightMode 
+            ? 'text-slate-500 hover:text-slate-300' 
+            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100';
+
+        btn.className = `px-5 py-2.5 rounded-t-xl font-bold text-sm uppercase tracking-wider transition-all ${isActive ? activeClass : inactiveClass}`;
         btn.textContent = tab.label;
         btn.onclick = () => {
             activeTab = tab.id;
@@ -212,8 +248,6 @@ function render() {
         content.appendChild(createCatalog(isNightMode));
     } else if (activeTab === 'planetarium') {
         content.appendChild(createPlanetarium(isNightMode));
-    } else if (activeTab === 'events') {
-        content.appendChild(createEvents(isNightMode));
     }
 
     app.appendChild(content);
@@ -221,7 +255,7 @@ function render() {
     // Footer
     const footer = document.createElement('footer');
     footer.className = "mt-12 py-6 border-t border-white/10 text-center opacity-40 text-[10px] uppercase tracking-widest";
-    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • v0.0.0.3-beta • Minden jog fenntartva`;
+    footer.innerHTML = `&copy; ${new Date().getFullYear()} AstroTool • v0.0.0.4-beta • Minden jog fenntartva`;
     app.appendChild(footer);
 
     // Dynamic Background
@@ -296,19 +330,20 @@ function showWiki() {
 async function init() {
     await TimeService.sync();
     
-    // Try to get location if not set in localStorage
-    if (localStorage.getItem('astro_location') === null) {
-        showInfoModal('Helymeghatározás', `
+    if (!storage.get('privacyAccepted', false)) {
+        showInfoModal('Adatvédelem és Helymeghatározás', `
             <div class="space-y-3">
-                <p>Az AstroTool-nak szüksége van a földrajzi helyzetedre a pontos Nap és Hold adatok kiszámításához.</p>
-                <p>Kérlek, engedélyezd a hozzáférést a következő ablakban!</p>
+                <p>Az AstroTool egy teljesen kliensoldali alkalmazás. <strong>Semmilyen személyes adatot vagy helyadatot nem küldünk külső szerverekre.</strong></p>
+                <p>A pontos csillagászati számításokhoz (pl. bolygók helyzete, felkelési/nyugvási idők) szükség van a földrajzi koordinátáidra.</p>
+                <p>Kérjük, engedélyezd a helymeghatározást a böngésződben, vagy add meg manuálisan a beállításokban.</p>
                 <button id="allow-geo" class="w-full px-4 py-2 rounded bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all ${isNightMode ? 'bg-red-900 hover:bg-red-800 text-red-500' : ''}">
-                    Értettem, engedélyezem
+                    Értettem és Elfogadom
                 </button>
             </div>
         `, isNightMode);
 
         document.getElementById('allow-geo').onclick = () => {
+            storage.set('privacyAccepted', true);
             const modal = document.getElementById('info-modal');
             if (modal) modal.remove();
             
@@ -330,7 +365,23 @@ async function init() {
             }
         };
     } else {
-        render();
+        // If privacy is already accepted, try to get location if we don't have it
+        if (localStorage.getItem('astro_location') === null && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                    storage.set('location', userLocation);
+                    render();
+                },
+                (err) => {
+                    console.warn('Geolocation failed', err);
+                    render();
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            render();
+        }
     }
 }
 

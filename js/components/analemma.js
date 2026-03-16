@@ -1,5 +1,4 @@
-import { SunIcon } from '../icons.js';
-import { formatDate, formatTime, TimeService } from '../utils.js';
+import { TimeService } from '../utils.js';
 
 export function createAnalemma(location, isNightMode) {
     const container = document.createElement('div');
@@ -25,10 +24,10 @@ export function createAnalemma(location, isNightMode) {
     const render = () => {
         container.innerHTML = '';
         
-        const headerColor = isNightMode ? "text-red-500" : "text-blue-300";
-        const textColor = isNightMode ? "#ff0000" : "#ffffff";
-        const pathColor = isNightMode ? "#ff0000" : "#fbbf24";
-        const gridColor = isNightMode ? "rgba(255, 0, 0, 0.2)" : "rgba(255, 255, 255, 0.15)";
+        const headerColor = isNightMode ? "text-red-500" : "text-blue-700";
+        const textColor = isNightMode ? "#ff0000" : "#0f172a";
+        const pathColor = isNightMode ? "#ff0000" : "#2563eb";
+        const gridColor = isNightMode ? "rgba(255, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.1)";
 
         // Controls
         const controls = document.createElement('div');
@@ -41,19 +40,19 @@ export function createAnalemma(location, isNightMode) {
         controls.innerHTML = `
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-bold uppercase ${headerColor}">Idő (UTC):</span>
-                <div class="flex items-center bg-black/20 rounded-lg p-1 border border-white/5">
-                    <button id="offset-down" class="p-1 hover:bg-white/10 rounded transition-colors">
+                <div class="flex items-center ${isNightMode ? 'bg-black/20 border-white/5' : 'bg-slate-100 border-slate-200'} rounded-lg p-1 border">
+                    <button id="offset-down" class="p-1 ${isNightMode ? 'hover:bg-white/10' : 'hover:bg-slate-200'} rounded transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <span class="font-mono text-sm font-bold w-16 text-center ${isNightMode ? 'text-red-400' : 'text-white'}">${timeStr}</span>
-                    <button id="offset-up" class="p-1 hover:bg-white/10 rounded transition-colors">
+                    <span class="font-mono text-sm font-bold w-16 text-center ${isNightMode ? 'text-red-400' : 'text-slate-900'}">${timeStr}</span>
+                    <button id="offset-up" class="p-1 ${isNightMode ? 'hover:bg-white/10' : 'hover:bg-slate-200'} rounded transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
                     </button>
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-bold uppercase ${headerColor}">Mód:</span>
-                <button id="mode-toggle" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border border-white/10 ${useLocalTime ? (isNightMode ? 'bg-red-900/40 text-red-500' : 'bg-blue-600 text-white') : 'bg-black/20 text-white/50'}">
+                <button id="mode-toggle" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isNightMode ? 'border-white/10' : 'border-slate-200'} ${useLocalTime ? (isNightMode ? 'bg-red-900/40 text-red-500' : 'bg-blue-600 text-white') : (isNightMode ? 'bg-black/20 text-white/50' : 'bg-slate-100 text-slate-500')}">
                     ${useLocalTime ? 'Helyi Idő' : 'UTC'}
                 </button>
             </div>

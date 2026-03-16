@@ -7,9 +7,11 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const container = document.createElement('div');
     container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6";
 
-    const cardClass = "astro-card flex flex-col justify-between";
-    const headerColor = isNightMode ? "text-red-500" : "text-blue-300";
-    const valueColor = isNightMode ? "text-red-400" : "text-white";
+    const cardClass = "astro-card flex flex-col justify-between p-7 shadow-xl";
+    const headerColor = isNightMode ? "text-red-500" : "text-blue-700";
+    const valueColor = isNightMode ? "text-red-400" : "text-slate-900";
+    const mutedColor = isNightMode ? "text-slate-400" : "text-slate-600";
+    const borderColor = isNightMode ? "border-red-900/30" : "border-slate-200";
 
     // 1. Time & Location Card
     const timeCard = document.createElement('div');
@@ -27,11 +29,6 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         return `${d}° ${m}' ${s}"`;
     };
 
-    const latStr = `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'É' : 'D'}`;
-    const lonStr = `${Math.abs(lon).toFixed(4)}° ${lon >= 0 ? 'K' : 'Ny'}`;
-    const latDMS = `${toDMS(lat)} ${lat >= 0 ? 'É' : 'D'}`;
-    const lonDMS = `${toDMS(lon)} ${lon >= 0 ? 'K' : 'Ny'}`;
-
     const updateTime = () => {
         const now = TimeService.now();
         const local = formatTime(now);
@@ -39,25 +36,28 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
         const tzOffset = -now.getTimezoneOffset() / 60;
         const tzStr = `GMT${tzOffset >= 0 ? '+' : ''}${tzOffset}`;
         
+        const latVal = parseFloat(lat) || 0;
+        const lonVal = parseFloat(lon) || 0;
+
         timeCard.innerHTML = `
             <div>
-                <div class="flex items-center gap-2 mb-2 ${headerColor} font-bold uppercase tracking-wider text-xs">
+                <div class="flex items-center gap-2 mb-3 ${headerColor} font-bold uppercase tracking-wider text-xs">
                     ${GlobeIcon("w-4 h-4")} Helyzet & Idő
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-sm mb-4">
+                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
                         <div class="astro-label">Szélesség</div>
-                        <div class="font-mono font-bold text-lg ${valueColor}">${latStr}</div>
-                        <div class="font-mono text-xs opacity-70">${latDMS}</div>
+                        <div class="font-mono font-bold text-lg ${valueColor}">${Math.abs(latVal).toFixed(4)}° ${latVal >= 0 ? 'É' : 'D'}</div>
+                        <div class="font-mono text-xs ${mutedColor}">${toDMS(latVal)} ${latVal >= 0 ? 'É' : 'D'}</div>
                     </div>
                     <div>
                         <div class="astro-label">Hosszúság</div>
-                        <div class="font-mono font-bold text-lg ${valueColor}">${lonStr}</div>
-                        <div class="font-mono text-xs opacity-70">${lonDMS}</div>
+                        <div class="font-mono font-bold text-lg ${valueColor}">${Math.abs(lonVal).toFixed(4)}° ${lonVal >= 0 ? 'K' : 'Ny'}</div>
+                        <div class="font-mono text-xs ${mutedColor}">${toDMS(lonVal)} ${lonVal >= 0 ? 'K' : 'Ny'}</div>
                     </div>
                 </div>
             </div>
-            <div class="border-t border-white/10 pt-3">
+            <div class="border-t ${borderColor} pt-4">
                 <div class="flex justify-between items-end">
                     <div>
                         <div class="astro-label">Helyi Idő <span class="opacity-50 text-[10px] ml-1">(${tzStr})</span></div>
@@ -65,14 +65,20 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                     </div>
                     <div class="text-right">
                         <div class="astro-label">UTC</div>
-                        <div class="font-mono text-sm opacity-70">${utc}</div>
+                        <div class="font-mono text-sm ${mutedColor}">${utc}</div>
                     </div>
                 </div>
             </div>
         `;
     };
     updateTime();
-    setInterval(updateTime, 1000); // 1 Hz update
+    const intervalId = setInterval(() => {
+        if (!document.body.contains(container)) {
+            clearInterval(intervalId);
+            return;
+        }
+        updateTime();
+    }, 1000); // 1 Hz update
 
     // 2. Sun Card
     const sunCard = document.createElement('div');
@@ -105,23 +111,23 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                 ${SunIcon("w-4 h-4")} Nap Adatok
             </div>
             <div class="space-y-3">
-                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                <div class="flex justify-between items-center border-b ${borderColor} pb-2">
                     <span class="astro-label mb-0">Napkelte / Napnyugta</span>
                     <span class="font-mono font-bold ${valueColor}">${sunrise} / ${sunset}</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                <div class="flex justify-between items-center border-b ${borderColor} pb-2">
                     <span class="astro-label mb-0">Delelés / Nadir</span>
                     <span class="font-mono font-bold ${valueColor}">${solarNoon} / ${nadir}</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span class="astro-label mb-0 text-yellow-500">Aranyóra (Reggel / Este)</span>
+                <div class="flex justify-between items-center border-b ${borderColor} pb-2">
+                    <span class="astro-label mb-0 text-amber-600">Aranyóra (Reggel / Este)</span>
                     <span class="font-mono font-bold text-[10px] ${valueColor}">${goldenHourMorning} | ${goldenHourEvening}</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span class="astro-label mb-0 text-blue-400">Kékóra (Reggel / Este)</span>
+                <div class="flex justify-between items-center border-b ${borderColor} pb-2">
+                    <span class="astro-label mb-0 text-blue-500">Kékóra (Reggel / Este)</span>
                     <span class="font-mono font-bold text-[10px] ${valueColor}">${blueHourMorning} | ${blueHourEvening}</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                <div class="flex justify-between items-center border-b ${borderColor} pb-2">
                     <span class="astro-label mb-0">Távolság / Látszó méret</span>
                     <span class="font-mono font-bold ${valueColor}">${formatNum(sunDistKm)} km / ${sunSizeDeg.toFixed(3)}°</span>
                 </div>
@@ -157,11 +163,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
 
     const moonPos = window.SunCalc ? window.SunCalc.getMoonPosition(TimeService.now(), location.latitude, location.longitude) : { distance: 384400 };
     const moonDistKm = moonPos.distance; // SunCalc.getMoonPosition returns distance in km
-    const moonSizeDeg = (3474 / moonDistKm) * (180 / Math.PI); // Simplified angular size
     
-    // Elongation
-    const elongation = moonData.phase * 360;
-
     // 30-day forecast
     const forecast30 = [];
     if (window.SunCalc) {
@@ -222,15 +224,13 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
     const nextPhases = getNextPhases(4);
     const nextNewMoon = nextPhases.find(p => p.type === 'new');
     const nextFullMoon = nextPhases.find(p => p.type === 'full');
-    
-    const nextPhaseStr = nextPhases[0] ? `${nextPhases[0].name}: ${formatDate(nextPhases[0].date)}` : '';
 
     const forecastHtml = forecast30.map(f => `
-        <div class="flex flex-col items-center min-w-[60px] p-2 bg-white/5 rounded">
+        <div class="flex flex-col items-center min-w-[60px] p-2 ${isNightMode ? 'bg-red-900/10' : 'bg-slate-50'} rounded">
             <div class="text-[9px] opacity-70 mb-1">${f.date.getDate()}.</div>
             ${renderSmallMoonPhaseIcon(f.fraction, f.isWaxing, isNightMode)}
-            <div class="text-[8px] mt-1 text-blue-300">↑${f.rise}</div>
-            <div class="text-[8px] text-red-400">↓${f.set}</div>
+            <div class="text-[8px] mt-1 text-blue-500">↑${f.rise}</div>
+            <div class="text-[8px] text-red-500">↓${f.set}</div>
         </div>
     `).join('');
 
@@ -239,11 +239,11 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
             <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                 ${forecastHtml}
             </div>
-            <div class="mt-4 space-y-1 border-t border-white/10 pt-2">
+            <div class="mt-4 space-y-1 border-t ${borderColor} pt-2">
                 <div class="font-bold text-xs uppercase mb-2">Következő Fő Fázisok:</div>
                 ${nextPhases.map(p => `
-                    <div class="flex justify-between border-b border-white/5 py-1">
-                        <span class="font-bold ${p.type === 'new' ? 'text-blue-300' : (p.type === 'full' ? 'text-yellow-300' : '')}">${p.name}</span>
+                    <div class="flex justify-between border-b ${borderColor} py-1">
+                        <span class="font-bold ${p.type === 'new' ? 'text-blue-500' : (p.type === 'full' ? 'text-amber-600' : '')}">${p.name}</span>
                         <span class="font-mono text-xs">${formatDate(p.date)} ${formatTime(p.date)}</span>
                     </div>
                 `).join('')}
@@ -284,7 +284,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                     </div>
                 </div>
             </div>
-            <div class="border-t border-white/5 pt-2 mt-2 space-y-1">
+            <div class="border-t ${borderColor} pt-2 mt-2 space-y-1">
                 <div class="flex justify-between items-center">
                     <span class="astro-label mb-0">Következő Újhold</span>
                     <span class="font-mono font-bold text-[10px] ${valueColor}">${nextNewMoon ? formatDate(nextNewMoon.date) : '-'}</span>
@@ -293,7 +293,7 @@ export function createDashboard(location, sunData, moonData, isNightMode) {
                     <span class="astro-label mb-0">Következő Telihold</span>
                     <span class="font-mono font-bold text-[10px] ${valueColor}">${nextFullMoon ? formatDate(nextFullMoon.date) : '-'}</span>
                 </div>
-                <div class="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
+                <div class="flex justify-between items-center mt-2 pt-2 border-t ${borderColor}">
                     <span class="astro-label mb-0">30 Napos Előrejelzés</span>
                     <button onclick="window.showMorePhases()" class="font-mono font-bold text-[10px] ${valueColor} hover:underline decoration-dotted underline-offset-2">Mutasd ▾</button>
                 </div>

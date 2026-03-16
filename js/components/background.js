@@ -81,6 +81,16 @@ export function createBackground() {
     drawStars();
 
     function updateSky() {
+        const isNightMode = document.body.classList.contains('night-mode');
+        
+        if (isNightMode) {
+            skyLayer.style.background = '#000000';
+            canvas.style.opacity = 1;
+            cityGlow.style.opacity = 0.3;
+            sunGlow.style.opacity = 0;
+            return;
+        }
+
         const now = TimeService.now();
         const loc = storage.get('location', { latitude: 47.4979, longitude: 19.0402 });
         
@@ -89,10 +99,10 @@ export function createBackground() {
         const altDeg = sunPos.altitude * (180 / Math.PI);
         const azDeg = (sunPos.azimuth * (180 / Math.PI)) + 180; // SunCalc Azimuth: South=0, West=90, East=-90. +180 makes North=0, East=90, South=180, West=270
 
-        let skyGradient = '';
-        let starOpacity = 0;
-        let cityOpacity = 0.3; // Base city glow
-        let sunGlowOpacity = 0;
+        let skyGradient;
+        let starOpacity;
+        let cityOpacity;
+        let sunGlowOpacity;
         let sunGlowColor = 'white';
 
         // Day: Alt > 6
@@ -167,46 +177,51 @@ export function createBackground() {
         const month = date.getMonth() + 1; // 1-12
         const day = date.getDate();
         
-        // Remove existing eggs
+        // Check if we already have the correct egg
         const existing = container.querySelector('.easter-egg');
-        if (existing) existing.remove();
-
-        let egg = null;
+        let shouldHaveEgg = false;
+        let eggContent = '';
+        let eggClass = '';
+        let eggStyle = '';
 
         // Christmas (Dec 24-26) - Santa
         if (month === 12 && (day >= 24 && day <= 26)) {
-            egg = document.createElement('div');
-            egg.className = 'easter-egg absolute text-4xl animate-fly-across pointer-events-none';
-            egg.style.top = '20%';
-            egg.textContent = '🎅🛷🦌';
+            shouldHaveEgg = true;
+            eggClass = 'easter-egg absolute text-4xl animate-fly-across pointer-events-none';
+            eggStyle = 'top: 20%;';
+            eggContent = '🎅🛷🦌';
         }
         // New Year (Dec 31 - Jan 1) - Fireworks
         else if ((month === 12 && day === 31) || (month === 1 && day === 1)) {
-            egg = document.createElement('div');
-            egg.className = 'easter-egg absolute inset-0 pointer-events-none';
-            // Simple CSS fireworks could be complex, let's just add emojis popping up
-            egg.innerHTML = '<div class="absolute bottom-0 left-1/4 text-4xl animate-bounce">🎆</div><div class="absolute bottom-10 left-3/4 text-4xl animate-bounce" style="animation-delay:0.5s">🎇</div>';
+            shouldHaveEgg = true;
+            eggClass = 'easter-egg absolute inset-0 pointer-events-none';
+            eggContent = '<div class="absolute bottom-0 left-1/4 text-4xl animate-bounce">🎆</div><div class="absolute bottom-10 left-3/4 text-4xl animate-bounce" style="animation-delay:0.5s">🎇</div>';
         }
-        // Easter (Approximate - hardcoded for 2025/2026 or just March/April check?)
-        // Let's just do a simple check for April for now as a placeholder or specific dates if known.
-        // 2025: April 20. 2026: April 5.
-        // Let's just say "Spring" bunnies in April? Or specific dates.
-        // User asked for Easter. Let's approximate or use a library. 
-        // Simple Gauss algorithm for Easter? Too complex for this snippet.
-        // Let's just add bunnies in April.
+        // Easter (Approximate - hardcoded for 2026)
         else if (month === 4 && day === 5) { // 2026 Easter
-             egg = document.createElement('div');
-             egg.className = 'easter-egg absolute bottom-0 w-full text-center text-4xl pointer-events-none';
-             egg.innerHTML = '🐇 🥚 🐇';
+             shouldHaveEgg = true;
+             eggClass = 'easter-egg absolute bottom-0 w-full text-center text-4xl pointer-events-none';
+             eggContent = '🐇 🥚 🐇';
         }
         // Aug 20 - Fireworks (Hungary)
         else if (month === 8 && day === 20) {
-            egg = document.createElement('div');
-            egg.className = 'easter-egg absolute inset-0 pointer-events-none';
-            egg.innerHTML = '<div class="absolute top-1/4 left-1/4 text-4xl animate-pulse">🎆</div><div class="absolute top-1/3 right-1/4 text-4xl animate-pulse" style="animation-delay:0.5s">🇭🇺</div>';
+            shouldHaveEgg = true;
+            eggClass = 'easter-egg absolute inset-0 pointer-events-none';
+            eggContent = '<div class="absolute top-1/4 left-1/4 text-4xl animate-pulse">🎆</div><div class="absolute top-1/3 right-1/4 text-4xl animate-pulse" style="animation-delay:0.5s">🇭🇺</div>';
         }
 
-        if (egg) container.appendChild(egg);
+        if (shouldHaveEgg) {
+            if (!existing || existing.innerHTML !== eggContent) {
+                if (existing) existing.remove();
+                const egg = document.createElement('div');
+                egg.className = eggClass;
+                if (eggStyle) egg.style.cssText = eggStyle;
+                egg.innerHTML = eggContent;
+                container.appendChild(egg);
+            }
+        } else if (existing) {
+            existing.remove();
+        }
     }
 
     // Update every 5 seconds for smoother movement

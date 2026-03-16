@@ -150,9 +150,8 @@ export function createPlanetarium(isNightMode) {
     const container = document.createElement('div');
     container.className = "space-y-4";
 
-    const textColor = isNightMode ? 'text-red-500' : 'text-white';
-    const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white/10 border-white/20';
-    const valueColor = isNightMode ? 'text-red-400' : 'text-white';
+    const textColor = isNightMode ? 'text-red-500' : 'text-slate-900';
+    const cardBg = isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-white border-slate-200';
 
     const location = storage.get('location', { latitude: 47.4979, longitude: 19.0402 });
     const now = TimeService.now();
@@ -162,7 +161,7 @@ export function createPlanetarium(isNightMode) {
     planetsCard.className = `astro-card ${cardBg}`;
     
     const tbodyHtml = planetsData.map(p => `
-        <tr class="border-b border-white/5">
+        <tr class="border-b ${isNightMode ? 'border-red-900/20' : 'border-slate-100'}">
             <td class="px-2 py-2 font-bold ${textColor}">${p.name}</td>
             <td class="px-2 py-2 font-mono">${p.raStr}</td>
             <td class="px-2 py-2 font-mono">${p.decStr}</td>
@@ -176,7 +175,7 @@ export function createPlanetarium(isNightMode) {
         <h2 class="text-lg font-bold uppercase tracking-wider mb-4 ${textColor}">Bolygó Pozíciók</h2>
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
-                <thead class="text-xs uppercase bg-black/20 ${textColor}">
+                <thead class="text-xs uppercase ${isNightMode ? 'bg-red-900/20' : 'bg-slate-50'} ${textColor}">
                     <tr>
                         <th class="px-2 py-2">Bolygó</th>
                         <th class="px-2 py-2">RA</th>
@@ -269,16 +268,16 @@ export function createPlanetarium(isNightMode) {
 
     skyCard.innerHTML = `
         <h2 class="text-lg font-bold uppercase tracking-wider mb-4 ${textColor}">Kiterített Égbolt Térkép</h2>
-        <div class="relative w-full h-64 bg-black/40 border border-white/20 rounded-lg overflow-hidden" style="background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) ${horizonY}%, rgba(20,0,0,0.6) ${horizonY}%, rgba(0,0,0,0.9) 100%);">
+        <div class="relative w-full h-64 ${isNightMode ? 'bg-black/40 border-red-900/30' : 'bg-slate-900 border-slate-700'} rounded-lg overflow-hidden" style="background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) ${horizonY}%, rgba(20,0,0,0.6) ${horizonY}%, rgba(0,0,0,0.9) 100%);">
             
             <!-- Grid lines -->
-            <div class="absolute left-0 right-0 border-t border-dashed border-white/20" style="top: ${mapAltToY(60)}%;"></div>
-            <div class="absolute left-0 right-0 border-t border-dashed border-white/20" style="top: ${mapAltToY(30)}%;"></div>
+            <div class="absolute left-0 right-0 border-t border-dashed ${isNightMode ? 'border-red-500/20' : 'border-white/20'}" style="top: ${mapAltToY(60)}%;"></div>
+            <div class="absolute left-0 right-0 border-t border-dashed ${isNightMode ? 'border-red-500/20' : 'border-white/20'}" style="top: ${mapAltToY(30)}%;"></div>
             <div class="absolute left-0 right-0 border-t-2 border-green-500/50" style="top: ${horizonY}%;"></div> <!-- Horizon -->
             
-            <div class="absolute top-0 bottom-0 border-l border-dashed border-white/10" style="left: ${mapAzToX(135)}%;"></div>
-            <div class="absolute top-0 bottom-0 border-l border-dashed border-white/20" style="left: ${mapAzToX(180)}%;"></div> <!-- South -->
-            <div class="absolute top-0 bottom-0 border-l border-dashed border-white/10" style="left: ${mapAzToX(225)}%;"></div>
+            <div class="absolute top-0 bottom-0 border-l border-dashed ${isNightMode ? 'border-red-500/10' : 'border-white/10'}" style="left: ${mapAzToX(135)}%;"></div>
+            <div class="absolute top-0 bottom-0 border-l border-dashed ${isNightMode ? 'border-red-500/20' : 'border-white/20'}" style="left: ${mapAzToX(180)}%;"></div> <!-- South -->
+            <div class="absolute top-0 bottom-0 border-l border-dashed ${isNightMode ? 'border-red-500/10' : 'border-white/10'}" style="left: ${mapAzToX(225)}%;"></div>
             
             <!-- Labels -->
             <div class="absolute left-2 text-[10px] opacity-50" style="top: ${mapAltToY(90)}%;">Zenit (90°)</div>
@@ -316,8 +315,8 @@ export function createPlanetarium(isNightMode) {
         <div class="flex flex-col gap-3 mb-6">
             <div class="flex gap-2 items-center">
                 <input type="date" id="vis-date" class="astro-input p-2 text-xs w-full" value="${todayStr}">
-                <button id="vis-prev-day" class="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors">&larr;</button>
-                <button id="vis-next-day" class="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors">&rarr;</button>
+                <button id="vis-prev-day" class="p-2 rounded ${isNightMode ? 'bg-red-900/20 hover:bg-red-900/40' : 'bg-slate-100 hover:bg-slate-200'} transition-colors">&larr;</button>
+                <button id="vis-next-day" class="p-2 rounded ${isNightMode ? 'bg-red-900/20 hover:bg-red-900/40' : 'bg-slate-100 hover:bg-slate-200'} transition-colors">&rarr;</button>
             </div>
             <select id="vis-preset" class="astro-input p-2 text-xs w-full">
                 <option value="">-- Egyedi RA/Dec --</option>
@@ -332,7 +331,7 @@ export function createPlanetarium(isNightMode) {
             </div>
         </div>
         
-        <div class="relative h-56 border-b border-l border-white/20 mt-4 ml-8 mr-2">
+        <div class="relative h-56 border-b border-l ${isNightMode ? 'border-red-900/30' : 'border-slate-300'} mt-4 ml-8 mr-2">
             <!-- Y axis labels -->
             <div class="absolute -left-8 top-0 text-[10px] opacity-70 w-6 text-right">90°</div>
             <div class="absolute -left-8 top-1/3 text-[10px] opacity-70 w-6 text-right">60°</div>
@@ -340,8 +339,8 @@ export function createPlanetarium(isNightMode) {
             <div class="absolute -left-8 bottom-0 text-[10px] opacity-70 w-6 text-right">0°</div>
             
             <!-- Grid lines -->
-            <div class="absolute left-0 right-0 top-1/3 border-t border-dashed border-white/10"></div>
-            <div class="absolute left-0 right-0 top-2/3 border-t border-dashed border-white/10"></div>
+            <div class="absolute left-0 right-0 top-1/3 border-t border-dashed ${isNightMode ? 'border-red-900/20' : 'border-slate-200'}"></div>
+            <div class="absolute left-0 right-0 top-2/3 border-t border-dashed ${isNightMode ? 'border-red-900/20' : 'border-slate-200'}"></div>
             
             <!-- Twilight Backgrounds -->
             <div id="twilight-bands" class="absolute inset-0 pointer-events-none"></div>
@@ -372,7 +371,7 @@ export function createPlanetarium(isNightMode) {
         <div class="flex justify-center flex-wrap gap-4 mt-2 text-[9px] opacity-70">
             <div class="flex items-center gap-1"><div class="w-2 h-2 bg-blue-900/50 rounded"></div> Polgári</div>
             <div class="flex items-center gap-1"><div class="w-2 h-2 bg-blue-900/80 rounded"></div> Nautikus</div>
-            <div class="flex items-center gap-1"><div class="w-2 h-2 bg-black rounded border border-white/20"></div> Asztronómiai / Éjszaka</div>
+            <div class="flex items-center gap-1"><div class="w-2 h-2 bg-black rounded border ${isNightMode ? 'border-red-900/50' : 'border-slate-400'}"></div> Asztronómiai / Éjszaka</div>
         </div>
     `;
 
@@ -427,7 +426,6 @@ export function createPlanetarium(isNightMode) {
             drawBand(times2.dawn, times2.sunrise, 'bg-blue-900/30'); // Civil
         }
 
-        let pathD = "";
         let points = [];
         let maxAlt = -90;
         let transitX = 0;
@@ -480,7 +478,7 @@ export function createPlanetarium(isNightMode) {
 
                 const avgAlt = (p1.alt + p2.alt) / 2;
                 
-                let color = '#3b82f6'; // Default
+                let color;
                 if (isNightMode) {
                     if (avgAlt < 20) color = '#7f1d1d';
                     else if (avgAlt < 40) color = '#dc2626';
@@ -506,8 +504,8 @@ export function createPlanetarium(isNightMode) {
             // Add Markers
             if (maxAlt > 0) {
                 markers.innerHTML += `
-                    <div class="absolute w-px bg-white/30 border-l border-dashed border-white/50" style="left: ${transitX}%; top: ${100 - (maxAlt/90)*100}%; bottom: 0;"></div>
-                    <div class="absolute text-[9px] font-bold bg-black/50 px-1 rounded transform -translate-x-1/2 -translate-y-full" style="left: ${transitX}%; top: ${100 - (maxAlt/90)*100}%; color: ${isNightMode ? '#fca5a5' : '#4ade80'};">
+                    <div class="absolute w-px ${isNightMode ? 'bg-red-500/30 border-red-500/50' : 'bg-slate-400/30 border-slate-400/50'} border-l border-dashed" style="left: ${transitX}%; top: ${100 - (maxAlt/90)*100}%; bottom: 0;"></div>
+                    <div class="absolute text-[9px] font-bold ${isNightMode ? 'bg-black/80' : 'bg-white/90 shadow-sm'} px-1 rounded transform -translate-x-1/2 -translate-y-full" style="left: ${transitX}%; top: ${100 - (maxAlt/90)*100}%; color: ${isNightMode ? '#fca5a5' : '#1e40af'};">
                         Transit: ${transitTime} (${maxAlt.toFixed(1)}°)
                     </div>
                 `;
@@ -569,34 +567,7 @@ export function createPlanetarium(isNightMode) {
         updateVisibilityChart();
     };
 
-    // Expose global function for catalog integration
-    window.showVisibility = (ra, dec) => {
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        tabBtns.forEach(btn => {
-            if (btn.dataset.tab === 'planetarium') {
-                btn.click();
-            }
-        });
-        
-        setTimeout(() => {
-            const presetSelect = document.getElementById('vis-preset');
-            const raInput = document.getElementById('vis-ra');
-            const decInput = document.getElementById('vis-dec');
-            const calcBtn = document.getElementById('vis-calc-btn');
-            
-            if (presetSelect && raInput && decInput && calcBtn) {
-                presetSelect.value = '';
-                raInput.disabled = false;
-                decInput.disabled = false;
-                raInput.value = ra;
-                decInput.value = dec;
-                calcBtn.click();
-                
-                // Scroll to vis card
-                calcBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 100);
-    };
+
 
     container.appendChild(planetsCard);
     container.appendChild(skyCard);

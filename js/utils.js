@@ -8,8 +8,8 @@ export function showInfoModal(title, content, isNightMode) {
     modal.id = 'info-modal';
     modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in";
     
-    const textClass = isNightMode ? "text-red-500" : "text-white";
-    const btnClass = isNightMode ? "bg-red-900/40 hover:bg-red-900/60 text-red-500 border border-red-500/50" : "bg-blue-600/80 hover:bg-blue-600 text-white border border-blue-500/50";
+    const textClass = isNightMode ? "text-red-500" : "text-slate-900";
+    const btnClass = isNightMode ? "bg-red-900/40 hover:bg-red-900/60 text-red-500 border border-red-500/50" : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg";
 
     modal.innerHTML = `
         <div class="astro-modal-content p-6 max-w-md w-full transform transition-all">
@@ -50,14 +50,16 @@ export const storage = {
         try {
             const val = localStorage.getItem('astro_' + key);
             return val !== null ? JSON.parse(val) : defaultValue;
-        } catch (e) {
+        } catch {
             return defaultValue;
         }
     },
     set: (key, value) => {
         try {
             localStorage.setItem('astro_' + key, JSON.stringify(value));
-        } catch (e) {}
+        } catch {
+            // Ignore storage errors
+        }
     }
 };
 
@@ -78,10 +80,15 @@ export function formatDuration(seconds) {
 }
 
 export function formatNum(num) {
-    if (num === undefined || num === null || isNaN(num)) return '-';
+    if (num === undefined || num === null || isNaN(num) || !isFinite(num)) return '0.00';
     if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
     if (num >= 1e3) return (num / 1e3).toFixed(2) + 'k';
     return num.toFixed(2);
+}
+
+export function safeFixed(num, decimals = 1, suffix = '') {
+    if (num === undefined || num === null || isNaN(num) || !isFinite(num)) return '0' + suffix;
+    return num.toFixed(decimals) + suffix;
 }
 
 export const TimeService = {
